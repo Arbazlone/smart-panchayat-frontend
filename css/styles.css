@@ -2900,3 +2900,207 @@ html, body {
     touch-action: auto !important;
     -webkit-overflow-scrolling: touch !important;
 }
+/* Profile Dropdown - Force Visible */
+.dropdown {
+    position: relative !important;
+    z-index: 1000 !important;
+}
+
+.dropdown-menu {
+    position: absolute !important;
+    top: 100% !important;
+    right: 0 !important;
+    margin-top: 10px !important;
+    background: white !important;
+    border-radius: 12px !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2) !important;
+    border: 1px solid var(--gray-200) !important;
+    min-width: 220px !important;
+    z-index: 9999 !important;
+    overflow: visible !important;
+    display: block !important;
+}
+
+.dropdown-item {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    padding: 14px 18px !important;
+    color: var(--gray-700) !important;
+    cursor: pointer !important;
+    transition: background 0.2s !important;
+    font-size: 1rem !important;
+}
+
+.dropdown-item:hover {
+    background: var(--gray-100) !important;
+    color: var(--primary-green) !important;
+}
+
+.dropdown-item i {
+    width: 20px !important;
+    color: var(--gray-600) !important;
+}
+
+.dropdown-divider {
+    height: 1px !important;
+    background: var(--gray-200) !important;
+    margin: 8px 0 !important;
+}
+
+.text-error {
+    color: var(--error) !important;
+}
+
+/* Fix for user menu button */
+#userMenuBtn {
+    cursor: pointer !important;
+}
+
+#userDropdownMenu {
+    display: none;
+}
+
+#userDropdownMenu[style*="display: block"],
+#userDropdownMenu.show {
+    display: block !important;
+}
+/* Create Post Modal - Mobile Friendly */
+#createPostModal .modal {
+    max-width: 550px !important;
+    width: 95% !important;
+    max-height: 85vh !important;
+    overflow-y: auto !important;
+    padding: 20px 16px !important;
+}
+
+#createPostModal .modal-header {
+    position: sticky !important;
+    top: 0 !important;
+    background: white !important;
+    z-index: 10 !important;
+    padding-bottom: 12px !important;
+    margin-bottom: 16px !important;
+    border-bottom: 1px solid var(--gray-200) !important;
+}
+
+#createPostModal .form-group {
+    margin-bottom: 16px !important;
+}
+
+#createPostModal .form-label {
+    font-size: 0.9rem !important;
+    margin-bottom: 6px !important;
+}
+
+#createPostModal .form-input {
+    padding: 12px !important;
+    font-size: 16px !important;
+    border-radius: 10px !important;
+}
+
+/* Post Type Selector - 3 Column Grid */
+#postTypeSelector {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 10px !important;
+    margin-bottom: 15px !important;
+}
+
+#postTypeSelector .service-category {
+    padding: 12px 5px !important;
+    border: 2px solid var(--gray-300) !important;
+    border-radius: 12px !important;
+    text-align: center !important;
+    cursor: pointer !important;
+    transition: all 0.2s !important;
+    background: white !important;
+}
+
+#postTypeSelector .service-category i {
+    font-size: 1.3rem !important;
+    margin-bottom: 5px !important;
+    display: block !important;
+}
+
+#postTypeSelector .service-category span {
+    font-size: 0.75rem !important;
+    font-weight: 500 !important;
+}
+
+#postTypeSelector .service-category.active {
+    border-color: var(--primary-green) !important;
+    background: rgba(46, 125, 50, 0.08) !important;
+    color: var(--primary-green) !important;
+}
+
+/* Issue and Service Fields */
+#issueFields, #serviceFields {
+    margin-top: 15px !important;
+    padding-top: 15px !important;
+    border-top: 1px solid var(--gray-200) !important;
+}
+
+#issueFields .form-group,
+#serviceFields .form-group {
+    margin-bottom: 15px !important;
+}
+
+/* Image Preview */
+#createPostModal .image-preview-container {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 10px !important;
+    margin-top: 12px !important;
+}
+
+/* Location Selector */
+#createPostModal .location-selector {
+    display: flex !important;
+    gap: 10px !important;
+    margin-top: 10px !important;
+}
+
+#createPostModal .location-btn {
+    flex: 1 !important;
+    padding: 10px !important;
+    border: 1px solid var(--gray-300) !important;
+    border-radius: 10px !important;
+    background: white !important;
+    font-size: 0.85rem !important;
+}
+
+/* Submit Button Area */
+#createPostModal .flex.gap-md {
+    margin-top: 20px !important;
+    position: sticky !important;
+    bottom: 0 !important;
+    background: white !important;
+    padding-top: 15px !important;
+    border-top: 1px solid var(--gray-200) !important;
+}
+
+#createPostModal .btn {
+    padding: 14px !important;
+    font-size: 1rem !important;
+}
+
+/* Mobile specific fixes */
+@media (max-width: 480px) {
+    #createPostModal .modal {
+        padding: 16px 12px !important;
+    }
+    
+    #postTypeSelector .service-category i {
+        font-size: 1.1rem !important;
+    }
+    
+    #postTypeSelector .service-category span {
+        font-size: 0.65rem !important;
+    }
+    
+    #createPostModal .location-btn {
+        font-size: 0.75rem !important;
+        padding: 8px !important;
+    }
+}
