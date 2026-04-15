@@ -826,13 +826,37 @@
     
     <!-- Mobile Bottom Navigation -->
     <nav class="mobile-nav">
-    <ul class="mobile-nav-menu">
-        <li><a href="dashboard.html" class="mobile-nav-item"><i class="fas fa-home"></i><span>Feed</span></a></li>
-        <li><a href="map.html" class="mobile-nav-item"><i class="fas fa-map-marker-alt"></i><span>Map</span></a></li>
-        <li><a href="#" class="mobile-nav-item emergency-nav" onclick="openEmergencyModal()"><i class="fas fa-bell" style="color: var(--error);"></i><span style="color: var(--error);">SOS</span></a></li>
-        <li><a href="users.html" class="mobile-nav-item"><i class="fas fa-users"></i><span>Users</span></a></li>
-    </ul>
-</nav>
+        <ul class="mobile-nav-menu">
+            <li>
+                <a href="#" class="mobile-nav-item active" data-mobile-page="feed">
+                    <i class="fas fa-home"></i>
+                    <span>Feed</span>
+                </a>
+            </li>
+            <li>
+    <a href="map.html" class="mobile-nav-item">
+        <i class="fas fa-map"></i>
+        <span>Map</span>
+    </a>
+</li>
+            <li>
+                <a href="chat.html" class="mobile-nav-item">
+                    <i class="fas fa-comments"></i>
+                    <span>Chat</span>
+                </a>
+           
+                <a href="users.html" class="mobile-nav-item">
+                <i class="fas fa-users"></i>
+                <span>Users</span>
+            </a>
+        </li>
+        <li>
+    <a href="events.html" class="mobile-nav-item">
+        <i class="fas fa-calendar-alt"></i>
+        <span>Events</span>
+    </a>
+</li>
+            <li>
                  <a href="#" class="mobile-nav-item" onclick="toggleMoreMenu()">
                 <i class="fas fa-bars"></i>
                 <span>More</span>
