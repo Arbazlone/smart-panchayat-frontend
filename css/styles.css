@@ -2859,12 +2859,19 @@ html, body {
     }
 }
 
-/* Hide scrollbars but keep functionality */
-::-webkit-scrollbar {
-    display: none !important;
+/* Hide scrollbars but KEEP functionality */
+body, .main-feed, .tab-content, .events-list, .modal, .notification-list {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
 }
 
+/* Hide scrollbar for Chrome/Safari */
+::-webkit-scrollbar {
+    width: 0px !important;
+    background: transparent !important;
+}
+
+/* Hide scrollbar for Firefox */
 * {
-    -ms-overflow-style: none !important;
     scrollbar-width: none !important;
 }
