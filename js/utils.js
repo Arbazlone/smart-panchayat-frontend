@@ -366,6 +366,38 @@ style.textContent = `
     .ml-sm { margin-left: var(--space-sm); }
 `;
 document.head.appendChild(style);
+// Toggle More Menu
+function toggleMoreMenu() {
+    const overlay = document.getElementById('moreMenuOverlay');
+    const menu = document.getElementById('moreMenu');
+    
+    if (overlay && menu) {
+        overlay.classList.toggle('active');
+        menu.classList.toggle('active');
+        document.body.style.overflow = menu.classList.contains('active') ? 'hidden' : '';
+    }
+}
+
+// Close more menu when clicking a link
+document.addEventListener('click', function(e) {
+    if (e.target.closest('.more-menu-item')) {
+        const overlay = document.getElementById('moreMenuOverlay');
+        const menu = document.getElementById('moreMenu');
+        if (overlay && menu) {
+            overlay.classList.remove('active');
+            menu.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    }
+    
+    // Close on overlay click
+    if (e.target.id === 'moreMenuOverlay') {
+        const menu = document.getElementById('moreMenu');
+        e.target.classList.remove('active');
+        menu.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+});
 // Reverse Geocoding - Get address from coordinates
 async function getAddressFromCoords(lat, lng) {
     try {
