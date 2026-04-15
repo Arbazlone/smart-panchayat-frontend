@@ -20,6 +20,14 @@
     <link rel="stylesheet" href="css/styles.css">
     
     <style>
+        /* Force scroll on mobile */
+        html, body {
+            overflow-y: scroll !important;
+            touch-action: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+            height: 100% !important;
+        }
+        
         /* Dashboard Specific Styles */
         .dashboard-layout {
             display: grid;
@@ -124,6 +132,7 @@
         /* Main Feed */
         .main-feed {
             min-height: 100vh;
+            overflow-y: visible !important;
         }
         
         .feed-header {
@@ -193,6 +202,13 @@
             margin-bottom: var(--space-lg);
             border-bottom: 1px solid var(--gray-200);
             padding-bottom: var(--space-md);
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        
+        .feed-filters::-webkit-scrollbar {
+            display: none;
         }
         
         .filter-tab {
@@ -203,6 +219,7 @@
             cursor: pointer;
             transition: all var(--transition-fast);
             font-weight: 500;
+            white-space: nowrap;
         }
         
         .filter-tab:hover {
@@ -500,7 +517,7 @@
         }
     </style>
 </head>
-<body>
+<body style="overflow-y: scroll !important; height: 100%; touch-action: auto !important;">
     <!-- Navigation -->
     <nav class="navbar">
         <div class="container navbar-container">
@@ -515,18 +532,13 @@
                 </button>
                 
                 <div class="flex items-center gap-sm">
-    <!-- Notification Bell -->
-    <button class="btn btn-icon" id="notificationBell" onclick="dashboardManager.toggleNotifications()">
-        <i class="fas fa-bell"></i>
-        <span class="badge badge-error" id="notificationBadge" style="display: none;">0</span>
-    </button>
-    
-    <!-- User Menu -->
-    <button class="btn btn-icon" id="userMenuBtn">
-        <div id="userAvatarSmall" class="avatar avatar-sm"></div>
-    </button>
-</div>
+                    <!-- Notification Bell -->
+                    <button class="btn btn-icon" id="notificationBell" onclick="dashboardManager.toggleNotifications()">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge badge-error" id="notificationBadge" style="display: none;">0</span>
+                    </button>
                     
+                    <!-- User Menu Dropdown -->
                     <div class="dropdown" id="userDropdown">
                         <button class="btn btn-icon" id="userMenuBtn">
                             <div id="userAvatarSmall" class="avatar avatar-sm"></div>
@@ -549,16 +561,17 @@
             </div>
         </div>
     </nav>
+    
     <!-- Notification Dropdown -->
-<div id="notificationDropdown" class="notification-dropdown" style="display: none;">
-    <div class="notification-header">
-        <h4>🔔 Notifications</h4>
-        <button class="btn btn-sm btn-outline" onclick="dashboardManager.markAllRead()">Mark all read</button>
+    <div id="notificationDropdown" class="notification-dropdown" style="display: none;">
+        <div class="notification-header">
+            <h4>🔔 Notifications</h4>
+            <button class="btn btn-sm btn-outline" onclick="dashboardManager.markAllRead()">Mark all read</button>
+        </div>
+        <div id="notificationList" class="notification-list">
+            <p class="text-center p-md">Loading...</p>
+        </div>
     </div>
-    <div id="notificationList" class="notification-list">
-        <p class="text-center p-md">Loading...</p>
-    </div>
-</div>
     
     <!-- Main Dashboard Layout -->
     <div class="container dashboard-layout">
@@ -571,17 +584,7 @@
                     <i class="fas fa-map-marker-alt"></i> 
                     <span id="locationText">Detecting location...</span>
                 </p>
-                <li class="sidebar-nav-item">
-    <a href="users.html" class="sidebar-nav-link">
-        <i class="fas fa-users"></i> User Directory
-    </a>
-</li>
-                <li class="sidebar-nav-item">
-    <a href="events.html" class="sidebar-nav-link">
-        <i class="fas fa-calendar-alt"></i> Village Events
-    </a>
-</li>
-
+                
                 <div class="user-stats">
                     <div class="stat-item">
                         <div class="stat-value" id="postCount">0</div>
@@ -631,12 +634,21 @@
                             <i class="fas fa-tools"></i> My Services
                             <span class="badge badge-info" id="servicesBadge">0</span>
                         </a>
-                        
-                        <li class="sidebar-nav-item">
-    <a href="map.html" class="sidebar-nav-link">
-        <i class="fas fa-map"></i> Village Map
-    </a>
-</li>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a href="map.html" class="sidebar-nav-link">
+                            <i class="fas fa-map"></i> Village Map
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a href="users.html" class="sidebar-nav-link">
+                            <i class="fas fa-users"></i> User Directory
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a href="events.html" class="sidebar-nav-link">
+                            <i class="fas fa-calendar-alt"></i> Village Events
+                        </a>
                     </li>
                     <li class="sidebar-nav-item">
                         <a href="#" class="sidebar-nav-link" data-page="saved">
@@ -673,11 +685,7 @@
             <div class="create-post-card">
                 <div class="create-post-input">
                     <div id="createPostAvatar"></div>
-                    <input type="text" 
-                           id="postInput" 
-                           placeholder="Share something with your village..."
-                           readonly
-                           onclick="openCreatePostModal()">
+                    <input type="text" id="postInput" placeholder="Share something with your village..." readonly onclick="openCreatePostModal()">
                 </div>
                 <div class="create-post-actions">
                     <div class="post-action" onclick="openCreatePostModal('photo')">
@@ -708,7 +716,7 @@
                 <div class="filter-tab" data-filter="emergency">Emergencies</div>
             </div>
             
-            <!-- Emergency Alert Banner (Hidden by default) -->
+            <!-- Emergency Alert Banner -->
             <div id="emergencyBanner" class="emergency-banner" style="display: none;">
                 <div class="emergency-banner-content">
                     <i class="fas fa-exclamation-triangle"></i>
@@ -724,7 +732,6 @@
             
             <!-- Feed Container -->
             <div id="feedContainer">
-                <!-- Skeleton Loaders -->
                 <div class="post-skeleton">
                     <div class="flex items-center gap-md mb-md">
                         <div class="skeleton skeleton-avatar"></div>
@@ -738,7 +745,6 @@
                     <div class="skeleton skeleton-text"></div>
                     <div class="skeleton skeleton-image"></div>
                 </div>
-                
                 <div class="post-skeleton">
                     <div class="flex items-center gap-md mb-md">
                         <div class="skeleton skeleton-avatar"></div>
@@ -762,18 +768,13 @@
         
         <!-- Right Sidebar -->
         <aside class="right-sidebar">
-            <!-- Emergency Card -->
             <div class="emergency-card">
                 <div class="emergency-card-content">
-                    <h3 style="color: white;">
-                        <i class="fas fa-ambulance"></i> Emergency
-                    </h3>
+                    <h3 style="color: white;"><i class="fas fa-ambulance"></i> Emergency</h3>
                     <p>One tap to alert your entire village</p>
-                    
                     <button class="btn emergency-btn-large" onclick="openEmergencyModal()">
                         <i class="fas fa-bell"></i> SOS EMERGENCY
                     </button>
-                    
                     <p class="text-sm" style="opacity: 0.9;">
                         <i class="fas fa-shield-alt"></i> 
                         Your location will be shared with nearby responders
@@ -781,18 +782,13 @@
                 </div>
             </div>
             
-            <!-- Active Emergencies -->
             <div class="active-emergencies">
-                <h4>
-                    <i class="fas fa-exclamation-triangle" style="color: var(--error);"></i>
-                    Active Emergencies
-                </h4>
+                <h4><i class="fas fa-exclamation-triangle" style="color: var(--error);"></i> Active Emergencies</h4>
                 <div id="activeEmergenciesList">
                     <p class="text-sm text-gray-600">No active emergencies in your area</p>
                 </div>
             </div>
             
-            <!-- Nearby Services -->
             <div class="nearby-services">
                 <div class="flex justify-between items-center mb-md">
                     <h4>Nearby Services</h4>
@@ -803,7 +799,6 @@
                 </div>
             </div>
             
-            <!-- Upcoming Events -->
             <div class="sidebar-card">
                 <h4>Upcoming Events</h4>
                 <div id="eventsList">
@@ -827,143 +822,80 @@
     <!-- Mobile Bottom Navigation -->
     <nav class="mobile-nav">
         <ul class="mobile-nav-menu">
-            <li>
-                <a href="#" class="mobile-nav-item active" data-mobile-page="feed">
-                    <i class="fas fa-home"></i>
-                    <span>Feed</span>
-                </a>
-            </li>
-            <li>
-    <a href="map.html" class="mobile-nav-item">
-        <i class="fas fa-map"></i>
-        <span>Map</span>
-    </a>
-</li>
-            <li>
-                <a href="chat.html" class="mobile-nav-item">
-                    <i class="fas fa-comments"></i>
-                    <span>Chat</span>
-                </a>
-            </li>
-            <li>
-           
-                <a href="users.html" class="mobile-nav-item">
-                <i class="fas fa-users"></i>
-                <span>Users</span>
-            </a>
-        </li>
-        <li>
-    <a href="events.html" class="mobile-nav-item">
-        <i class="fas fa-calendar-alt"></i>
-        <span>Events</span>
-    </a>
-</li>
-            <li>
-                 <a href="#" class="mobile-nav-item" onclick="toggleMoreMenu()">
-                <i class="fas fa-bars"></i>
-                <span>More</span>
-            </a>
-        </li>
-    </ul>
-</nav>
+            <li><a href="#" class="mobile-nav-item active"><i class="fas fa-home"></i><span>Feed</span></a></li>
+            <li><a href="map.html" class="mobile-nav-item"><i class="fas fa-map"></i><span>Map</span></a></li>
+            <li><a href="chat.html" class="mobile-nav-item"><i class="fas fa-comments"></i><span>Chat</span></a></li>
+            <li><a href="users.html" class="mobile-nav-item"><i class="fas fa-users"></i><span>Users</span></a></li>
+            <li><a href="events.html" class="mobile-nav-item"><i class="fas fa-calendar-alt"></i><span>Events</span></a></li>
+            <li><a href="#" class="mobile-nav-item" onclick="toggleMoreMenu()"><i class="fas fa-bars"></i><span>More</span></a></li>
+        </ul>
+    </nav>
 
-<!-- More Menu Overlay -->
-<div id="moreMenuOverlay" class="more-menu-overlay" onclick="toggleMoreMenu()"></div>
+    <!-- More Menu Overlay -->
+    <div id="moreMenuOverlay" class="more-menu-overlay" onclick="toggleMoreMenu()"></div>
 
-<!-- More Menu -->
-<div id="moreMenu" class="more-menu">
-    <div class="more-menu-header">
-        <h3>More Options</h3>
-        <button class="more-menu-close" onclick="toggleMoreMenu()">
-            <i class="fas fa-times"></i>
-        </button>
+    <!-- More Menu -->
+    <div id="moreMenu" class="more-menu">
+        <div class="more-menu-header">
+            <h3>More Options</h3>
+            <button class="more-menu-close" onclick="toggleMoreMenu()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="more-menu-grid">
+            <a href="profile.html" class="more-menu-item">
+                <div class="more-menu-icon" style="background: rgba(46, 125, 50, 0.1);">
+                    <i class="fas fa-user" style="color: var(--primary-green);"></i>
+                </div>
+                <span>Profile</span>
+            </a>
+            <a href="#" class="more-menu-item" onclick="openEmergencyModal()">
+                <div class="more-menu-icon" style="background: rgba(211, 47, 47, 0.1);">
+                    <i class="fas fa-bell" style="color: var(--error);"></i>
+                </div>
+                <span>SOS</span>
+            </a>
+            <a href="profile.html#settings" class="more-menu-item">
+                <div class="more-menu-icon" style="background: var(--gray-100);">
+                    <i class="fas fa-cog" style="color: var(--gray-700);"></i>
+                </div>
+                <span>Settings</span>
+            </a>
+            <a href="#" class="more-menu-item" onclick="dashboardManager.logout()">
+                <div class="more-menu-icon" style="background: rgba(211, 47, 47, 0.1);">
+                    <i class="fas fa-sign-out-alt" style="color: var(--error);"></i>
+                </div>
+                <span>Logout</span>
+            </a>
+        </div>
     </div>
-    <div class="more-menu-grid">
-        <a href="profile.html" class="more-menu-item">
-            <div class="more-menu-icon" style="background: rgba(46, 125, 50, 0.1);">
-                <i class="fas fa-user" style="color: var(--primary-green);"></i>
-            </div>
-            <span>Profile</span>
-        </a>
-        <a href="chat.html" class="more-menu-item">
-            <div class="more-menu-icon" style="background: rgba(30, 136, 229, 0.1);">
-                <i class="fas fa-comments" style="color: var(--info);"></i>
-            </div>
-            <span>Chat</span>
-        </a>
-        <a href="events.html" class="more-menu-item">
-            <div class="more-menu-icon" style="background: rgba(255, 160, 0, 0.1);">
-                <i class="fas fa-calendar-alt" style="color: var(--warning);"></i>
-            </div>
-            <span>Events</span>
-        </a>
-        <a href="profile.html#settings" class="more-menu-item">
-            <div class="more-menu-icon" style="background: var(--gray-100);">
-                <i class="fas fa-cog" style="color: var(--gray-700);"></i>
-            </div>
-            <span>Settings</span>
-        </a>
-        <a href="#" class="more-menu-item" onclick="dashboardManager.logout()">
-            <div class="more-menu-icon" style="background: rgba(211, 47, 47, 0.1);">
-                <i class="fas fa-sign-out-alt" style="color: var(--error);"></i>
-            </div>
-            <span>Logout</span>
-        </a>
-    </div>
-</div>
     
     <!-- Create Post Modal -->
     <div id="createPostModal" class="modal-overlay" style="display: none;">
         <div class="modal post-modal">
             <div class="modal-header">
                 <h3 class="modal-title" id="postModalTitle">Create Post</h3>
-                <button class="modal-close" onclick="closeCreatePostModal()">
-                    <i class="fas fa-times"></i>
-                </button>
+                <button class="modal-close" onclick="closeCreatePostModal()"><i class="fas fa-times"></i></button>
             </div>
-            
             <form id="createPostForm">
                 <div class="form-group">
                     <label class="form-label">Post Type</label>
                     <div class="service-categories" id="postTypeSelector">
-                        <div class="service-category active" data-type="general">
-                            <i class="fas fa-newspaper"></i>
-                            <span>General</span>
-                        </div>
-                        <div class="service-category" data-type="issue">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <span>Issue</span>
-                        </div>
-                        <div class="service-category" data-type="service">
-                            <i class="fas fa-tools"></i>
-                            <span>Service</span>
-                        </div>
+                        <div class="service-category active" data-type="general"><i class="fas fa-newspaper"></i><span>General</span></div>
+                        <div class="service-category" data-type="issue"><i class="fas fa-exclamation-triangle"></i><span>Issue</span></div>
+                        <div class="service-category" data-type="service"><i class="fas fa-tools"></i><span>Service</span></div>
                     </div>
                 </div>
-                
                 <div class="form-group">
                     <label class="form-label">Title</label>
-                    <input type="text" 
-                           class="form-input" 
-                           id="postTitle" 
-                           placeholder="Enter a title for your post"
-                           maxlength="100">
+                    <input type="text" class="form-input" id="postTitle" placeholder="Enter a title for your post" maxlength="100">
                 </div>
-                
                 <div class="form-group">
                     <label class="form-label">Description</label>
-                    <textarea class="form-input" 
-                              id="postDescription" 
-                              rows="4" 
-                              placeholder="Describe your issue or share your thoughts..."
-                              maxlength="500"></textarea>
+                    <textarea class="form-input" id="postDescription" rows="4" placeholder="Describe your issue or share your thoughts..." maxlength="500"></textarea>
                     <div class="flex justify-between">
                         <span class="text-sm text-gray-600">Be specific to get better responses</span>
                         <span class="text-sm text-gray-600" id="charCount">0/500</span>
                     </div>
                 </div>
-                
-                <!-- Issue-specific fields -->
                 <div id="issueFields" style="display: none;">
                     <div class="form-group">
                         <label class="form-label">Issue Category</label>
@@ -976,7 +908,6 @@
                             <option value="other">Other</option>
                         </select>
                     </div>
-                    
                     <div class="form-group">
                         <label class="form-label">Priority</label>
                         <select class="form-input" id="issuePriority">
@@ -986,8 +917,6 @@
                         </select>
                     </div>
                 </div>
-                
-                <!-- Service Request Fields -->
                 <div id="serviceFields" style="display: none;">
                     <div class="form-group">
                         <label class="form-label">Service Type</label>
@@ -1001,16 +930,10 @@
                             <option value="other">Other</option>
                         </select>
                     </div>
-                    
                     <div class="form-group">
                         <label class="form-label">Budget (Optional)</label>
-                        <input type="number" 
-                               class="form-input" 
-                               id="serviceBudget" 
-                               placeholder="Enter your budget"
-                               min="0">
+                        <input type="number" class="form-input" id="serviceBudget" placeholder="Enter your budget" min="0">
                     </div>
-                    
                     <div class="form-group">
                         <label class="form-label">Timeline</label>
                         <select class="form-input" id="serviceTimeline">
@@ -1021,47 +944,27 @@
                         </select>
                     </div>
                 </div>
-                
                 <div class="form-group">
                     <label class="form-label">Add Photos</label>
-                    <input type="file" 
-                           class="form-input" 
-                           id="postImages" 
-                           accept="image/*"
-                           multiple
-                           capture="environment">
+                    <input type="file" class="form-input" id="postImages" accept="image/*" multiple capture="environment">
                     <div id="imagePreviewContainer" class="image-preview-container"></div>
                 </div>
-                
                 <div class="form-group">
                     <label class="form-label">Location</label>
                     <div class="location-selector">
-                        <button type="button" class="location-btn active" id="useCurrentLocationBtn">
-                            <i class="fas fa-location-dot"></i> Current Location
-                        </button>
-                        <button type="button" class="location-btn" id="chooseLocationBtn">
-                            <i class="fas fa-map"></i> Choose on Map
-                        </button>
+                        <button type="button" class="location-btn active" id="useCurrentLocationBtn"><i class="fas fa-location-dot"></i> Current Location</button>
+                        <button type="button" class="location-btn" id="chooseLocationBtn"><i class="fas fa-map"></i> Choose on Map</button>
                     </div>
                     <p id="selectedLocationText" class="text-sm text-gray-600 mt-sm">
-                        <i class="fas fa-map-pin"></i> 
-                        <span id="locationDisplay">Detecting your location...</span>
+                        <i class="fas fa-map-pin"></i> <span id="locationDisplay">Detecting your location...</span>
                     </p>
                 </div>
-                
                 <div class="form-group">
-                    <label class="flex items-center gap-sm">
-                        <input type="checkbox" id="postAnonymous"> Post Anonymously
-                    </label>
+                    <label class="flex items-center gap-sm"><input type="checkbox" id="postAnonymous"> Post Anonymously</label>
                 </div>
-                
                 <div class="flex gap-md">
-                    <button type="button" class="btn btn-outline flex-1" onclick="closeCreatePostModal()">
-                        Cancel
-                    </button>
-                    <button type="submit" class="btn btn-primary flex-1" id="submitPostBtn">
-                        <i class="fas fa-paper-plane"></i> Post
-                    </button>
+                    <button type="button" class="btn btn-outline flex-1" onclick="closeCreatePostModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary flex-1" id="submitPostBtn"><i class="fas fa-paper-plane"></i> Post</button>
                 </div>
             </form>
         </div>
@@ -1071,68 +974,29 @@
     <div id="emergencyModal" class="modal-overlay" style="display: none;">
         <div class="modal emergency-modal">
             <div class="modal-header">
-                <h3 class="modal-title" style="color: var(--error);">
-                    <i class="fas fa-exclamation-triangle"></i> Emergency Alert
-                </h3>
-                <button class="modal-close" onclick="closeEmergencyModal()">
-                    <i class="fas fa-times"></i>
-                </button>
+                <h3 class="modal-title" style="color: var(--error);"><i class="fas fa-exclamation-triangle"></i> Emergency Alert</h3>
+                <button class="modal-close" onclick="closeEmergencyModal()"><i class="fas fa-times"></i></button>
             </div>
-            
             <div class="alert alert-error">
                 <i class="fas fa-info-circle"></i>
-                <strong>This will alert everyone in your village!</strong>
-                <br>Use only for real emergencies.
+                <strong>This will alert everyone in your village!</strong><br>Use only for real emergencies.
             </div>
-            
             <div class="emergency-types">
-                <div class="emergency-type-btn fire" data-emergency="fire" onclick="selectEmergencyType('fire')">
-                    <i class="fas fa-fire"></i>
-                    <h4>Fire</h4>
-                    <p class="text-sm">Fire hazard or burning</p>
-                </div>
-                
-                <div class="emergency-type-btn medical" data-emergency="medical" onclick="selectEmergencyType('medical')">
-                    <i class="fas fa-heartbeat"></i>
-                    <h4>Medical</h4>
-                    <p class="text-sm">Medical emergency</p>
-                </div>
-                
-                <div class="emergency-type-btn theft" data-emergency="theft" onclick="selectEmergencyType('theft')">
-                    <i class="fas fa-shield-alt"></i>
-                    <h4>Theft/Security</h4>
-                    <p class="text-sm">Theft or security threat</p>
-                </div>
-                
-                <div class="emergency-type-btn other" data-emergency="other" onclick="selectEmergencyType('other')">
-                    <i class="fas fa-exclamation"></i>
-                    <h4>Other</h4>
-                    <p class="text-sm">Other emergency</p>
-                </div>
+                <div class="emergency-type-btn fire" data-emergency="fire" onclick="selectEmergencyType('fire')"><i class="fas fa-fire"></i><h4>Fire</h4><p class="text-sm">Fire hazard or burning</p></div>
+                <div class="emergency-type-btn medical" data-emergency="medical" onclick="selectEmergencyType('medical')"><i class="fas fa-heartbeat"></i><h4>Medical</h4><p class="text-sm">Medical emergency</p></div>
+                <div class="emergency-type-btn theft" data-emergency="theft" onclick="selectEmergencyType('theft')"><i class="fas fa-shield-alt"></i><h4>Theft/Security</h4><p class="text-sm">Theft or security threat</p></div>
+                <div class="emergency-type-btn other" data-emergency="other" onclick="selectEmergencyType('other')"><i class="fas fa-exclamation"></i><h4>Other</h4><p class="text-sm">Other emergency</p></div>
             </div>
-            
             <div class="form-group">
                 <label class="form-label">Additional Details (Optional)</label>
-                <textarea class="form-input" 
-                          id="emergencyDetails" 
-                          rows="3" 
-                          placeholder="Provide more details about the emergency..."></textarea>
+                <textarea class="form-input" id="emergencyDetails" rows="3" placeholder="Provide more details about the emergency..."></textarea>
             </div>
-            
             <div class="form-group">
-                <label class="flex items-center gap-sm">
-                    <input type="checkbox" id="shareLiveLocation" checked>
-                    Share my live location with emergency responders
-                </label>
+                <label class="flex items-center gap-sm"><input type="checkbox" id="shareLiveLocation" checked> Share my live location with emergency responders</label>
             </div>
-            
             <div class="flex gap-md">
-                <button type="button" class="btn btn-outline flex-1" onclick="closeEmergencyModal()">
-                    Cancel
-                </button>
-                <button type="button" class="btn btn-danger flex-1" id="triggerEmergencyBtn" onclick="triggerEmergency()">
-                    <i class="fas fa-bell"></i> SEND EMERGENCY ALERT
-                </button>
+                <button type="button" class="btn btn-outline flex-1" onclick="closeEmergencyModal()">Cancel</button>
+                <button type="button" class="btn btn-danger flex-1" id="triggerEmergencyBtn" onclick="triggerEmergency()"><i class="fas fa-bell"></i> SEND EMERGENCY ALERT</button>
             </div>
         </div>
     </div>

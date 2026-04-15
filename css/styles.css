@@ -2848,3 +2848,55 @@ body {
 * {
     scrollbar-width: none !important;
 }
+/* ============ FORCE SCROLL FIX - DO NOT REMOVE ============ */
+html {
+    overflow-y: scroll !important;
+    height: 100% !important;
+}
+
+body {
+    overflow-y: scroll !important;
+    height: 100% !important;
+    position: relative !important;
+    -webkit-overflow-scrolling: touch !important;
+}
+
+.main-feed,
+.tab-content,
+#feedContainer,
+.messages-container,
+.events-list,
+.modal {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    max-height: none !important;
+}
+
+/* Force kill any overflow: hidden on these */
+html, body, .container, .dashboard-layout, .main-feed, .post-card {
+    overflow-x: hidden !important;
+}
+/* ============ KILL TWO-FINGER SCROLL - FORCE NORMAL SCROLL ============ */
+html, body {
+    touch-action: auto !important;
+    overflow-y: scroll !important;
+    -webkit-overflow-scrolling: touch !important;
+}
+
+* {
+    touch-action: auto !important;
+}
+
+.container, .dashboard-layout, .main-feed, .post-card, .modal {
+    touch-action: auto !important;
+}
+
+/* Remove any pan-y restrictions */
+html, body, div, section, article, main {
+    touch-action: auto !important;
+}
+html, body {
+    overflow-y: scroll !important;
+    touch-action: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+}
