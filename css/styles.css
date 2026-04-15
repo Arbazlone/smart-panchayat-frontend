@@ -486,7 +486,7 @@ input[type="checkbox"] {
     gap: var(--space-sm);
 }
 
-/* Mobile Navigation */
+/* ---------- BOTTOM NAVIGATION - CLEAN ---------- */
 .mobile-nav {
     position: fixed;
     bottom: 0;
@@ -494,9 +494,10 @@ input[type="checkbox"] {
     right: 0;
     background: white;
     border-top: 1px solid var(--gray-200);
-    padding: 8px 16px;
-    display: none;
+    padding: 6px 12px;
+    padding-bottom: max(6px, env(safe-area-inset-bottom));
     z-index: 100;
+    box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .mobile-nav-menu {
@@ -504,24 +505,39 @@ input[type="checkbox"] {
     justify-content: space-around;
     align-items: center;
     list-style: none;
+    max-width: 400px;
+    margin: 0 auto;
 }
 
 .mobile-nav-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
-    color: var(--gray-600);
+    gap: 3px;
+    color: var(--gray-500);
     text-decoration: none;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
+    font-weight: 500;
+    transition: color 0.2s;
+    padding: 4px 0;
 }
 
-.mobile-nav-item i { font-size: 1.5rem; }
-.mobile-nav-item.active { color: var(--primary-green); }
+.mobile-nav-item i {
+    font-size: 1.4rem;
+}
 
-@media (max-width: 768px) {
-    .mobile-nav { display: block; }
-    body { padding-bottom: 80px; }
+.mobile-nav-item.active {
+    color: var(--primary-green);
+}
+
+.mobile-nav-item.emergency-nav i {
+    color: var(--error);
+}
+
+@media (min-width: 769px) {
+    .mobile-nav {
+        display: none !important;
+    }
 }
 
 /* ---------- MODALS ---------- */
@@ -1870,25 +1886,8 @@ input[type="checkbox"] {
 .provider-name { font-weight: 600; display: flex; align-items: center; gap: var(--space-xs); }
 .provider-distance { font-size: 0.75rem; color: var(--gray-600); }
 
-/* ---------- ONLINE STATUS ---------- */
 .online-status {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 0.75rem;
-    padding: 2px 10px;
-    border-radius: 20px;
-    margin-left: 10px;
-}
-
-.online-status.online {
-    background: rgba(67, 160, 71, 0.1);
-    color: var(--success);
-}
-
-.online-status.offline {
-    background: var(--gray-100);
-    color: var(--gray-600);
+    display: none !important;
 }
 
 /* ---------- LOCATION SELECTOR ---------- */
@@ -2517,4 +2516,126 @@ input, textarea, select, button {
 
 body {
     padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px)) !important;
+}
+/* ============ MOBILE TOP NAVBAR FIX ============ */
+@media (max-width: 768px) {
+    .navbar {
+        padding: 8px 0 !important;
+        background: white !important;
+        border-bottom: 1px solid var(--gray-200) !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+    }
+    
+    .navbar-container {
+        padding: 0 16px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+    }
+    
+    .navbar-brand {
+        font-size: 1.2rem !important;
+        font-weight: 700 !important;
+        color: var(--primary-green) !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+    }
+    
+    .navbar-brand i {
+        font-size: 1.1rem !important;
+    }
+    
+    /* Hide the full text on mobile, show only icon */
+    .navbar-brand span {
+        display: inline !important;
+    }
+    
+    /* Right icons container */
+    .navbar .flex.items-center.gap-sm,
+    .navbar .flex.items-center.gap-md {
+        display: flex !important;
+        align-items: center !important;
+        gap: 4px !important;
+    }
+    
+    /* Notification bell and user avatar */
+    .navbar .btn-icon {
+        width: 38px !important;
+        height: 38px !important;
+        border-radius: 50% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: transparent !important;
+        border: none !important;
+        color: var(--gray-700) !important;
+        font-size: 1.2rem !important;
+    }
+    
+    /* Avatar in navbar */
+    .navbar .avatar-sm {
+        width: 32px !important;
+        height: 32px !important;
+    }
+    
+    /* Hide desktop menu */
+    .navbar-menu {
+        display: none !important;
+    }
+    
+    /* Notification badge positioning */
+    #notificationBell {
+        position: relative !important;
+    }
+    
+    #notificationBadge {
+        position: absolute !important;
+        top: 2px !important;
+        right: 2px !important;
+        background: var(--error) !important;
+        color: white !important;
+        font-size: 0.6rem !important;
+        font-weight: 700 !important;
+        padding: 2px 5px !important;
+        border-radius: 10px !important;
+        min-width: 16px !important;
+        text-align: center !important;
+        border: 2px solid white !important;
+    }
+}
+/* ============ FIX CONTENT SCALING ============ */
+* {
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+}
+
+img {
+    max-width: 100% !important;
+    height: auto !important;
+}
+
+.post-card, 
+.create-post-card,
+.card,
+.modal {
+    max-width: 100% !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+}
+
+/* Fix for iOS input zoom */
+input, 
+textarea, 
+select {
+    font-size: 16px !important;
+}
+
+/* Prevent pull-to-refresh */
+body {
+    overscroll-behavior-y: contain !important;
 }
