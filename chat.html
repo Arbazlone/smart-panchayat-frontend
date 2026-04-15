@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#2E7D32">
+    <title>Village Chat - Smart Panchayat</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <style>
+        .chat-container {
+            display: flex;
+            height: calc(100vh - 80px);
+            margin-top: 0;
+        }
+        
+        .chat-sidebar {
+            width: 320px;
+            border-right: 1px solid var(--gray-200);
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+        
+        .chat-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--gray-50);
+        }
+        
+        .chat-header {
+            padding: var(--space-md) var(--space-lg);
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: white;
+        }
+        
+        .chat-search {
+            padding: var(--space-md);
+            border-bottom: 1px solid var(--gray-200);
+        }
+        
+        .conversation-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+        
+        /* Village Chat - Special Styling */
+        .village-chat-item {
+            background: linear-gradient(135deg, rgba(46, 125, 50, 0.05) 0%, rgba(46, 125, 50, 0.02) 100%);
+            border-bottom: 2px solid var(--primary-green-light) !important;
+        }
+        
+        .chat-section-header {
+            padding: 12px 20px 5px 20px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--gray-500);
+        }
+        
+        .conversation-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md) var(--space-lg);
+            cursor: pointer;
+            transition: background var(--transition-fast);
+            border-bottom: 1px solid var(--gray-100);
+        }
+        
+        .conversation-item:hover {
+            background: var(--gray-100);
+        }
+        
+        .conversation-item.active {
+            background: rgba(46, 125, 50, 0.1);
+            border-left: 3px solid var(--primary-green);
+        }
+        
+        .conversation-info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .conversation-name {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+        }
+        
+        .conversation-last-message {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .conversation-time {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+        }
+        
+        .unread-badge {
+            background: var(--primary-green);
+            color: white;
+            border-radius: var(--radius-full);
+            padding: 2px 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: var(--space-lg);
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-md);
+        }
+        
+        .message {
+            display: flex;
+            gap: var(--space-md);
+            max-width: 70%;
+        }
+        
+        .message.sent {
+            margin-left: auto;
+            flex-direction: row-reverse;
+        }
+        
+        .message-content {
+            background: white;
+            padding: var(--space-md);
+            border-radius: var(--radius-lg);
+            border-top-left-radius: 4px;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .message.sent .message-content {
+            background: var(--primary-green);
+            color: white;
+            border-top-left-radius: var(--radius-lg);
+            border-top-right-radius: 4px;
+        }
+        
+        .message-time {
+            font-size: 0.7rem;
+            color: var(--gray-500);
+            margin-top: 4px;
+        }
+        
+        .message.sent .message-time {
+            color: rgba(255, 255, 255, 0.8);
+            text-align: right;
+        }
+        
+        .message-input-container {
+            padding: var(--space-lg);
+            border-top: 1px solid var(--gray-200);
+            display: flex;
+            gap: var(--space-md);
+            align-items: flex-end;
+            background: white;
+        }
+        
+        .message-input {
+            flex: 1;
+            padding: var(--space-md);
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius-lg);
+            resize: none;
+            max-height: 120px;
+            font-family: var(--font-sans);
+        }
+        
+        .message-input:focus {
+            outline: none;
+            border-color: var(--primary-green);
+        }
+        
+        .chat-actions {
+            display: flex;
+            gap: var(--space-sm);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: var(--space-2xl);
+            color: var(--gray-500);
+        }
+        
+        .online-indicator {
+            width: 10px;
+            height: 10px;
+            background: var(--success);
+            border-radius: 50%;
+            display: inline-block;
+            margin-left: var(--space-xs);
+        }
+        
+        .chat-header-info {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        @media (max-width: 768px) {
+            .chat-container {
+                flex-direction: column;
+            }
+            
+            .chat-sidebar {
+                width: 100%;
+                height: 40%;
+            }
+            
+            .message {
+                max-width: 85%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container navbar-container">
+            <a href="dashboard.html" class="navbar-brand">
+                <i class="fas fa-arrow-left"></i>
+                <span>Village Chat</span>
+            </a>
+            <div class="flex items-center gap-md">
+                <span class="text-sm text-gray-600">
+                    <i class="fas fa-circle" style="color: var(--success); font-size: 8px;"></i>
+                    <span id="onlineCount">0</span> online
+                </span>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="chat-container">
+        <!-- Sidebar -->
+        <div class="chat-sidebar">
+            <div class="chat-header">
+                <h3>💬 Messages</h3>
+                <button class="btn btn-icon" id="newChatBtn" title="New Chat">
+                    <i class="fas fa-edit"></i>
+                </button>
+            </div>
+            
+            <div class="chat-search">
+                <input type="text" class="form-input" placeholder="🔍 Search conversations..." id="searchChatInput">
+            </div>
+            
+            <div class="conversation-list" id="conversationList">
+                <!-- VILLAGE CHAT SECTION -->
+                <div class="chat-section-header">
+                    <i class="fas fa-users"></i> VILLAGE COMMUNITY
+                </div>
+                
+                <!-- Village Group Chat (Always present) -->
+                <div class="conversation-item village-chat-item active" data-chat="village">
+                    <div class="avatar" style="background: var(--primary-green);">
+                        <i class="fas fa-tree"></i>
+                    </div>
+                    <div class="conversation-info">
+                        <div class="conversation-name">
+                            🏘️ Village Community
+                            <span class="online-indicator"></span>
+                        </div>
+                        <div class="conversation-last-message" id="villageLastMessage">
+                            Loading...
+                        </div>
+                    </div>
+                    <div class="conversation-time" id="villageLastTime"></div>
+                </div>
+                
+                <!-- PERSONAL CHATS SECTION -->
+                <div class="chat-section-header" style="margin-top: 8px;">
+                    <i class="fas fa-user-friends"></i> PERSONAL CHATS
+                </div>
+                
+                <!-- Individual conversations loaded here -->
+                <div id="individualChats"></div>
+            </div>
+        </div>
+        
+        <!-- Main Chat Area -->
+        <div class="chat-main">
+            <div class="chat-header">
+                <div class="flex items-center gap-md">
+                    <div class="avatar" style="background: var(--primary-green);" id="chatAvatar">
+                        <i class="fas fa-tree"></i>
+                    </div>
+                    <div class="chat-header-info">
+                        <h3 id="currentChatName">🏘️ Village Community</h3>
+                        <p class="text-sm text-gray-600" id="chatSubtitle">
+                            <span id="memberCount">--</span> members • Everyone can message
+                        </p>
+                    </div>
+                </div>
+                <div class="chat-actions">
+                    <button class="btn btn-icon" id="chatInfoBtn" title="Chat Info">
+                        <i class="fas fa-info-circle"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="messages-container" id="messagesContainer">
+                <div class="empty-state">
+                    <i class="fas fa-comments" style="font-size: 3rem;"></i>
+                    <p>No messages yet. Start the conversation!</p>
+                </div>
+            </div>
+            
+            <div class="message-input-container">
+                <button class="btn btn-icon" id="attachFileBtn" title="Attach File">
+                    <i class="fas fa-paperclip"></i>
+                </button>
+                <textarea class="message-input" id="messageInput" placeholder="Type a message..." rows="1"></textarea>
+                <button class="btn btn-primary btn-icon" id="sendMessageBtn" title="Send">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+                <input type="file" id="fileInput" style="display: none;" accept="image/*">
+            </div>
+        </div>
+    </div>
+    
+    <!-- New Chat Modal -->
+    <div id="newChatModal" class="modal-overlay" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="fas fa-user-plus"></i> New Personal Chat
+                </h3>
+                <button class="modal-close" onclick="closeNewChatModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Search for a user</label>
+                <input type="text" class="form-input" id="userSearchInput" placeholder="Enter name or phone number">
+            </div>
+            <div id="userSearchResults"></div>
+        </div>
+    </div>
+    
+    <div id="toastContainer" class="toast-container"></div>
+    
+    <script src="js/utils.js"></script>
+    <script src="js/chat.js"></script>
+</body>
+</html>

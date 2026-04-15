@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="description" content="Smart Panchayat Dashboard - Connect with your village community">
+    <meta name="theme-color" content="#2E7D32">
+    
+    <title>Dashboard - Smart Panchayat System</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <style>
+        /* Dashboard Specific Styles */
+        .dashboard-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr 320px;
+            gap: var(--space-lg);
+            min-height: calc(100vh - 80px);
+            margin-top: var(--space-lg);
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            position: sticky;
+            top: 80px;
+            height: fit-content;
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+        }
+        
+        .sidebar-card {
+            background: var(--gray-50);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            border: 1px solid var(--gray-200);
+            margin-bottom: var(--space-md);
+        }
+        
+        .user-profile-card {
+            text-align: center;
+        }
+        
+        .user-avatar-large {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto var(--space-md);
+            border-radius: var(--radius-full);
+            border: 3px solid var(--primary-green);
+            padding: 3px;
+        }
+        
+        .user-stats {
+            display: flex;
+            justify-content: space-around;
+            margin: var(--space-md) 0;
+            padding: var(--space-md) 0;
+            border-top: 1px solid var(--gray-200);
+            border-bottom: 1px solid var(--gray-200);
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary-green);
+        }
+        
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--gray-600);
+        }
+        
+        .sidebar-nav {
+            list-style: none;
+        }
+        
+        .sidebar-nav-item {
+            margin-bottom: var(--space-xs);
+        }
+        
+        .sidebar-nav-link {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            color: var(--gray-700);
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            transition: all var(--transition-fast);
+        }
+        
+        .sidebar-nav-link i {
+            width: 24px;
+            text-align: center;
+        }
+        
+        .sidebar-nav-link:hover {
+            background: var(--gray-100);
+            color: var(--primary-green);
+        }
+        
+        .sidebar-nav-link.active {
+            background: var(--primary-green);
+            color: white;
+        }
+        
+        .sidebar-nav-link .badge {
+            margin-left: auto;
+        }
+        
+        /* Main Feed */
+        .main-feed {
+            min-height: 100vh;
+        }
+        
+        .feed-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-lg);
+        }
+        
+        .create-post-card {
+            background: var(--gray-50);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            border: 1px solid var(--gray-200);
+            margin-bottom: var(--space-lg);
+        }
+        
+        .create-post-input {
+            display: flex;
+            gap: var(--space-md);
+            align-items: center;
+        }
+        
+        .create-post-input input {
+            flex: 1;
+            padding: var(--space-md);
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius-full);
+            background: var(--gray-100);
+            font-size: 1rem;
+        }
+        
+        .create-post-input input:focus {
+            outline: none;
+            border-color: var(--primary-green);
+            background: var(--gray-50);
+        }
+        
+        .create-post-actions {
+            display: flex;
+            gap: var(--space-md);
+            margin-top: var(--space-md);
+            padding-top: var(--space-md);
+            border-top: 1px solid var(--gray-200);
+        }
+        
+        .post-action {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            border-radius: var(--radius-full);
+            background: var(--gray-100);
+            color: var(--gray-700);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .post-action:hover {
+            background: var(--gray-200);
+        }
+        
+        /* Filter Tabs */
+        .feed-filters {
+            display: flex;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-lg);
+            border-bottom: 1px solid var(--gray-200);
+            padding-bottom: var(--space-md);
+        }
+        
+        .filter-tab {
+            padding: var(--space-sm) var(--space-lg);
+            border-radius: var(--radius-full);
+            background: var(--gray-100);
+            color: var(--gray-700);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            font-weight: 500;
+        }
+        
+        .filter-tab:hover {
+            background: var(--gray-200);
+        }
+        
+        .filter-tab.active {
+            background: var(--primary-green);
+            color: white;
+        }
+        
+        /* Right Sidebar */
+        .right-sidebar {
+            position: sticky;
+            top: 80px;
+            height: fit-content;
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+        }
+        
+        .emergency-card {
+            background: var(--emergency-bg);
+            color: white;
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .emergency-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 10s linear infinite;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .emergency-card-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .emergency-btn-large {
+            width: 100%;
+            padding: var(--space-lg);
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: var(--space-md) 0;
+            animation: emergency-pulse 1.5s infinite;
+        }
+        
+        .nearby-services {
+            background: var(--gray-50);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            border: 1px solid var(--gray-200);
+            margin-bottom: var(--space-lg);
+        }
+        
+        .service-provider-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md) 0;
+            border-bottom: 1px solid var(--gray-200);
+        }
+        
+        .service-provider-item:last-child {
+            border-bottom: none;
+        }
+        
+        .provider-info {
+            flex: 1;
+        }
+        
+        .provider-name {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+        }
+        
+        .provider-distance {
+            font-size: 0.75rem;
+            color: var(--gray-600);
+        }
+        
+        .active-emergencies {
+            background: var(--gray-50);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            border: 1px solid var(--error);
+        }
+        
+        .emergency-alert-item {
+            background: rgba(211, 47, 47, 0.1);
+            border-radius: var(--radius-md);
+            padding: var(--space-md);
+            margin-bottom: var(--space-sm);
+            border-left: 4px solid var(--error);
+        }
+        
+        /* Post Creation Modal */
+        .post-modal .modal {
+            max-width: 600px;
+        }
+        
+        .image-preview-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: var(--space-sm);
+            margin-top: var(--space-md);
+        }
+        
+        .image-preview-item {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+        
+        .image-preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .image-preview-remove {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: rgba(0,0,0,0.5);
+            color: white;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: var(--radius-full);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .location-selector {
+            display: flex;
+            gap: var(--space-sm);
+            margin-top: var(--space-sm);
+        }
+        
+        .location-btn {
+            flex: 1;
+            padding: var(--space-md);
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius-md);
+            background: var(--gray-50);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+        }
+        
+        .location-btn.active {
+            border-color: var(--primary-green);
+            background: rgba(46, 125, 50, 0.1);
+            color: var(--primary-green);
+        }
+        
+        /* Emergency Modal */
+        .emergency-modal .modal {
+            border: 4px solid var(--error);
+            animation: emergency-shake 0.5s ease;
+        }
+        
+        @keyframes emergency-shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+            20%, 40%, 60%, 80% { transform: translateX(2px); }
+        }
+        
+        .emergency-types {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+        
+        .emergency-type-btn {
+            padding: var(--space-lg);
+            border: 2px solid var(--gray-300);
+            border-radius: var(--radius-lg);
+            background: var(--gray-50);
+            cursor: pointer;
+            text-align: center;
+            transition: all var(--transition-fast);
+        }
+        
+        .emergency-type-btn i {
+            font-size: 2rem;
+            margin-bottom: var(--space-sm);
+        }
+        
+        .emergency-type-btn.fire:hover,
+        .emergency-type-btn.fire.active {
+            border-color: #FF6F00;
+            background: rgba(255, 111, 0, 0.1);
+        }
+        
+        .emergency-type-btn.medical:hover,
+        .emergency-type-btn.medical.active {
+            border-color: #D32F2F;
+            background: rgba(211, 47, 47, 0.1);
+        }
+        
+        .emergency-type-btn.theft:hover,
+        .emergency-type-btn.theft.active {
+            border-color: #7B1FA2;
+            background: rgba(123, 31, 162, 0.1);
+        }
+        
+        .emergency-type-btn.other:hover,
+        .emergency-type-btn.other.active {
+            border-color: #1976D2;
+            background: rgba(25, 118, 210, 0.1);
+        }
+        
+        /* Loading Skeleton */
+        .post-skeleton {
+            background: var(--gray-50);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-md);
+            border: 1px solid var(--gray-200);
+        }
+        
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .dashboard-layout {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar, .right-sidebar {
+                display: none;
+            }
+            
+            .mobile-sidebar-active .sidebar {
+                display: block;
+                position: fixed;
+                top: 0;
+                left: 0;
+                bottom: 0;
+                width: 280px;
+                z-index: 1000;
+                background: var(--gray-50);
+                padding: var(--space-lg);
+                box-shadow: var(--shadow-2xl);
+            }
+        }
+        
+        /* Service Request Styles */
+        .service-categories {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--space-sm);
+            margin-bottom: var(--space-lg);
+        }
+        
+        .service-category {
+            padding: var(--space-md);
+            border: 2px solid var(--gray-300);
+            border-radius: var(--radius-md);
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .service-category i {
+            font-size: 1.5rem;
+            margin-bottom: var(--space-xs);
+        }
+        
+        .service-category:hover,
+        .service-category.active {
+            border-color: var(--primary-green);
+            background: rgba(46, 125, 50, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container navbar-container">
+            <a href="index.html" class="navbar-brand">
+                <i class="fas fa-tree"></i>
+                <span>Smart Panchayat</span>
+            </a>
+            
+            <div class="flex items-center gap-md">
+                <button class="btn btn-icon" id="mobileMenuToggle" style="display: none;">
+                    <i class="fas fa-bars"></i>
+                </button>
+                
+                <div class="flex items-center gap-sm">
+    <!-- Notification Bell -->
+    <button class="btn btn-icon" id="notificationBell" onclick="dashboardManager.toggleNotifications()">
+        <i class="fas fa-bell"></i>
+        <span class="badge badge-error" id="notificationBadge" style="display: none;">0</span>
+    </button>
+    
+    <!-- User Menu -->
+    <button class="btn btn-icon" id="userMenuBtn">
+        <div id="userAvatarSmall" class="avatar avatar-sm"></div>
+    </button>
+</div>
+                    
+                    <div class="dropdown" id="userDropdown">
+                        <button class="btn btn-icon" id="userMenuBtn">
+                            <div id="userAvatarSmall" class="avatar avatar-sm"></div>
+                        </button>
+                        
+                        <div class="dropdown-menu" id="userDropdownMenu" style="display: none;">
+                            <a href="profile.html" class="dropdown-item">
+                                <i class="fas fa-user"></i> Profile
+                            </a>
+                            <a href="profile.html#settings" class="dropdown-item">
+                                <i class="fas fa-cog"></i> Settings
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a href="#" class="dropdown-item text-error" id="logoutBtn">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <!-- Notification Dropdown -->
+<div id="notificationDropdown" class="notification-dropdown" style="display: none;">
+    <div class="notification-header">
+        <h4>🔔 Notifications</h4>
+        <button class="btn btn-sm btn-outline" onclick="dashboardManager.markAllRead()">Mark all read</button>
+    </div>
+    <div id="notificationList" class="notification-list">
+        <p class="text-center p-md">Loading...</p>
+    </div>
+</div>
+    
+    <!-- Main Dashboard Layout -->
+    <div class="container dashboard-layout">
+        <!-- Left Sidebar -->
+        <aside class="sidebar" id="mainSidebar">
+            <div class="sidebar-card user-profile-card">
+                <div id="userAvatarLarge" class="user-avatar-large"></div>
+                <h3 id="userNameDisplay">Loading...</h3>
+                <p id="userLocation" class="text-sm text-gray-600">
+                    <i class="fas fa-map-marker-alt"></i> 
+                    <span id="locationText">Detecting location...</span>
+                </p>
+                <li class="sidebar-nav-item">
+    <a href="users.html" class="sidebar-nav-link">
+        <i class="fas fa-users"></i> User Directory
+    </a>
+</li>
+                <li class="sidebar-nav-item">
+    <a href="events.html" class="sidebar-nav-link">
+        <i class="fas fa-calendar-alt"></i> Village Events
+    </a>
+</li>
+
+                <div class="user-stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="postCount">0</div>
+                        <div class="stat-label">Posts</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="helpedCount">0</div>
+                        <div class="stat-label">Helped</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="ratingValue">0.0</div>
+                        <div class="stat-label">Rating</div>
+                    </div>
+                </div>
+                
+                <a href="profile.html" class="btn btn-outline btn-block btn-sm">
+                    <i class="fas fa-edit"></i> Edit Profile
+                </a>
+            </div>
+            
+            <div class="sidebar-card">
+                <ul class="sidebar-nav">
+                    <li class="sidebar-nav-item">
+                        <a href="#" class="sidebar-nav-link active" data-page="feed">
+                            <i class="fas fa-home"></i> Feed
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a href="profile.html" class="sidebar-nav-link">
+                            <i class="fas fa-user"></i> My Profile
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a href="chat.html" class="sidebar-nav-link">
+                            <i class="fas fa-comments"></i> Village Chat
+                            <span class="badge badge-info" id="chatBadge">New</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a href="#" class="sidebar-nav-link" data-page="issues">
+                            <i class="fas fa-exclamation-circle"></i> My Issues
+                            <span class="badge badge-warning" id="issuesBadge">0</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a href="#" class="sidebar-nav-link" data-page="services">
+                            <i class="fas fa-tools"></i> My Services
+                            <span class="badge badge-info" id="servicesBadge">0</span>
+                        </a>
+                        
+                        <li class="sidebar-nav-item">
+    <a href="map.html" class="sidebar-nav-link">
+        <i class="fas fa-map"></i> Village Map
+    </a>
+</li>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a href="#" class="sidebar-nav-link" data-page="saved">
+                            <i class="fas fa-bookmark"></i> Saved Posts
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a href="#" class="sidebar-nav-link" id="logoutSidebarBtn">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="sidebar-card">
+                <h4>Verified Providers</h4>
+                <div id="sidebarProviders">
+                    <p class="text-sm text-gray-600">Loading providers...</p>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- Main Feed Area -->
+        <main class="main-feed">
+            <!-- Feed Header -->
+            <div class="feed-header">
+                <h2 id="feedTitle">Community Feed</h2>
+                <button class="btn btn-outline btn-sm" id="refreshFeedBtn">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+            </div>
+            
+            <!-- Create Post Card -->
+            <div class="create-post-card">
+                <div class="create-post-input">
+                    <div id="createPostAvatar"></div>
+                    <input type="text" 
+                           id="postInput" 
+                           placeholder="Share something with your village..."
+                           readonly
+                           onclick="openCreatePostModal()">
+                </div>
+                <div class="create-post-actions">
+                    <div class="post-action" onclick="openCreatePostModal('photo')">
+                        <i class="fas fa-camera" style="color: #4CAF50;"></i>
+                        <span>Photo</span>
+                    </div>
+                    <div class="post-action" onclick="openCreatePostModal('issue')">
+                        <i class="fas fa-exclamation-triangle" style="color: #FF6F00;"></i>
+                        <span>Report Issue</span>
+                    </div>
+                    <div class="post-action" onclick="openCreatePostModal('service')">
+                        <i class="fas fa-tools" style="color: #1976D2;"></i>
+                        <span>Request Service</span>
+                    </div>
+                    <div class="post-action" onclick="openCreatePostModal('location')">
+                        <i class="fas fa-map-marker-alt" style="color: #D32F2F;"></i>
+                        <span>Location</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Feed Filters -->
+            <div class="feed-filters">
+                <div class="filter-tab active" data-filter="all">All Posts</div>
+                <div class="filter-tab" data-filter="issues">Issues</div>
+                <div class="filter-tab" data-filter="services">Services</div>
+                <div class="filter-tab" data-filter="nearby">Nearby</div>
+                <div class="filter-tab" data-filter="emergency">Emergencies</div>
+            </div>
+            
+            <!-- Emergency Alert Banner (Hidden by default) -->
+            <div id="emergencyBanner" class="emergency-banner" style="display: none;">
+                <div class="emergency-banner-content">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div>
+                        <strong id="emergencyBannerTitle">Emergency Alert!</strong>
+                        <p id="emergencyBannerMessage">There is an active emergency in your area.</p>
+                    </div>
+                </div>
+                <button class="emergency-banner-close" onclick="closeEmergencyBanner()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <!-- Feed Container -->
+            <div id="feedContainer">
+                <!-- Skeleton Loaders -->
+                <div class="post-skeleton">
+                    <div class="flex items-center gap-md mb-md">
+                        <div class="skeleton skeleton-avatar"></div>
+                        <div style="flex: 1;">
+                            <div class="skeleton skeleton-text" style="width: 150px;"></div>
+                            <div class="skeleton skeleton-text" style="width: 100px;"></div>
+                        </div>
+                    </div>
+                    <div class="skeleton skeleton-title"></div>
+                    <div class="skeleton skeleton-text"></div>
+                    <div class="skeleton skeleton-text"></div>
+                    <div class="skeleton skeleton-image"></div>
+                </div>
+                
+                <div class="post-skeleton">
+                    <div class="flex items-center gap-md mb-md">
+                        <div class="skeleton skeleton-avatar"></div>
+                        <div style="flex: 1;">
+                            <div class="skeleton skeleton-text" style="width: 150px;"></div>
+                            <div class="skeleton skeleton-text" style="width: 100px;"></div>
+                        </div>
+                    </div>
+                    <div class="skeleton skeleton-title"></div>
+                    <div class="skeleton skeleton-text"></div>
+                </div>
+            </div>
+            
+            <!-- Load More Button -->
+            <div class="text-center mt-lg">
+                <button class="btn btn-outline" id="loadMoreBtn">
+                    <i class="fas fa-arrow-down"></i> Load More
+                </button>
+            </div>
+        </main>
+        
+        <!-- Right Sidebar -->
+        <aside class="right-sidebar">
+            <!-- Emergency Card -->
+            <div class="emergency-card">
+                <div class="emergency-card-content">
+                    <h3 style="color: white;">
+                        <i class="fas fa-ambulance"></i> Emergency
+                    </h3>
+                    <p>One tap to alert your entire village</p>
+                    
+                    <button class="btn emergency-btn-large" onclick="openEmergencyModal()">
+                        <i class="fas fa-bell"></i> SOS EMERGENCY
+                    </button>
+                    
+                    <p class="text-sm" style="opacity: 0.9;">
+                        <i class="fas fa-shield-alt"></i> 
+                        Your location will be shared with nearby responders
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Active Emergencies -->
+            <div class="active-emergencies">
+                <h4>
+                    <i class="fas fa-exclamation-triangle" style="color: var(--error);"></i>
+                    Active Emergencies
+                </h4>
+                <div id="activeEmergenciesList">
+                    <p class="text-sm text-gray-600">No active emergencies in your area</p>
+                </div>
+            </div>
+            
+            <!-- Nearby Services -->
+            <div class="nearby-services">
+                <div class="flex justify-between items-center mb-md">
+                    <h4>Nearby Services</h4>
+                    <a href="#" class="text-sm" style="color: var(--primary-green);">View All</a>
+                </div>
+                <div id="nearbyServicesList">
+                    <p class="text-sm text-gray-600">Loading services...</p>
+                </div>
+            </div>
+            
+            <!-- Upcoming Events -->
+            <div class="sidebar-card">
+                <h4>Upcoming Events</h4>
+                <div id="eventsList">
+                    <div class="event-item">
+                        <div class="flex items-start gap-sm">
+                            <div class="text-center">
+                                <div class="font-bold">15</div>
+                                <div class="text-xs">May</div>
+                            </div>
+                            <div>
+                                <strong>Village Meeting</strong>
+                                <p class="text-sm text-gray-600">10:00 AM - Panchayat Hall</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+    
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-nav">
+        <ul class="mobile-nav-menu">
+            <li>
+                <a href="#" class="mobile-nav-item active" data-mobile-page="feed">
+                    <i class="fas fa-home"></i>
+                    <span>Feed</span>
+                </a>
+            </li>
+            <li>
+    <a href="map.html" class="mobile-nav-item">
+        <i class="fas fa-map"></i>
+        <span>Map</span>
+    </a>
+</li>
+            <li>
+                <a href="chat.html" class="mobile-nav-item">
+                    <i class="fas fa-comments"></i>
+                    <span>Chat</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" class="mobile-nav-item emergency-nav" onclick="openEmergencyModal()">
+                    <i class="fas fa-bell" style="color: var(--error);"></i>
+                    <span style="color: var(--error);">SOS</span>
+                </a>
+            </li>
+            <li>
+                <a href="users.html" class="mobile-nav-item">
+                <i class="fas fa-users"></i>
+                <span>Users</span>
+            </a>
+        </li>
+        <li>
+                <a href="profile.html" class="mobile-nav-item">
+                    <i class="fas fa-user"></i>
+                    <span>Profile</span>
+                </a>
+            </li>
+            <li>
+                 <a href="#" class="mobile-nav-item" onclick="toggleMoreMenu()">
+                <i class="fas fa-bars"></i>
+                <span>More</span>
+            </a>
+        </li>
+    </ul>
+</nav>
+
+<!-- More Menu Overlay -->
+<div id="moreMenuOverlay" class="more-menu-overlay" onclick="toggleMoreMenu()"></div>
+
+<!-- More Menu -->
+<div id="moreMenu" class="more-menu">
+    <div class="more-menu-header">
+        <h3>More Options</h3>
+        <button class="more-menu-close" onclick="toggleMoreMenu()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="more-menu-grid">
+        <a href="profile.html" class="more-menu-item">
+            <div class="more-menu-icon" style="background: rgba(46, 125, 50, 0.1);">
+                <i class="fas fa-user" style="color: var(--primary-green);"></i>
+            </div>
+            <span>Profile</span>
+        </a>
+        <a href="chat.html" class="more-menu-item">
+            <div class="more-menu-icon" style="background: rgba(30, 136, 229, 0.1);">
+                <i class="fas fa-comments" style="color: var(--info);"></i>
+            </div>
+            <span>Chat</span>
+        </a>
+        <a href="events.html" class="more-menu-item">
+            <div class="more-menu-icon" style="background: rgba(255, 160, 0, 0.1);">
+                <i class="fas fa-calendar-alt" style="color: var(--warning);"></i>
+            </div>
+            <span>Events</span>
+        </a>
+        <a href="profile.html#settings" class="more-menu-item">
+            <div class="more-menu-icon" style="background: var(--gray-100);">
+                <i class="fas fa-cog" style="color: var(--gray-700);"></i>
+            </div>
+            <span>Settings</span>
+        </a>
+        <a href="#" class="more-menu-item" onclick="dashboardManager.logout()">
+            <div class="more-menu-icon" style="background: rgba(211, 47, 47, 0.1);">
+                <i class="fas fa-sign-out-alt" style="color: var(--error);"></i>
+            </div>
+            <span>Logout</span>
+        </a>
+    </div>
+</div>
+    
+    <!-- Create Post Modal -->
+    <div id="createPostModal" class="modal-overlay" style="display: none;">
+        <div class="modal post-modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="postModalTitle">Create Post</h3>
+                <button class="modal-close" onclick="closeCreatePostModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <form id="createPostForm">
+                <div class="form-group">
+                    <label class="form-label">Post Type</label>
+                    <div class="service-categories" id="postTypeSelector">
+                        <div class="service-category active" data-type="general">
+                            <i class="fas fa-newspaper"></i>
+                            <span>General</span>
+                        </div>
+                        <div class="service-category" data-type="issue">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span>Issue</span>
+                        </div>
+                        <div class="service-category" data-type="service">
+                            <i class="fas fa-tools"></i>
+                            <span>Service</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Title</label>
+                    <input type="text" 
+                           class="form-input" 
+                           id="postTitle" 
+                           placeholder="Enter a title for your post"
+                           maxlength="100">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-input" 
+                              id="postDescription" 
+                              rows="4" 
+                              placeholder="Describe your issue or share your thoughts..."
+                              maxlength="500"></textarea>
+                    <div class="flex justify-between">
+                        <span class="text-sm text-gray-600">Be specific to get better responses</span>
+                        <span class="text-sm text-gray-600" id="charCount">0/500</span>
+                    </div>
+                </div>
+                
+                <!-- Issue-specific fields -->
+                <div id="issueFields" style="display: none;">
+                    <div class="form-group">
+                        <label class="form-label">Issue Category</label>
+                        <select class="form-input" id="issueCategory">
+                            <option value="">Select category</option>
+                            <option value="water">Water Supply</option>
+                            <option value="electricity">Electricity</option>
+                            <option value="road">Road Condition</option>
+                            <option value="sanitation">Sanitation</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Priority</label>
+                        <select class="form-input" id="issuePriority">
+                            <option value="low">Low - Can wait</option>
+                            <option value="medium">Medium - Needs attention soon</option>
+                            <option value="high">High - Urgent attention required</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Service Request Fields -->
+                <div id="serviceFields" style="display: none;">
+                    <div class="form-group">
+                        <label class="form-label">Service Type</label>
+                        <select class="form-input" id="serviceType">
+                            <option value="">Select service</option>
+                            <option value="plumber">Plumber</option>
+                            <option value="electrician">Electrician</option>
+                            <option value="carpenter">Carpenter</option>
+                            <option value="painter">Painter</option>
+                            <option value="cleaner">Cleaner</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Budget (Optional)</label>
+                        <input type="number" 
+                               class="form-input" 
+                               id="serviceBudget" 
+                               placeholder="Enter your budget"
+                               min="0">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Timeline</label>
+                        <select class="form-input" id="serviceTimeline">
+                            <option value="immediate">Immediate</option>
+                            <option value="today">Today</option>
+                            <option value="this_week">This Week</option>
+                            <option value="flexible">Flexible</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Add Photos</label>
+                    <input type="file" 
+                           class="form-input" 
+                           id="postImages" 
+                           accept="image/*"
+                           multiple
+                           capture="environment">
+                    <div id="imagePreviewContainer" class="image-preview-container"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Location</label>
+                    <div class="location-selector">
+                        <button type="button" class="location-btn active" id="useCurrentLocationBtn">
+                            <i class="fas fa-location-dot"></i> Current Location
+                        </button>
+                        <button type="button" class="location-btn" id="chooseLocationBtn">
+                            <i class="fas fa-map"></i> Choose on Map
+                        </button>
+                    </div>
+                    <p id="selectedLocationText" class="text-sm text-gray-600 mt-sm">
+                        <i class="fas fa-map-pin"></i> 
+                        <span id="locationDisplay">Detecting your location...</span>
+                    </p>
+                </div>
+                
+                <div class="form-group">
+                    <label class="flex items-center gap-sm">
+                        <input type="checkbox" id="postAnonymous"> Post Anonymously
+                    </label>
+                </div>
+                
+                <div class="flex gap-md">
+                    <button type="button" class="btn btn-outline flex-1" onclick="closeCreatePostModal()">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary flex-1" id="submitPostBtn">
+                        <i class="fas fa-paper-plane"></i> Post
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Emergency Modal -->
+    <div id="emergencyModal" class="modal-overlay" style="display: none;">
+        <div class="modal emergency-modal">
+            <div class="modal-header">
+                <h3 class="modal-title" style="color: var(--error);">
+                    <i class="fas fa-exclamation-triangle"></i> Emergency Alert
+                </h3>
+                <button class="modal-close" onclick="closeEmergencyModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="alert alert-error">
+                <i class="fas fa-info-circle"></i>
+                <strong>This will alert everyone in your village!</strong>
+                <br>Use only for real emergencies.
+            </div>
+            
+            <div class="emergency-types">
+                <div class="emergency-type-btn fire" data-emergency="fire" onclick="selectEmergencyType('fire')">
+                    <i class="fas fa-fire"></i>
+                    <h4>Fire</h4>
+                    <p class="text-sm">Fire hazard or burning</p>
+                </div>
+                
+                <div class="emergency-type-btn medical" data-emergency="medical" onclick="selectEmergencyType('medical')">
+                    <i class="fas fa-heartbeat"></i>
+                    <h4>Medical</h4>
+                    <p class="text-sm">Medical emergency</p>
+                </div>
+                
+                <div class="emergency-type-btn theft" data-emergency="theft" onclick="selectEmergencyType('theft')">
+                    <i class="fas fa-shield-alt"></i>
+                    <h4>Theft/Security</h4>
+                    <p class="text-sm">Theft or security threat</p>
+                </div>
+                
+                <div class="emergency-type-btn other" data-emergency="other" onclick="selectEmergencyType('other')">
+                    <i class="fas fa-exclamation"></i>
+                    <h4>Other</h4>
+                    <p class="text-sm">Other emergency</p>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Additional Details (Optional)</label>
+                <textarea class="form-input" 
+                          id="emergencyDetails" 
+                          rows="3" 
+                          placeholder="Provide more details about the emergency..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label class="flex items-center gap-sm">
+                    <input type="checkbox" id="shareLiveLocation" checked>
+                    Share my live location with emergency responders
+                </label>
+            </div>
+            
+            <div class="flex gap-md">
+                <button type="button" class="btn btn-outline flex-1" onclick="closeEmergencyModal()">
+                    Cancel
+                </button>
+                <button type="button" class="btn btn-danger flex-1" id="triggerEmergencyBtn" onclick="triggerEmergency()">
+                    <i class="fas fa-bell"></i> SEND EMERGENCY ALERT
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
+    
+    <!-- Scripts -->
+    <script src="js/utils.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/emergency.js"></script>
+</body>
+</html>

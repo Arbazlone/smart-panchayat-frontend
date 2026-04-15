@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <meta name="theme-color" content="#2E7D32">
+    <title>Village Map - Smart Panchayat</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <style>
+        .map-container {
+            height: calc(100vh - 80px);
+            width: 100%;
+            position: relative;
+        }
+        
+        #villageMap {
+            height: 100%;
+            width: 100%;
+            z-index: 1;
+        }
+        
+        .map-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .map-control-btn {
+            width: 44px;
+            height: 44px;
+            background: white;
+            border: none;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-lg);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            color: var(--gray-700);
+            transition: all var(--transition-fast);
+        }
+        
+        .map-control-btn:hover {
+            background: var(--primary-green);
+            color: white;
+        }
+        
+        .map-filters {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 5px;
+        }
+        
+        .map-filter-chip {
+            background: white;
+            padding: 10px 20px;
+            border-radius: var(--radius-full);
+            box-shadow: var(--shadow-lg);
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--gray-700);
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all var(--transition-fast);
+            border: 2px solid transparent;
+        }
+        
+        .map-filter-chip i {
+            margin-right: 8px;
+        }
+        
+        .map-filter-chip.active {
+            background: var(--primary-green);
+            color: white;
+            border-color: white;
+        }
+        
+        .map-filter-chip.emergency.active {
+            background: var(--error);
+        }
+        
+        .location-selector-overlay {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            background: white;
+            padding: 15px 25px;
+            border-radius: var(--radius-full);
+            box-shadow: var(--shadow-2xl);
+            display: none;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .location-selector-overlay.active {
+            display: flex;
+        }
+        
+        .selected-coords {
+            font-size: 0.875rem;
+            color: var(--gray-700);
+        }
+        
+        .map-popup {
+            min-width: 200px;
+        }
+        
+        .popup-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .popup-desc {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            margin-bottom: 10px;
+        }
+        
+        .popup-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .marker-issue { color: #FF6F00; }
+        .marker-service { color: #1976D2; }
+        .marker-emergency { color: #D32F2F; }
+        .marker-general { color: #2E7D32; }
+        
+        .leaflet-popup-content {
+            margin: 15px;
+            min-width: 200px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container navbar-container">
+            <a href="dashboard.html" class="navbar-brand">
+                <i class="fas fa-arrow-left"></i>
+                <span>Village Map</span>
+            </a>
+            <div class="flex items-center gap-md">
+                <span class="text-sm text-gray-600" id="mapStatus">
+                    <i class="fas fa-circle" style="color: var(--success); font-size: 8px;"></i>
+                    Loading map...
+                </span>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="map-container">
+        <div id="villageMap"></div>
+        
+        <!-- Map Controls -->
+        <div class="map-controls">
+            <button class="map-control-btn" onclick="mapManager.locateUser()" title="My Location">
+                <i class="fas fa-location-dot"></i>
+            </button>
+            <button class="map-control-btn" onclick="mapManager.refreshMap()" title="Refresh">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+            <button class="map-control-btn" onclick="mapManager.toggleFullscreen()" title="Fullscreen">
+                <i class="fas fa-expand"></i>
+            </button>
+        </div>
+        
+        <!-- Map Filters -->
+        <div class="map-filters">
+            <div class="map-filter-chip active" data-filter="all" onclick="mapManager.filterMarkers('all')">
+                <i class="fas fa-globe"></i> All
+            </div>
+            <div class="map-filter-chip" data-filter="issue" onclick="mapManager.filterMarkers('issue')">
+                <i class="fas fa-exclamation-triangle"></i> Issues
+            </div>
+            <div class="map-filter-chip" data-filter="service" onclick="mapManager.filterMarkers('service')">
+                <i class="fas fa-tools"></i> Services
+            </div>
+            <div class="map-filter-chip emergency" data-filter="emergency" onclick="mapManager.filterMarkers('emergency')">
+                <i class="fas fa-ambulance"></i> Emergencies
+            </div>
+        </div>
+        
+        <!-- Location Selector (for choosing location) -->
+        <div class="location-selector-overlay" id="locationSelector">
+            <i class="fas fa-map-pin" style="color: var(--primary-green);"></i>
+            <span class="selected-coords" id="selectedCoords">Select a location</span>
+            <button class="btn btn-primary btn-sm" onclick="mapManager.confirmLocation()">
+                <i class="fas fa-check"></i> Use This Location
+            </button>
+            <button class="btn btn-outline btn-sm" onclick="mapManager.cancelLocationSelect()">
+                Cancel
+            </button>
+        </div>
+    </div>
+    
+    <!-- Create Post from Map Modal -->
+    <div id="mapPostModal" class="modal-overlay" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="fas fa-map-pin"></i> Create Post at Selected Location
+                </h3>
+                <button class="modal-close" onclick="closeMapPostModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="mapPostForm">
+                <div class="form-group">
+                    <label class="form-label">Post Type</label>
+                    <div class="service-categories">
+                        <div class="service-category active" data-type="general">
+                            <i class="fas fa-newspaper"></i>
+                            <span>General</span>
+                        </div>
+                        <div class="service-category" data-type="issue">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span>Issue</span>
+                        </div>
+                        <div class="service-category" data-type="service">
+                            <i class="fas fa-tools"></i>
+                            <span>Service</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Title</label>
+                    <input type="text" class="form-input" id="mapPostTitle" placeholder="Enter title" maxlength="100">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-input" id="mapPostDescription" rows="3" placeholder="Describe your post..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Selected Location</label>
+                    <div class="location-display-box" style="background: var(--gray-100); padding: 12px; border-radius: var(--radius-md);">
+                        <i class="fas fa-map-marker-alt" style="color: var(--primary-green);"></i>
+                        <span id="mapSelectedLocation">No location selected</span>
+                    </div>
+                </div>
+                
+                <div class="flex gap-md">
+                    <button type="button" class="btn btn-outline flex-1" onclick="closeMapPostModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary flex-1">
+                        <i class="fas fa-paper-plane"></i> Create Post
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div id="toastContainer" class="toast-container"></div>
+    
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/map.js"></script>
+</body>
+</html>

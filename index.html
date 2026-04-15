@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="description" content="Smart Panchayat System - Connecting villages with technology for faster emergency response and community services">
+    <meta name="theme-color" content="#2E7D32">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <title>Smart Panchayat System - Village Connect</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <style>
+        /* Page-specific styles */
+        .hero-section {
+            min-height: calc(100vh - 80px);
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, rgba(46, 125, 50, 0.05) 0%, rgba(46, 125, 50, 0.1) 100%);
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .hero-badge {
+            display: inline-block;
+            background: var(--primary-green);
+            color: white;
+            padding: var(--space-xs) var(--space-md);
+            border-radius: var(--radius-full);
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: var(--space-lg);
+        }
+        
+        .hero-title {
+            font-size: clamp(2.5rem, 8vw, 4rem);
+            margin-bottom: var(--space-lg);
+            background: linear-gradient(135deg, var(--primary-green-dark) 0%, var(--primary-green) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .hero-description {
+            font-size: 1.25rem;
+            color: var(--gray-700);
+            margin-bottom: var(--space-xl);
+            max-width: 600px;
+        }
+        
+        .auth-card {
+            background: var(--gray-50);
+            border-radius: var(--radius-xl);
+            padding: var(--space-xl);
+            box-shadow: var(--shadow-2xl);
+            border: 1px solid var(--gray-200);
+            backdrop-filter: blur(10px);
+        }
+        
+        .auth-tabs {
+            display: flex;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-xl);
+            border-bottom: 2px solid var(--gray-200);
+        }
+        
+        .auth-tab {
+            flex: 1;
+            padding: var(--space-md);
+            background: none;
+            border: none;
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--gray-600);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            position: relative;
+        }
+        
+        .auth-tab.active {
+            color: var(--primary-green);
+        }
+        
+        .auth-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--primary-green);
+        }
+        
+        .auth-form {
+            display: none;
+        }
+        
+        .auth-form.active {
+            display: block;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--space-lg);
+            margin-top: var(--space-2xl);
+        }
+        
+        .feature-card {
+            text-align: center;
+            padding: var(--space-lg);
+            background: var(--gray-50);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--gray-200);
+            transition: all var(--transition-base);
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .feature-icon {
+            width: 64px;
+            height: 64px;
+            background: var(--primary-green);
+            color: white;
+            border-radius: var(--radius-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto var(--space-md);
+            font-size: 1.5rem;
+        }
+        
+        .feature-icon.emergency {
+            background: var(--error);
+            animation: emergency-pulse 2s infinite;
+        }
+        
+        .otp-section {
+            display: none;
+            margin-top: var(--space-md);
+        }
+        
+        .otp-section.active {
+            display: block;
+        }
+        
+        .otp-input-group {
+            display: flex;
+            gap: var(--space-sm);
+            justify-content: center;
+        }
+        
+        .otp-input {
+            width: 50px;
+            height: 50px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 600;
+            border: 2px solid var(--gray-300);
+            border-radius: var(--radius-md);
+            background: var(--gray-50);
+            transition: all var(--transition-fast);
+        }
+        
+        .otp-input:focus {
+            border-color: var(--primary-green);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+        }
+        
+        .timer {
+            color: var(--gray-600);
+            font-size: 0.875rem;
+            margin-top: var(--space-sm);
+        }
+        
+        .resend-btn {
+            color: var(--primary-green);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        .resend-btn:disabled {
+            color: var(--gray-400);
+            cursor: not-allowed;
+        }
+        
+        /* Background Pattern */
+        .bg-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(46, 125, 50, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(46, 125, 50, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container navbar-container">
+            <a href="#" class="navbar-brand">
+                <i class="fas fa-tree"></i>
+                <span>Smart Panchayat</span>
+            </a>
+            <ul class="navbar-menu">
+                <li><a href="#home" class="navbar-link active">Home</a></li>
+                <li><a href="#features" class="navbar-link">Features</a></li>
+                <li><a href="#about" class="navbar-link">About</a></li>
+                <li><a href="#contact" class="navbar-link">Contact</a></li>
+            </ul>
+            <div>
+                <a href="#auth" class="btn btn-outline">Sign In</a>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Hero Section -->
+    <section class="hero-section" id="home">
+        <div class="bg-pattern"></div>
+        <div class="container">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-xl" style="align-items: center;">
+                <!-- Left Content -->
+                <div class="hero-content">
+                    <span class="hero-badge">
+                        <i class="fas fa-bolt"></i> Emergency Ready 24/7
+                    </span>
+                    <h1 class="hero-title">
+                        Your Village.<br>Connected.
+                    </h1>
+                    <p class="hero-description">
+                        Report issues, request services, and alert your community in emergencies. 
+                        Building stronger villages through technology.
+                    </p>
+                    <div class="flex gap-md">
+                        <a href="#auth" class="btn btn-primary btn-lg">
+                            Get Started <i class="fas fa-arrow-right"></i>
+                        </a>
+                        <a href="#features" class="btn btn-outline btn-lg">
+                            Learn More
+                        </a>
+                    </div>
+                    
+                    <!-- Stats -->
+                    <div class="flex gap-xl mt-xl">
+                        <div>
+                            <div class="text-2xl font-bold text-primary-green">500+</div>
+                            <div class="text-sm text-gray-600">Active Villages</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold text-primary-green">10k+</div>
+                            <div class="text-sm text-gray-600">Community Members</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold text-primary-green">1k+</div>
+                            <div class="text-sm text-gray-600">Issues Resolved</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right Auth Card -->
+                <div id="auth">
+                    <div class="auth-card">
+                        <div class="auth-tabs">
+                            <button class="auth-tab active" data-tab="login">Login</button>
+                            <button class="auth-tab" data-tab="signup">Sign Up</button>
+                        </div>
+                        
+                        <!-- Login Form -->
+                        <form id="loginForm" class="auth-form active">
+                            <div class="form-group">
+                                <label class="form-label">Phone Number</label>
+                                <div class="input-icon-wrapper">
+                                    <i class="fas fa-phone input-icon"></i>
+                                    <input type="tel" 
+                                           class="form-input" 
+                                           id="loginPhone" 
+                                           placeholder="Enter your phone number"
+                                           pattern="[0-9]{10}"
+                                           maxlength="10"
+                                           required>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Password</label>
+                                <div class="input-icon-wrapper">
+                                    <i class="fas fa-lock input-icon"></i>
+                                    <input type="password" 
+                                           class="form-input" 
+                                           id="loginPassword" 
+                                           placeholder="Enter your password"
+                                           required>
+                                </div>
+                            </div>
+                            
+                            <div class="flex justify-between items-center mb-md">
+                                <label class="flex items-center gap-sm">
+                                    <input type="checkbox" id="rememberMe"> Remember me
+                                </label>
+                                <a href="#" class="text-sm" style="color: var(--primary-green);">Forgot Password?</a>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary btn-block btn-lg">
+                                Login <i class="fas fa-sign-in-alt"></i>
+                            </button>
+                            
+                            <div class="text-center mt-md">
+                                <span class="text-sm text-gray-600">Or login with</span>
+                            </div>
+                            
+                            <div class="flex gap-sm mt-sm">
+                                <button type="button" class="btn btn-outline flex-1">
+                                    <i class="fab fa-google"></i> Google
+                                </button>
+                                <button type="button" class="btn btn-outline flex-1">
+                                    <i class="fab fa-facebook"></i> Facebook
+                                </button>
+                            </div>
+                        </form>
+                        
+                        <!-- Signup Form -->
+                        <form id="signupForm" class="auth-form">
+                            <div class="form-group">
+                                <label class="form-label">Full Name</label>
+                                <div class="input-icon-wrapper">
+                                    <i class="fas fa-user input-icon"></i>
+                                    <input type="text" 
+                                           class="form-input" 
+                                           id="signupName" 
+                                           placeholder="Enter your full name"
+                                           required>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Phone Number</label>
+                                <div class="input-icon-wrapper">
+                                    <i class="fas fa-phone input-icon"></i>
+                                    <input type="tel" 
+                                           class="form-input" 
+                                           id="signupPhone" 
+                                           placeholder="10-digit mobile number"
+                                           pattern="[0-9]{10}"
+                                           maxlength="10"
+                                           required>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Password</label>
+                                <div class="input-icon-wrapper">
+                                    <i class="fas fa-lock input-icon"></i>
+                                    <input type="password" 
+                                           class="form-input" 
+                                           id="signupPassword" 
+                                           placeholder="Create a strong password"
+                                           minlength="6"
+                                           required>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Confirm Password</label>
+                                <div class="input-icon-wrapper">
+                                    <i class="fas fa-check-circle input-icon"></i>
+                                    <input type="password" 
+                                           class="form-input" 
+                                           id="signupConfirmPassword" 
+                                           placeholder="Confirm your password"
+                                           required>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Occupation</label>
+                                <select class="form-input" id="signupOccupation">
+                                    <option value="">Select occupation</option>
+                                    <option value="farmer">Farmer</option>
+                                    <option value="teacher">Teacher</option>
+                                    <option value="business">Business Owner</option>
+                                    <option value="student">Student</option>
+                                    <option value="service">Service Provider</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Profile Photo (Optional)</label>
+                                <input type="file" 
+                                       class="form-input" 
+                                       id="signupPhoto" 
+                                       accept="image/*"
+                                       capture="environment">
+                            </div>
+                            
+                            <!-- OTP Section (Hidden initially) -->
+                            <div id="otpSection" class="otp-section">
+                                <div class="alert alert-info mb-md">
+                                    <i class="fas fa-info-circle"></i>
+                                    We've sent a verification code to your phone
+                                </div>
+                                
+                                <div class="otp-input-group">
+                                    <input type="text" class="otp-input" maxlength="1" pattern="[0-9]">
+                                    <input type="text" class="otp-input" maxlength="1" pattern="[0-9]">
+                                    <input type="text" class="otp-input" maxlength="1" pattern="[0-9]">
+                                    <input type="text" class="otp-input" maxlength="1" pattern="[0-9]">
+                                    <input type="text" class="otp-input" maxlength="1" pattern="[0-9]">
+                                    <input type="text" class="otp-input" maxlength="1" pattern="[0-9]">
+                                </div>
+                                
+                                <div class="timer">
+                                    Time remaining: <span id="timer">02:00</span>
+                                </div>
+                                
+                                <button type="button" class="resend-btn" id="resendOtpBtn" disabled>
+                                    Resend Code
+                                </button>
+                            </div>
+                            
+                            <div class="flex items-start gap-sm mb-md">
+                                <input type="checkbox" id="termsCheck" required>
+                                <label for="termsCheck" class="text-sm">
+                                    I agree to the 
+                                    <a href="#" style="color: var(--primary-green);">Terms of Service</a> 
+                                    and 
+                                    <a href="#" style="color: var(--primary-green);">Privacy Policy</a>
+                                </label>
+                            </div>
+                            
+                            <button type="button" class="btn btn-primary btn-block btn-lg" id="signupBtn">
+                                Create Account <i class="fas fa-user-plus"></i>
+                            </button>
+                            
+                            <button type="submit" class="btn btn-primary btn-block btn-lg" id="verifyOtpBtn" style="display: none;">
+                                Verify & Continue <i class="fas fa-check"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Features Section -->
+    <section id="features" class="py-xl">
+        <div class="container">
+            <div class="text-center mb-xl">
+                <h2>Powerful Features for Your Village</h2>
+                <p class="text-lg text-gray-600">Everything you need to keep your community connected and safe</p>
+            </div>
+            
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <h3>Issue Reporting</h3>
+                    <p>Report water, electricity, or road issues with photos and location tracking</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon emergency">
+                        <i class="fas fa-ambulance"></i>
+                    </div>
+                    <h3>Emergency Alerts</h3>
+                    <p>One-tap emergency alerts to notify entire village instantly</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-tools"></i>
+                    </div>
+                    <h3>Service Requests</h3>
+                    <p>Find plumbers, electricians, and other services in your village</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3>Community Feed</h3>
+                    <p>Stay updated with announcements and community discussions</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
+    
+    <!-- Scripts -->
+    <script src="js/utils.js"></script>
+    <script src="js/auth.js"></script>
+</body>
+</html>

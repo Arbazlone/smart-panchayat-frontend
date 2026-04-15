@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#2E7D32">
+    <title>User Directory - Smart Panchayat</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <style>
+        .directory-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+        
+        .directory-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .directory-header h1 {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 0;
+        }
+        
+        .directory-header h1 i {
+            color: var(--primary-green);
+            font-size: 2rem;
+        }
+        
+        .directory-stats {
+            display: flex;
+            gap: 30px;
+        }
+        
+        .stat-badge {
+            text-align: center;
+        }
+        
+        .stat-badge .number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-green);
+        }
+        
+        .stat-badge .label {
+            font-size: 0.85rem;
+            color: var(--gray-600);
+        }
+        
+        .search-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        
+        .search-bar .form-input {
+            flex: 1;
+            min-width: 250px;
+        }
+        
+        .filter-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-chip {
+            padding: 8px 18px;
+            background: white;
+            border: 1px solid var(--gray-300);
+            border-radius: 30px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--gray-700);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .filter-chip:hover {
+            background: var(--gray-100);
+        }
+        
+        .filter-chip.active {
+            background: var(--primary-green);
+            color: white;
+            border-color: var(--primary-green);
+        }
+        
+        .users-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+        
+        .user-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--gray-200);
+            transition: all 0.25s ease;
+            position: relative;
+        }
+        
+        .user-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-green-light);
+        }
+        
+        .user-card-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .user-card-avatar {
+            position: relative;
+        }
+        
+        .user-card-info {
+            flex: 1;
+        }
+        
+        .user-card-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+        
+        .user-card-role {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .role-provider {
+            background: rgba(46, 125, 50, 0.1);
+            color: var(--primary-green);
+        }
+        
+        .role-user {
+            background: rgba(30, 136, 229, 0.1);
+            color: var(--info);
+        }
+        
+        .role-admin {
+            background: rgba(211, 47, 47, 0.1);
+            color: var(--error);
+        }
+        
+        .user-card-detail {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            color: var(--gray-700);
+        }
+        
+        .user-card-detail i {
+            width: 20px;
+            color: var(--gray-500);
+        }
+        
+        .user-card-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--gray-200);
+        }
+        
+        .user-stat {
+            text-align: center;
+        }
+        
+        .user-stat .value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--gray-800);
+        }
+        
+        .user-stat .label {
+            font-size: 0.7rem;
+            color: var(--gray-500);
+            text-transform: uppercase;
+        }
+        
+        .user-card-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+        
+        .user-card-actions .btn {
+            flex: 1;
+            padding: 8px 12px;
+            font-size: 0.85rem;
+        }
+        
+        .verified-badge {
+            color: var(--primary-green);
+            font-size: 1rem;
+        }
+        
+        .online-indicator {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            width: 12px;
+            height: 12px;
+            background: var(--success);
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+        
+        .provider-category {
+            display: inline-block;
+            padding: 2px 8px;
+            background: var(--gray-100);
+            border-radius: 4px;
+            font-size: 0.75rem;
+            color: var(--gray-600);
+            margin-top: 4px;
+        }
+        
+        @media (max-width: 768px) {
+            .directory-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .users-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container navbar-container">
+            <a href="dashboard.html" class="navbar-brand">
+                <i class="fas fa-arrow-left"></i>
+                <span>User Directory</span>
+            </a>
+            <div class="flex items-center gap-md">
+                <a href="dashboard.html" class="btn btn-outline btn-sm">
+                    <i class="fas fa-home"></i> Dashboard
+                </a>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="directory-container">
+        <div class="directory-header">
+            <h1>
+                <i class="fas fa-users"></i>
+                Community Members
+            </h1>
+            <div class="directory-stats">
+                <div class="stat-badge">
+                    <div class="number" id="totalUsers">0</div>
+                    <div class="label">Total Users</div>
+                </div>
+                <div class="stat-badge">
+                    <div class="number" id="providerCount">0</div>
+                    <div class="label">Providers</div>
+                </div>
+                <div class="stat-badge">
+                    <div class="number" id="onlineCount">0</div>
+                    <div class="label">Online</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="search-bar">
+            <input type="text" class="form-input" id="searchInput" placeholder="🔍 Search by name, phone, or location...">
+            <button class="btn btn-outline" onclick="directoryManager.refresh()">
+                <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+        </div>
+        
+        <div class="filter-tabs">
+            <div class="filter-chip active" data-filter="all">All Users</div>
+            <div class="filter-chip" data-filter="provider">Service Providers</div>
+            <div class="filter-chip" data-filter="user">Community Members</div>
+            <div class="filter-chip" data-filter="verified">Verified</div>
+            <div class="filter-chip" data-filter="online">Online Now</div>
+        </div>
+        
+        <div class="users-grid" id="usersGrid">
+            <!-- Skeleton loaders -->
+            <div class="user-card skeleton">
+                <div class="user-card-header">
+                    <div class="skeleton skeleton-avatar"></div>
+                    <div style="flex:1">
+                        <div class="skeleton skeleton-text"></div>
+                        <div class="skeleton skeleton-text" style="width:60%"></div>
+                    </div>
+                </div>
+                <div class="skeleton skeleton-text"></div>
+                <div class="skeleton skeleton-text"></div>
+            </div>
+            <div class="user-card skeleton">
+                <div class="user-card-header">
+                    <div class="skeleton skeleton-avatar"></div>
+                    <div style="flex:1">
+                        <div class="skeleton skeleton-text"></div>
+                        <div class="skeleton skeleton-text" style="width:60%"></div>
+                    </div>
+                </div>
+                <div class="skeleton skeleton-text"></div>
+                <div class="skeleton skeleton-text"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="toastContainer" class="toast-container"></div>
+    
+    <script src="js/utils.js"></script>
+    <script src="js/directory.js"></script>
+</body>
+</html>
