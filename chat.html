@@ -457,23 +457,82 @@
     <script src="js/chat.js"></script>
     
     <script>
-        // Simple bridge to make chat.js work with this UI
-        document.addEventListener('DOMContentLoaded', function() {
-            // Make sure chat.js finds all elements
-            console.log('✅ Chat UI ready');
-            
-            // Fix mobile back navigation
-            const chatItems = document.querySelectorAll('.village-chat, .chat-item');
-            chatItems.forEach(item => {
-                item.addEventListener('click', function() {
-                    document.getElementById('chatMain').classList.add('active');
-                });
-            });
+        
+// Fix Personal Chat Click Handlers
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🔧 Personal chat fix loaded');
+    
+    // Function to attach click handlers to personal chat items
+    function attachPersonalChatHandlers() {
+        const personalChats = document.querySelectorAll('#individualChats .chat-item');
+        console.log('📌 Attaching handlers to', personalChats.length, 'personal chats');
+        
+        personalChats.forEach(item => {
+            item.removeEventListener('click', handleChatClick);
+            item.addEventListener('click', handleChatClick);
+        });
+    }
+    
+    function handleChatClick(e) {
+        const chatItem = e.currentTarget;
+        const chatId = chatItem.dataset.chat;
+        console.log('💬 Personal chat clicked:', chatId);
+        
+        // Remove active class from all chats
+        document.querySelectorAll('.village-chat, .chat-item').forEach(c => {
+            c.classList.remove('active');
         });
         
-        function closeNewChatModal() {
-            document.getElementById('newChatModal').style.display = 'none';
+        // Add active class to clicked chat
+        chatItem.classList.add('active');
+        
+        // Show chat main on mobile
+        document.getElementById('chatMain').classList.add('active');
+        
+        // Switch chat in chatManager
+        if (window.chatManager) {
+            console.log('🔄 Switching to personal chat:', chatId);
+            chatManager.switchToPersonalChat(chatId);
+        } else {
+            console.error('❌ chatManager not found');
         }
+    }
+    
+    // Watch for changes in the individualChats container
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+                console.log('🔄 Personal chats updated, reattaching handlers');
+                setTimeout(attachPersonalChatHandlers, 100);
+            }
+        });
+    });
+    
+    const container = document.getElementById('individualChats');
+    if (container) {
+        observer.observe(container, { childList: true, subtree: true });
+        console.log('👁️ Observer attached to individualChats');
+    }
+    
+    // Initial attachment
+    setTimeout(attachPersonalChatHandlers, 500);
+    
+    // Fix Village Chat click
+    const villageChat = document.querySelector('[data-chat="village"]');
+    if (villageChat) {
+        villageChat.addEventListener('click', function() {
+            document.querySelectorAll('.village-chat, .chat-item').forEach(c => {
+                c.classList.remove('active');
+            });
+            this.classList.add('active');
+            document.getElementById('chatMain').classList.add('active');
+            
+            if (window.chatManager) {
+                chatManager.switchToVillageChat();
+            }
+        });
+    }
+});
     </script>
 </body>
 </html>

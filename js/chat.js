@@ -238,47 +238,57 @@ class ChatManager {
     }
     
     async switchToPersonalChat(chatId) {
-        this.currentChat = chatId;
-        
-        document.querySelectorAll('.conversation-item').forEach(item => {
-            item.classList.toggle('active', item.dataset.chat === chatId);
-        });
-        
-        const conversation = this.conversations.find(c => c._id === chatId);
-        if (conversation) {
-            document.getElementById('currentChatName').textContent = conversation.participant.name;
-            document.getElementById('chatSubtitle').innerHTML = `
-                <i class="fas fa-lock"></i> Private Chat • Only you two can see messages
-            `;
-            
-            // Update avatar
-            const avatarHtml = createAvatar(conversation.participant, 'md');
-            document.getElementById('chatAvatar').innerHTML = avatarHtml;
-        }
-        
-        await this.loadPrivateMessages(chatId);
+    console.log('🔄 switchToPersonalChat called with:', chatId);
+    this.currentChat = chatId;
+    
+    // Update UI - remove active from all, add to selected
+    document.querySelectorAll('.village-chat, .chat-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    
+    const selectedChat = document.querySelector(`[data-chat="${chatId}"]`);
+    if (selectedChat) {
+        selectedChat.classList.add('active');
     }
     
+    // Update header
+    const conversation = this.conversations.find(c => c._id === chatId);
+    if (conversation) {
+        document.getElementById('currentChatName').textContent = conversation.participant.name;
+        document.getElementById('chatSubtitle').textContent = 'Private Chat';
+        
+        // Update avatar
+        const avatarHtml = createAvatar(conversation.participant, 'md');
+        document.getElementById('chatAvatar').innerHTML = avatarHtml;
+    }
+    
+    // Load messages
+    this.loadPrivateMessages(chatId);
+} 
+    
     async loadPrivateMessages(chatId) {
-        this.isLoading = true;
-        try {
-            const response = await fetch(`${this.API_BASE_URL}/chat/${chatId}/messages`, {
-                headers: { 'Authorization': `Bearer ${this.user.token}` }
-            });
-            const data = await response.json();
-            
-            if (data.success) {
-                this.messages = data.messages || [];
-                this.renderMessages();
-            }
-        } catch (error) {
-            console.error('Error loading private messages:', error);
+    console.log('📩 Loading private messages for:', chatId);
+    
+    try {
+        const response = await fetch(`${this.API_BASE_URL}/chat/${chatId}/messages`, {
+            headers: { 'Authorization': `Bearer ${this.user.token}` }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            this.messages = data.messages || [];
+            this.renderMessages();
+        } else {
             this.messages = [];
             this.renderMessages();
-        } finally {
-            this.isLoading = false;
         }
+    } catch (error) {
+        console.error('Error loading private messages:', error);
+        this.messages = [];
+        this.renderMessages();
     }
+}
     
     async startPersonalChat(userId) {
         try {
