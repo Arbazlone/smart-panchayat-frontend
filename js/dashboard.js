@@ -541,7 +541,7 @@ async markAllRead() {
                             ${distanceText ? ` • <i class="fas fa-map-marker-alt"></i> ${distanceText}` : ''}
                         </div>
                     </div>
-                    <button class="btn btn-icon" onclick="dashboardManager.showPostOptions('${post._id}')">
+                   <button class="btn btn-icon" onclick="dashboardManager.showPostOptions('${post._id}', event)">
                         <i class="fas fa-ellipsis-v"></i>
                     </button>
                 </div>
@@ -1246,7 +1246,7 @@ showLikedUsersModal(users) {
         showToast(post.userSaved ? 'Saved!' : 'Removed', 'success');
     }
     
-   showPostOptions(postId) {
+  showPostOptions(postId, event) {
     const post = this.posts.find(p => p._id === postId);
     if (!post) return;
     
@@ -1254,29 +1254,29 @@ showLikedUsersModal(users) {
     
     const overlay = document.createElement('div');
     overlay.className = 'post-options-overlay';
-    overlay.onclick = () => overlay.remove();
+   overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) overlay.remove();
+});
     
     const menu = document.createElement('div');
     menu.className = 'post-options-menu';
     
     let optionsHtml = '';
 
-if (isAuthor) {
+// ✅ DELETE (author OR admin)
+if (isAuthor || this.currentUser.role === 'admin') {
     optionsHtml += `
-        <div class="post-option-item" onclick="dashboardManager.editPost('${postId}')">
-            <i class="fas fa-edit"></i> Edit Post
-        </div>
         <div class="post-option-item danger" onclick="dashboardManager.deletePost('${postId}')">
             <i class="fas fa-trash"></i> Delete Post
         </div>
     `;
 }
 
-// 👑 ADMIN DELETE (separate block)
-if (this.currentUser.role === 'admin' && !isAuthor) {
+// 👑 ADMIN ONLY → PIN
+if (this.currentUser.role === 'admin') {
     optionsHtml += `
-        <div class="post-option-item danger" onclick="dashboardManager.deletePost('${postId}')">
-            <i class="fas fa-trash"></i> Delete Post
+        <div class="post-option-item" onclick="dashboardManager.togglePin('${postId}')">
+            <i class="fas fa-thumbtack"></i> Pin / Unpin Post
         </div>
     `;
 }
@@ -1324,6 +1324,7 @@ optionsHtml += `
 }
 
 deletePost(postId) {
+    
     if (!confirm('Are you sure you want to delete this post?')) return;
     
     fetch(`${this.API_BASE_URL}/posts/${postId}`, {
@@ -1331,14 +1332,35 @@ deletePost(postId) {
         headers: { 'Authorization': `Bearer ${this.currentUser.token}` }
     })
     .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            this.posts = this.posts.filter(p => p._id !== postId);
-            this.renderFeed();
-            showToast('Post deleted', 'success');
+   .then(data => {
+    if (data.success) {
+        this.posts = this.posts.filter(p => p._id !== postId);
+        this.renderFeed();
+        showToast('Post deleted', 'success');
+    } else {
+        showToast(data.message || 'Delete failed', 'error');
+    }
+})
+    .catch(() => showToast('Failed to delete post', 'error'))
+    .finally(() => document.querySelector('.post-options-overlay')?.remove());
+}
+togglePin(postId) {
+    fetch(`${this.API_BASE_URL}/posts/${postId}/pin`, {
+        method: 'PUT',
+        headers: {
+            'Authorization': `Bearer ${this.currentUser.token}`
         }
     })
-    .catch(() => showToast('Failed to delete post', 'error'))
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            showToast(data.isPinned ? 'Post pinned 📌' : 'Post unpinned', 'success');
+            this.refreshFeed();
+        } else {
+            showToast(data.message || 'Failed', 'error');
+        }
+    })
+    .catch(() => showToast('Error pinning post', 'error'))
     .finally(() => document.querySelector('.post-options-overlay')?.remove());
 }
 
