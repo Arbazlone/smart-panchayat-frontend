@@ -220,13 +220,21 @@ ${getProviderCategory()}
                 </div>
                 
                 <div class="user-card-actions">
-                    <button class="btn btn-primary btn-sm" onclick="directoryManager.viewProfile('${user._id}')">
-                        <i class="fas fa-user"></i> Profile
-                    </button>
-                    <button class="btn btn-outline btn-sm" onclick="directoryManager.messageUser('${user._id}')">
-                        <i class="fas fa-comment"></i> Chat
-                    </button>
-                </div>
+    <button class="btn btn-primary btn-sm" onclick="directoryManager.viewProfile('${user._id}')">
+        <i class="fas fa-user"></i> Profile
+    </button>
+
+    <button class="btn btn-outline btn-sm" onclick="directoryManager.messageUser('${user._id}')">
+        <i class="fas fa-comment"></i> Chat
+    </button>
+
+    ${this.user.role === 'admin' ? `
+        <button onclick="deleteUser('${user._id}')" 
+            style="background:red;color:white;padding:6px 10px;border:none;border-radius:6px;margin-left:5px;">
+            🗑 Delete
+        </button>
+    ` : ''}
+</div>
             </div>
         `;
     }
@@ -246,6 +254,33 @@ ${getProviderCategory()}
 }
 
 let directoryManager;
+async function deleteUser(userId) {
+    if (!confirm("Delete this user?")) return;
+
+    try {
+        const user = JSON.parse(localStorage.getItem('user'));
+        const token = user?.token;
+
+        const res = await fetch(`https://smart-panchayat-backend.onrender.com/api/users/${userId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+            alert('User deleted');
+            location.reload();
+        } else {
+            alert(data.message);
+        }
+
+    } catch (err) {
+        alert('Error deleting user');
+    }
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     directoryManager = new DirectoryManager();
