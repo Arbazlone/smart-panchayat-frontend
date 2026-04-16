@@ -708,31 +708,69 @@ class ProfileManager {
     
     // ============ AVATAR ============
     
-    async handleAvatarChange(file) {
-        if (!file) return;
-        if (file.size > 5 * 1024 * 1024) { showToast('Image too large (max 5MB)', 'error'); return; }
-        
+   async handleAvatarChange(file) {
+    if (!file) {
+        console.log('❌ No file selected');
+        return;
+    }
+    
+    console.log('📸 File selected:', file.name, file.type, file.size);
+    
+    if (file.size > 5 * 1024 * 1024) {
+        showToast('Image size should be less than 5MB', 'error');
+        return;
+    }
+    
+    // Show loading
+    showToast('Uploading...', 'info');
+    
+    try {
         const formData = new FormData();
         formData.append('avatar', file);
         
-        try {
-            const response = await fetch(`${this.API_BASE_URL}/users/avatar`, {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${this.user.token}` },
-                body: formData
-            });
-            const data = await response.json();
-            if (data.success) {
-                const existingUser = JSON.parse(localStorage.getItem('panchayat_user') || '{}');
-                existingUser.profilePic = data.profilePic;
-                localStorage.setItem('panchayat_user', JSON.stringify(existingUser));
-                
-                const avatarImg = document.getElementById('profileAvatar');
-                if (avatarImg) avatarImg.src = 'http://localhost:5000' + data.profilePic + '?t=' + Date.now();
-                showToast('Profile picture updated!', 'success');
+        // Get token from storage
+        const token = this.user?.token || JSON.parse(localStorage.getItem('panchayat_user') || '{}').token;
+        
+        console.log('📤 Sending to:', `${this.API_BASE_URL}/users/avatar`);
+        
+        const response = await fetch(`${this.API_BASE_URL}/users/avatar`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            body: formData
+        });
+        
+        const data = await response.json();
+        console.log('📥 Server response:', data);
+        
+        if (data.success) {
+            // Update UI immediately
+            const avatarImg = document.getElementById('profileAvatar');
+            if (avatarImg) {
+                avatarImg.src = 'http://localhost:5000' + data.profilePic + '?t=' + Date.now();
             }
-        } catch (error) { showToast('Upload failed', 'error'); }
+            
+            // Save to localStorage
+            const storedUser = JSON.parse(localStorage.getItem('panchayat_user') || sessionStorage.getItem('panchayat_user') || '{}');
+            storedUser.profilePic = data.profilePic;
+            
+            if (localStorage.getItem('panchayat_user')) {
+                localStorage.setItem('panchayat_user', JSON.stringify(storedUser));
+            } else {
+                sessionStorage.setItem('panchayat_user', JSON.stringify(storedUser));
+            }
+            
+            showToast('Profile picture updated!', 'success');
+        } else {
+            console.error('❌ Upload failed:', data.message);
+            showToast(data.message || 'Failed to upload', 'error');
+        }
+    } catch (error) {
+        console.error('❌ Upload error:', error);
+        showToast('Network error. Check console.', 'error');
     }
+}
     
     // ============ BIO ============
     
