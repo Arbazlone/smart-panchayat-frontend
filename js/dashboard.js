@@ -1261,7 +1261,7 @@ showLikedUsersModal(users) {
     
     let optionsHtml = '';
     
-    if (isAuthor) {
+    if (isAuthor || this.user.role === 'admin') {
         optionsHtml += `
             <div class="post-option-item" onclick="dashboardManager.editPost('${postId}')">
                 <i class="fas fa-edit"></i> Edit Post
