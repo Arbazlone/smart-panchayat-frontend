@@ -547,7 +547,9 @@ async markAllRead() {
                 </div>
                 
                 <div class="post-content">
-                    <h3 class="post-title">${getTitle()}</h3>
+                   <h3 class="post-title">
+    ${post.isPinned ? '📌 ' : ''}${getTitle()}
+</h3>
                     
                     ${post.type === 'issue' && post.issueCategory ? `
                         <div class="flex gap-sm mb-sm">
