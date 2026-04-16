@@ -509,7 +509,7 @@ class ChatManager {
                         ${createAvatar(user, 'md')}
                         <div style="flex: 1;">
                             <div class="font-medium">${user.name}</div>
-                            <div class="text-sm text-gray-600">${user.phone}</div>
+                           
                         </div>
                         <i class="fas fa-chevron-right" style="color: var(--gray-400);"></i>
                     </div>
