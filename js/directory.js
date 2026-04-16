@@ -258,8 +258,8 @@ async function deleteUser(userId) {
     if (!confirm("Delete this user?")) return;
 
     try {
-        const user = JSON.parse(localStorage.getItem('user'));
-        const token = user?.token;
+       const currentUser = getCurrentUser();
+       const token = currentUser.token;
 
         const res = await fetch(`https://smart-panchayat-backend.onrender.com/api/users/${userId}`, {
             method: 'DELETE',
