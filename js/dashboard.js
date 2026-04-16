@@ -1260,32 +1260,44 @@ showLikedUsersModal(users) {
     menu.className = 'post-options-menu';
     
     let optionsHtml = '';
-    
-    if (isAuthor || this.user.role === 'admin') {
-        optionsHtml += `
-            <div class="post-option-item" onclick="dashboardManager.editPost('${postId}')">
-                <i class="fas fa-edit"></i> Edit Post
-            </div>
-            <div class="post-option-item danger" onclick="dashboardManager.deletePost('${postId}')">
-                <i class="fas fa-trash"></i> Delete Post
-            </div>
-        `;
-    } else {
-        optionsHtml += `
-            <div class="post-option-item" onclick="dashboardManager.reportPost('${postId}')">
-                <i class="fas fa-flag"></i> Report Post
-            </div>
-            <div class="post-option-item" onclick="dashboardManager.hidePost('${postId}')">
-                <i class="fas fa-eye-slash"></i> Hide Post
-            </div>
-        `;
-    }
-    
+
+if (isAuthor) {
     optionsHtml += `
-        <div class="post-option-item" onclick="dashboardManager.copyPostLink('${postId}')">
-            <i class="fas fa-link"></i> Copy Link
+        <div class="post-option-item" onclick="dashboardManager.editPost('${postId}')">
+            <i class="fas fa-edit"></i> Edit Post
+        </div>
+        <div class="post-option-item danger" onclick="dashboardManager.deletePost('${postId}')">
+            <i class="fas fa-trash"></i> Delete Post
         </div>
     `;
+}
+
+// 👑 ADMIN DELETE (separate block)
+if (this.user.role === 'admin' && !isAuthor) {
+    optionsHtml += `
+        <div class="post-option-item danger" onclick="dashboardManager.deletePost('${postId}')">
+            <i class="fas fa-trash"></i> Delete Post
+        </div>
+    `;
+}
+
+// 👤 Normal users (not owner)
+if (!isAuthor) {
+    optionsHtml += `
+        <div class="post-option-item" onclick="dashboardManager.reportPost('${postId}')">
+            <i class="fas fa-flag"></i> Report Post
+        </div>
+        <div class="post-option-item" onclick="dashboardManager.hidePost('${postId}')">
+            <i class="fas fa-eye-slash"></i> Hide Post
+        </div>
+    `;
+}
+
+optionsHtml += `
+    <div class="post-option-item" onclick="dashboardManager.copyPostLink('${postId}')">
+        <i class="fas fa-link"></i> Copy Link
+    </div>
+`;
     
     menu.innerHTML = optionsHtml;
     overlay.appendChild(menu);
