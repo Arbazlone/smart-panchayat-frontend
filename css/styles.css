@@ -2329,12 +2329,20 @@ input[type="checkbox"] {
 
 /* Extra small devices */
 @media (max-width: 480px) {
+    /* Keep counts visible but smaller */
     .post-action-btn span {
-        display: none !important;
+        display: inline !important;
+        font-size: 0.75rem !important;
+        margin-left: 3px !important;
     }
     
     .post-action-btn i {
-        font-size: 1.2rem !important;
+        font-size: 1rem !important;
+    }
+    
+    .post-action-btn {
+        padding: 6px 8px !important;
+        gap: 2px !important;
     }
     
     .create-post-input input {
