@@ -1273,7 +1273,7 @@ if (isAuthor) {
 }
 
 // 👑 ADMIN DELETE (separate block)
-if (this.user.role === 'admin' && !isAuthor) {
+if (this.currentUser.role === 'admin' && !isAuthor) {
     optionsHtml += `
         <div class="post-option-item danger" onclick="dashboardManager.deletePost('${postId}')">
             <i class="fas fa-trash"></i> Delete Post
