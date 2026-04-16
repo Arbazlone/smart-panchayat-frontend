@@ -188,9 +188,9 @@ ${getProviderCategory()}
                 </div>
                 
                 <div class="user-card-detail">
-                    <i class="fas fa-phone"></i>
-                    <span>${user.phone || 'No phone'}</span>
-                </div>
+    <i class="fas fa-user-shield"></i>
+    <span>Contact hidden for privacy</span>
+</div>
                 
                 <div class="user-card-detail">
                     <i class="fas fa-map-marker-alt"></i>
