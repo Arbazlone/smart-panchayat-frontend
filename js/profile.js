@@ -219,7 +219,13 @@ class ProfileManager {
     
     updateContactDisplay(data) {
         const el = (id) => document.getElementById(id);
-        if (el('displayPhone')) el('displayPhone').textContent = data.phone || '--';
+      if (el('displayPhone')) {
+    if (data._id === this.user._id) {
+        el('displayPhone').textContent = data.phone || '--';
+    } else {
+        el('displayPhone').textContent = "Hidden for privacy";
+    }
+}
         if (el('displayAlternatePhone')) el('displayAlternatePhone').textContent = data.alternatePhone || 'Not provided';
         if (el('displayEmail')) el('displayEmail').textContent = data.email || 'Not provided';
         if (el('displayAddress')) el('displayAddress').textContent = data.address || 'Not provided';
