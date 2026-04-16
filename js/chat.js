@@ -102,8 +102,9 @@ class ChatManager {
                     
                     // Show notification and play sound for new messages
                     newMessages.forEach(msg => {
-                        if (msg.sender._id !== this.user.id) {
-                            showToast(`📨 ${msg.sender.name}: ${msg.content.substring(0, 30)}...`, 'info');
+                      const senderId = msg.sender?._id || msg.sender;
+if (senderId !== this.user.id) {
+                            showToast(`📨 ${msg.sender?.name || 'User'}: ${(msg.content || '').substring(0, 30)}...`, 'info');
                             this.playMessageSound();
                         }
                     });
@@ -168,7 +169,7 @@ class ChatManager {
             const lastMsg = this.messages[this.messages.length - 1];
             const lastMsgEl = document.getElementById('villageLastMessage');
             const timeEl = document.getElementById('villageLastTime');
-            if (lastMsgEl) lastMsgEl.textContent = lastMsg.content.substring(0, 30) + (lastMsg.content.length > 30 ? '...' : '');
+            if (lastMsgEl) lastMsgEl.textContent = (lastMsg.content || '').substring(0, 30) + ((lastMsg.content || '').length > 30 ? '...' : '');
             if (timeEl) timeEl.textContent = formatRelativeTime(lastMsg.createdAt);
         }
     }
@@ -357,15 +358,16 @@ class ChatManager {
                 `;
             }
             
-            const isSent = msg.sender._id === this.user.id || msg.sender === this.user.id;
-            const senderName = msg.sender.name || 'User';
+           const senderId = msg.sender?._id || msg.sender;
+           const isSent = senderId === this.user.id;
+           const senderName = msg.sender?.name || 'User';
             
             html += `
                 <div class="message ${isSent ? 'sent' : 'received'}">
                     ${!isSent ? createAvatar({ name: senderName }, 'sm') : ''}
                     <div>
                         ${!isSent ? `<div class="text-sm font-medium mb-xs">${senderName}</div>` : ''}
-                        <div class="message-content">${this.escapeHtml(msg.content)}</div>
+                        <div class="message-content">${this.escapeHtml(msg.content || '')}</div>
                         <div class="message-time">
                             ${formatRelativeTime(msg.createdAt)}
                             ${isSent ? ' • ' + (msg.status === 'sent' ? '✓✓' : '✓') : ''}
@@ -478,7 +480,7 @@ class ChatManager {
         if (this.currentChat === 'village') {
             const lastMsgEl = document.getElementById('villageLastMessage');
             const timeEl = document.getElementById('villageLastTime');
-            if (lastMsgEl) lastMsgEl.textContent = content.substring(0, 30) + (content.length > 30 ? '...' : '');
+            if (lastMsgEl) lastMsgEl.textContent = (content || '').substring(0, 30) + (content.length > 30 ? '...' : '');
             if (timeEl) timeEl.textContent = 'Just now';
         }
         this.loadConversations(); // Refresh sidebar
