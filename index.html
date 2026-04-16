@@ -2,203 +2,490 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover, shrink-to-fit=no">
-    <meta name="description" content="Smart Panchayat System - Connecting villages with technology for faster emergency response and community services">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="description" content="Smart Panchayat - Connect with your village community">
     <meta name="theme-color" content="#2E7D32">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    
-    <title>Smart Panchayat System - Village Connect</title>
+    <title>Smart Panchayat - Village Connect</title>
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <!-- Font Awesome Icons -->
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/styles.css">
     
     <style>
-        /* Page-specific styles */
-        .hero-section {
-            min-height: calc(100vh - 80px);
+        /* ============================================ */
+        /* PROFESSIONAL LOGIN/SIGNUP - MOBILE FIRST */
+        /* ============================================ */
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary: #2E7D32;
+            --primary-dark: #1B5E20;
+            --primary-light: #4CAF50;
+            --accent: #FF6F00;
+            --gray-50: #FAFAFA;
+            --gray-100: #F5F5F5;
+            --gray-200: #EEEEEE;
+            --gray-600: #757575;
+            --gray-800: #424242;
+            --success: #43A047;
+            --error: #E53935;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
+            --shadow-md: 0 8px 24px rgba(0,0,0,0.1);
+            --shadow-lg: 0 16px 32px rgba(0,0,0,0.12);
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
+            min-height: 100vh;
             display: flex;
             align-items: center;
-            position: relative;
-            overflow: hidden;
-            background: linear-gradient(135deg, rgba(46, 125, 50, 0.05) 0%, rgba(46, 125, 50, 0.1) 100%);
+            justify-content: center;
+            padding: 16px;
+            margin: 0;
         }
         
-        .hero-content {
-            position: relative;
-            z-index: 2;
+        /* Main Container */
+        .auth-container {
+            width: 100%;
+            max-width: 420px;
+            margin: 0 auto;
+            animation: slideUp 0.5s ease;
         }
         
-        .hero-badge {
-            display: inline-block;
-            background: var(--primary-green);
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Logo Section */
+        .logo-section {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        
+        .logo-icon {
+            width: 72px;
+            height: 72px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            box-shadow: var(--shadow-md);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+        
+        .logo-icon i {
+            font-size: 36px;
             color: white;
-            padding: var(--space-xs) var(--space-md);
-            border-radius: var(--radius-full);
-            font-size: 0.875rem;
-            font-weight: 600;
-            margin-bottom: var(--space-lg);
         }
         
-        .hero-title {
-            font-size: clamp(2.5rem, 8vw, 4rem);
-            margin-bottom: var(--space-lg);
-            background: linear-gradient(135deg, var(--primary-green-dark) 0%, var(--primary-green) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+        .logo-section h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 6px;
+            letter-spacing: -0.5px;
         }
         
-        .hero-description {
-            font-size: 1.25rem;
-            color: var(--gray-700);
-            margin-bottom: var(--space-xl);
-            max-width: 600px;
+        .logo-section p {
+            font-size: 14px;
+            color: var(--gray-600);
+            font-weight: 400;
         }
         
+        /* Auth Card */
         .auth-card {
-            background: var(--gray-50);
-            border-radius: var(--radius-xl);
-            padding: var(--space-xl);
-            box-shadow: var(--shadow-2xl);
-            border: 1px solid var(--gray-200);
+            background: white;
+            border-radius: 28px;
+            padding: 28px 24px;
+            box-shadow: var(--shadow-lg);
             backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
         }
         
+        /* Tabs */
         .auth-tabs {
             display: flex;
-            gap: var(--space-sm);
-            margin-bottom: var(--space-xl);
-            border-bottom: 2px solid var(--gray-200);
+            gap: 8px;
+            margin-bottom: 28px;
+            background: var(--gray-100);
+            padding: 4px;
+            border-radius: 16px;
         }
         
         .auth-tab {
             flex: 1;
-            padding: var(--space-md);
-            background: none;
+            padding: 14px 8px;
             border: none;
-            font-size: 1.125rem;
+            background: transparent;
+            font-size: 16px;
             font-weight: 600;
             color: var(--gray-600);
             cursor: pointer;
-            transition: all var(--transition-fast);
+            border-radius: 12px;
+            transition: all 0.25s ease;
             position: relative;
+            overflow: hidden;
+        }
+        
+        .auth-tab::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: white;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+            z-index: -1;
         }
         
         .auth-tab.active {
-            color: var(--primary-green);
+            color: var(--primary);
+            background: white;
+            box-shadow: var(--shadow-sm);
         }
         
-        .auth-tab.active::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: var(--primary-green);
-        }
-        
+        /* Forms */
         .auth-form {
             display: none;
+            animation: fadeIn 0.3s ease;
         }
         
         .auth-form.active {
             display: block;
         }
         
-        .feature-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: var(--space-lg);
-            margin-top: var(--space-2xl);
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
         }
         
-        .feature-card {
-            text-align: center;
-            padding: var(--space-lg);
+        /* Input Groups */
+        .input-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .input-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        
+        .input-wrapper {
+            position: relative;
+        }
+        
+        .input-wrapper i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-600);
+            font-size: 16px;
+            transition: color 0.2s ease;
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 16px 16px 16px 48px;
+            border: 2px solid var(--gray-200);
+            border-radius: 16px;
+            font-size: 16px;
+            font-family: 'Inter', sans-serif;
             background: var(--gray-50);
-            border-radius: var(--radius-lg);
-            border: 1px solid var(--gray-200);
-            transition: all var(--transition-base);
+            transition: all 0.2s ease;
+            outline: none;
         }
         
-        .feature-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-lg);
+        .input-field:focus {
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(46, 125, 50, 0.1);
         }
         
-        .feature-icon {
-            width: 64px;
-            height: 64px;
-            background: var(--primary-green);
-            color: white;
-            border-radius: var(--radius-full);
+        .input-field:focus + i,
+        .input-wrapper:focus-within i {
+            color: var(--primary);
+        }
+        
+        .input-field.error {
+            border-color: var(--error);
+        }
+        
+        .error-message {
+            font-size: 12px;
+            color: var(--error);
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            animation: shake 0.3s ease;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-4px); }
+            75% { transform: translateX(4px); }
+        }
+        
+        /* Password Strength */
+        .password-strength {
+            margin-top: 8px;
+        }
+        
+        .strength-bar {
+            height: 4px;
+            background: var(--gray-200);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: 4px;
+        }
+        
+        .strength-fill {
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease, background 0.3s ease;
+            border-radius: 2px;
+        }
+        
+        .strength-text {
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        /* Checkbox */
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 16px 0;
+        }
+        
+        .checkbox-wrapper input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+        
+        .checkbox-wrapper label {
+            font-size: 14px;
+            color: var(--gray-600);
+            cursor: pointer;
+        }
+        
+        .checkbox-wrapper a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        /* Buttons */
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto var(--space-md);
-            font-size: 1.5rem;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
         }
         
-        .feature-icon.emergency {
-            background: var(--error);
-            animation: emergency-pulse 2s infinite;
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
         }
         
-        .otp-section {
-            display: none;
-            margin-top: var(--space-md);
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(46, 125, 50, 0.4);
         }
         
-        .otp-section.active {
-            display: block;
+        .btn-primary:active {
+            transform: translateY(0);
         }
         
-        .otp-input-group {
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        /* Loading Spinner */
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Divider */
+        .divider {
             display: flex;
-            gap: var(--space-sm);
+            align-items: center;
+            text-align: center;
+            margin: 24px 0;
+        }
+        
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid var(--gray-200);
+        }
+        
+        .divider span {
+            padding: 0 16px;
+            font-size: 13px;
+            color: var(--gray-600);
+            font-weight: 500;
+        }
+        
+        /* Social Login */
+        .social-login {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .social-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid var(--gray-200);
+            border-radius: 16px;
+            background: white;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--gray-800);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
             justify-content: center;
+            gap: 8px;
+        }
+        
+        .social-btn:hover {
+            border-color: var(--primary);
+            background: var(--gray-50);
+        }
+        
+        .social-btn i {
+            font-size: 18px;
+        }
+        
+        /* Footer Links */
+        .auth-footer {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 14px;
+            color: var(--gray-600);
+        }
+        
+        .auth-footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        /* OTP Section */
+        .otp-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--gray-200);
+        }
+        
+        .otp-inputs {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin: 20px 0;
         }
         
         .otp-input {
-            width: 50px;
-            height: 50px;
+            width: 48px;
+            height: 56px;
             text-align: center;
-            font-size: 1.5rem;
-            font-weight: 600;
-            border: 2px solid var(--gray-300);
-            border-radius: var(--radius-md);
+            font-size: 24px;
+            font-weight: 700;
+            border: 2px solid var(--gray-200);
+            border-radius: 12px;
             background: var(--gray-50);
-            transition: all var(--transition-fast);
+            transition: all 0.2s ease;
         }
         
         .otp-input:focus {
-            border-color: var(--primary-green);
+            border-color: var(--primary);
+            background: white;
             outline: none;
             box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
         }
         
-        .timer {
+        .otp-timer {
+            text-align: center;
+            font-size: 14px;
             color: var(--gray-600);
-            font-size: 0.875rem;
-            margin-top: var(--space-sm);
+            margin-bottom: 16px;
+        }
+        
+        .otp-timer span {
+            font-weight: 700;
+            color: var(--primary);
         }
         
         .resend-btn {
-            color: var(--primary-green);
             background: none;
             border: none;
+            color: var(--primary);
+            font-weight: 600;
             cursor: pointer;
-            font-weight: 500;
+            padding: 8px;
         }
         
         .resend-btn:disabled {
@@ -206,317 +493,383 @@
             cursor: not-allowed;
         }
         
-        /* Background Pattern */
-        .bg-pattern {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-image: 
-                radial-gradient(circle at 20% 80%, rgba(46, 125, 50, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(46, 125, 50, 0.1) 0%, transparent 50%);
-            pointer-events: none;
+        /* Features Section */
+        .features {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            margin-top: 24px;
+        }
+        
+        .feature {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .feature i {
+            font-size: 24px;
+            color: var(--primary);
+            background: rgba(46, 125, 50, 0.1);
+            padding: 10px;
+            border-radius: 12px;
+        }
+        
+        .feature span {
+            font-size: 12px;
+            color: var(--gray-600);
+        }
+        
+        /* Mobile Optimizations */
+        @media (max-width: 480px) {
+            body {
+                padding: 12px;
+                align-items: flex-start;
+            }
+            
+            .auth-container {
+                margin-top: 20px;
+            }
+            
+            .auth-card {
+                padding: 20px 16px;
+            }
+            
+            .logo-icon {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .logo-section h1 {
+                font-size: 24px;
+            }
+            
+            .input-field {
+                padding: 14px 14px 14px 44px;
+                font-size: 16px;
+            }
+            
+            .btn {
+                padding: 14px;
+            }
+            
+            .otp-input {
+                width: 42px;
+                height: 50px;
+                font-size: 20px;
+            }
+            
+            .features {
+                gap: 20px;
+            }
+        }
+        
+        /* Desktop Optimizations */
+        @media (min-width: 768px) {
+            .auth-container {
+                max-width: 440px;
+            }
+        }
+        
+        /* Toast Customization */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+        
+        /* Hidden */
+        .hidden {
+            display: none !important;
         }
     </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar">
-        <div class="container navbar-container">
-            <a href="#" class="navbar-brand">
+    <div class="auth-container">
+        <!-- Logo -->
+        <div class="logo-section">
+            <div class="logo-icon">
                 <i class="fas fa-tree"></i>
-                <span>Smart Panchayat</span>
-            </a>
-            <ul class="navbar-menu">
-                <li><a href="#home" class="navbar-link active">Home</a></li>
-                <li><a href="#features" class="navbar-link">Features</a></li>
-                <li><a href="#about" class="navbar-link">About</a></li>
-                <li><a href="#contact" class="navbar-link">Contact</a></li>
-            </ul>
-            <div>
-                <a href="#auth" class="btn btn-outline">Sign In</a>
             </div>
+            <h1>Smart Panchayat</h1>
+            <p>Connect with your village community</p>
         </div>
-    </nav>
-    
-    <!-- Hero Section -->
-    <section class="hero-section" id="home">
-        <div class="bg-pattern"></div>
-        <div class="container">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-xl" style="align-items: center;">
-                <!-- Left Content -->
-                <div class="hero-content">
-                    <span class="hero-badge">
-                        <i class="fas fa-bolt"></i> Emergency Ready 24/7
-                    </span>
-                    <h1 class="hero-title">
-                        Your Village.<br>Connected.
-                    </h1>
-                    <p class="hero-description">
-                        Report issues, request services, and alert your community in emergencies. 
-                        Building stronger villages through technology.
-                    </p>
-                    <div class="flex gap-md">
-                        <a href="#auth" class="btn btn-primary btn-lg">
-                            Get Started <i class="fas fa-arrow-right"></i>
-                        </a>
-                        <a href="#features" class="btn btn-outline btn-lg">
-                            Learn More
-                        </a>
-                    </div>
-                    
-                    <!-- Stats -->
-                    <div class="flex gap-xl mt-xl">
-                        <div>
-                            <div class="text-2xl font-bold text-primary-green">500+</div>
-                            <div class="text-sm text-gray-600">Active Villages</div>
-                        </div>
-                        <div>
-                            <div class="text-2xl font-bold text-primary-green">10k+</div>
-                            <div class="text-sm text-gray-600">Community Members</div>
-                        </div>
-                        <div>
-                            <div class="text-2xl font-bold text-primary-green">1k+</div>
-                            <div class="text-sm text-gray-600">Issues Resolved</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Right Auth Card -->
-                <div id="auth">
-                    <div class="auth-card">
-                        <div class="auth-tabs">
-                            <button class="auth-tab active" data-tab="login">Login</button>
-                            <button class="auth-tab" data-tab="signup">Sign Up</button>
-                        </div>
-                        
-                        <!-- Login Form -->
-                        <form id="loginForm" class="auth-form active">
-                            <div class="form-group">
-                                <label class="form-label">Phone Number</label>
-                                <div class="input-icon-wrapper">
-                                    <i class="fas fa-phone input-icon"></i>
-                                    <input type="tel" 
-                                           class="form-input" 
-                                           id="loginPhone" 
-                                           placeholder="Enter your phone number"
-                                           pattern="[0-9]{10}"
-                                           maxlength="10"
-                                           required>
-                                </div>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label">Password</label>
-                                <div class="input-icon-wrapper">
-                                    <i class="fas fa-lock input-icon"></i>
-                                    <input type="password" 
-                                           class="form-input" 
-                                           id="loginPassword" 
-                                           placeholder="Enter your password"
-                                           required>
-                                </div>
-                            </div>
-                            
-                            <div class="flex justify-between items-center mb-md">
-                                <label class="flex items-center gap-sm">
-                                    <input type="checkbox" id="rememberMe"> Remember me
-                                </label>
-                                <a href="#" class="text-sm" style="color: var(--primary-green);">Forgot Password?</a>
-                            </div>
-                            
-                            <button type="submit" class="btn btn-primary btn-block btn-lg">
-                                Login <i class="fas fa-sign-in-alt"></i>
-                            </button>
-                            
-                            <div class="text-center mt-md">
-                                <span class="text-sm text-gray-600">Or login with</span>
-                            </div>
-                            
-                            <div class="flex gap-sm mt-sm">
-                                <button type="button" class="btn btn-outline flex-1">
-                                    <i class="fab fa-google"></i> Google
-                                </button>
-                                <button type="button" class="btn btn-outline flex-1">
-                                    <i class="fab fa-facebook"></i> Facebook
-                                </button>
-                            </div>
-                        </form>
-                        
-                        <!-- Signup Form -->
-                        <form id="signupForm" class="auth-form">
-                            <div class="form-group">
-                                <label class="form-label">Full Name</label>
-                                <div class="input-icon-wrapper">
-                                    <i class="fas fa-user input-icon"></i>
-                                    <input type="text" 
-                                           class="form-input" 
-                                           id="signupName" 
-                                           placeholder="Enter your full name"
-                                           required>
-                                </div>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label">Phone Number</label>
-                                <div class="input-icon-wrapper">
-                                    <i class="fas fa-phone input-icon"></i>
-                                    <input type="tel" 
-                                           class="form-input" 
-                                           id="signupPhone" 
-                                           placeholder="10-digit mobile number"
-                                           pattern="[0-9]{10}"
-                                           maxlength="10"
-                                           required>
-                                </div>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label">Password</label>
-                                <div class="input-icon-wrapper">
-                                    <i class="fas fa-lock input-icon"></i>
-                                    <input type="password" 
-                                           class="form-input" 
-                                           id="signupPassword" 
-                                           placeholder="Create a strong password"
-                                           minlength="6"
-                                           required>
-                                </div>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label">Confirm Password</label>
-                                <div class="input-icon-wrapper">
-                                    <i class="fas fa-check-circle input-icon"></i>
-                                    <input type="password" 
-                                           class="form-input" 
-                                           id="signupConfirmPassword" 
-                                           placeholder="Confirm your password"
-                                           required>
-                                </div>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label">Occupation</label>
-                                <select class="form-input" id="signupOccupation">
-                                    <option value="">Select occupation</option>
-                                    <option value="farmer">Farmer</option>
-                                    <option value="teacher">Teacher</option>
-                                    <option value="business">Business Owner</option>
-                                    <option value="student">Student</option>
-                                    <option value="service">Service Provider</option>
-                                    <option value="other">Other</option>
-                                </select>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label">Profile Photo (Optional)</label>
-                                <input type="file" 
-                                       class="form-input" 
-                                       id="signupPhoto" 
-                                       accept="image/*"
-                                       capture="environment">
-                            </div>
-                            
-                            <!-- OTP Section (Hidden initially) -->
-                            <div id="otpSection" class="otp-section">
-                                <div class="alert alert-info mb-md">
-                                    <i class="fas fa-info-circle"></i>
-                                    We've sent a verification code to your phone
-                                </div>
-                                
-                                <div class="otp-input-group">
-                                    <input type="text" class="otp-input" maxlength="1" pattern="[0-9]">
-                                    <input type="text" class="otp-input" maxlength="1" pattern="[0-9]">
-                                    <input type="text" class="otp-input" maxlength="1" pattern="[0-9]">
-                                    <input type="text" class="otp-input" maxlength="1" pattern="[0-9]">
-                                    <input type="text" class="otp-input" maxlength="1" pattern="[0-9]">
-                                    <input type="text" class="otp-input" maxlength="1" pattern="[0-9]">
-                                </div>
-                                
-                                <div class="timer">
-                                    Time remaining: <span id="timer">02:00</span>
-                                </div>
-                                
-                                <button type="button" class="resend-btn" id="resendOtpBtn" disabled>
-                                    Resend Code
-                                </button>
-                            </div>
-                            
-                            <div class="flex items-start gap-sm mb-md">
-                                <input type="checkbox" id="termsCheck" required>
-                                <label for="termsCheck" class="text-sm">
-                                    I agree to the 
-                                    <a href="#" style="color: var(--primary-green);">Terms of Service</a> 
-                                    and 
-                                    <a href="#" style="color: var(--primary-green);">Privacy Policy</a>
-                                </label>
-                            </div>
-                            
-                            <button type="button" class="btn btn-primary btn-block btn-lg" id="signupBtn">
-                                Create Account <i class="fas fa-user-plus"></i>
-                            </button>
-                            
-                            <button type="submit" class="btn btn-primary btn-block btn-lg" id="verifyOtpBtn" style="display: none;">
-                                Verify & Continue <i class="fas fa-check"></i>
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    
-    <!-- Features Section -->
-    <section id="features" class="py-xl">
-        <div class="container">
-            <div class="text-center mb-xl">
-                <h2>Powerful Features for Your Village</h2>
-                <p class="text-lg text-gray-600">Everything you need to keep your community connected and safe</p>
+        
+        <!-- Auth Card -->
+        <div class="auth-card">
+            <!-- Tabs -->
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-tab="login">Login</button>
+                <button class="auth-tab" data-tab="signup">Sign Up</button>
             </div>
             
-            <div class="feature-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-exclamation-triangle"></i>
+            <!-- Login Form -->
+            <form id="loginForm" class="auth-form active">
+                <div class="input-group">
+                    <label class="input-label">Phone Number</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-phone"></i>
+                        <input type="tel" 
+                               class="input-field" 
+                               id="loginPhone" 
+                               placeholder="Enter 10-digit number"
+                               inputmode="numeric"
+                               maxlength="10">
                     </div>
-                    <h3>Issue Reporting</h3>
-                    <p>Report water, electricity, or road issues with photos and location tracking</p>
+                    <div class="error-message hidden" id="loginPhoneError"></div>
                 </div>
                 
-                <div class="feature-card">
-                    <div class="feature-icon emergency">
-                        <i class="fas fa-ambulance"></i>
+                <div class="input-group">
+                    <label class="input-label">Password</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" 
+                               class="input-field" 
+                               id="loginPassword" 
+                               placeholder="Enter your password">
                     </div>
-                    <h3>Emergency Alerts</h3>
-                    <p>One-tap emergency alerts to notify entire village instantly</p>
+                    <div class="error-message hidden" id="loginPasswordError"></div>
                 </div>
                 
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-tools"></i>
-                    </div>
-                    <h3>Service Requests</h3>
-                    <p>Find plumbers, electricians, and other services in your village</p>
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="rememberMe">
+                    <label for="rememberMe">Remember me</label>
+                    <a href="#" style="margin-left: auto;">Forgot?</a>
                 </div>
                 
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <h3>Community Feed</h3>
-                    <p>Stay updated with announcements and community discussions</p>
+                <button type="submit" class="btn btn-primary" id="loginBtn">
+                    <span>Login</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+                
+                <div class="divider">
+                    <span>or continue with</span>
                 </div>
+                
+                <div class="social-login">
+                    <button type="button" class="social-btn">
+                        <i class="fab fa-google"></i> Google
+                    </button>
+                    <button type="button" class="social-btn">
+                        <i class="fab fa-facebook"></i> Facebook
+                    </button>
+                </div>
+            </form>
+            
+            <!-- Signup Form -->
+            <form id="signupForm" class="auth-form">
+                <div class="input-group">
+                    <label class="input-label">Full Name</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-user"></i>
+                        <input type="text" 
+                               class="input-field" 
+                               id="signupName" 
+                               placeholder="Enter your full name">
+                    </div>
+                    <div class="error-message hidden" id="signupNameError"></div>
+                </div>
+                
+                <div class="input-group">
+                    <label class="input-label">Phone Number</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-phone"></i>
+                        <input type="tel" 
+                               class="input-field" 
+                               id="signupPhone" 
+                               placeholder="10-digit mobile number"
+                               inputmode="numeric"
+                               maxlength="10">
+                    </div>
+                    <div class="error-message hidden" id="signupPhoneError"></div>
+                </div>
+                
+                <div class="input-group">
+                    <label class="input-label">Password</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" 
+                               class="input-field" 
+                               id="signupPassword" 
+                               placeholder="Create a strong password">
+                    </div>
+                    <div class="password-strength hidden" id="passwordStrength">
+                        <div class="strength-bar">
+                            <div class="strength-fill" id="strengthFill"></div>
+                        </div>
+                        <span class="strength-text" id="strengthText"></span>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label class="input-label">Confirm Password</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-check-circle"></i>
+                        <input type="password" 
+                               class="input-field" 
+                               id="signupConfirmPassword" 
+                               placeholder="Re-enter your password">
+                    </div>
+                    <div class="error-message hidden" id="signupConfirmError"></div>
+                </div>
+                
+                <div class="input-group">
+                    <label class="input-label">Occupation</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-briefcase"></i>
+                        <select class="input-field" id="signupOccupation">
+                            <option value="">Select occupation</option>
+                            <option value="farmer">🌾 Farmer</option>
+                            <option value="teacher">📚 Teacher</option>
+                            <option value="business">💼 Business</option>
+                            <option value="student">🎓 Student</option>
+                            <option value="service">🔧 Service Provider</option>
+                            <option value="other">📌 Other</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="termsCheck">
+                    <label for="termsCheck">I agree to the <a href="#">Terms</a> and <a href="#">Privacy Policy</a></label>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" id="signupBtn">
+                    <span>Create Account</span>
+                    <i class="fas fa-user-plus"></i>
+                </button>
+                
+                <!-- OTP Section (hidden initially) -->
+                <div class="otp-section hidden" id="otpSection">
+                    <p style="text-align: center; font-size: 14px; color: var(--gray-600); margin-bottom: 16px;">
+                        <i class="fas fa-shield-alt"></i> 
+                        Enter the 6-digit code sent to your phone
+                    </p>
+                    
+                    <div class="otp-inputs">
+                        <input type="text" class="otp-input" maxlength="1" pattern="[0-9]">
+                        <input type="text" class="otp-input" maxlength="1" pattern="[0-9]">
+                        <input type="text" class="otp-input" maxlength="1" pattern="[0-9]">
+                        <input type="text" class="otp-input" maxlength="1" pattern="[0-9]">
+                        <input type="text" class="otp-input" maxlength="1" pattern="[0-9]">
+                        <input type="text" class="otp-input" maxlength="1" pattern="[0-9]">
+                    </div>
+                    
+                    <div class="otp-timer">
+                        Resend code in <span id="otpTimer">02:00</span>
+                        <button class="resend-btn" id="resendOtpBtn" disabled>Resend</button>
+                    </div>
+                    
+                    <button type="button" class="btn btn-primary" id="verifyOtpBtn">
+                        <span>Verify & Continue</span>
+                        <i class="fas fa-check"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Features -->
+        <div class="features">
+            <div class="feature">
+                <i class="fas fa-shield-alt"></i>
+                <span>Secure</span>
+            </div>
+            <div class="feature">
+                <i class="fas fa-bolt"></i>
+                <span>Fast</span>
+            </div>
+            <div class="feature">
+                <i class="fas fa-users"></i>
+                <span>Community</span>
             </div>
         </div>
-    </section>
+        
+        <!-- Footer -->
+        <div class="auth-footer">
+            <p>By continuing, you agree to our <a href="#">Terms</a></p>
+        </div>
+    </div>
     
     <!-- Toast Container -->
     <div id="toastContainer" class="toast-container"></div>
     
-    <!-- Scripts -->
     <script src="js/utils.js"></script>
     <script src="js/auth.js"></script>
+    
+    <script>
+        // Smooth tab switching
+        document.querySelectorAll('.auth-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                
+                const tabName = this.dataset.tab;
+                document.getElementById('loginForm').classList.toggle('active', tabName === 'login');
+                document.getElementById('signupForm').classList.toggle('active', tabName === 'signup');
+            });
+        });
+        
+        // Password strength indicator
+        const passwordInput = document.getElementById('signupPassword');
+        const strengthFill = document.getElementById('strengthFill');
+        const strengthText = document.getElementById('strengthText');
+        const strengthDiv = document.getElementById('passwordStrength');
+        
+        passwordInput?.addEventListener('input', function() {
+            const val = this.value;
+            if (val.length > 0) {
+                strengthDiv.classList.remove('hidden');
+                
+                let strength = 0;
+                if (val.length >= 6) strength++;
+                if (/[a-z]/.test(val) && /[A-Z]/.test(val)) strength++;
+                if (/[0-9]/.test(val)) strength++;
+                if (/[^a-zA-Z0-9]/.test(val)) strength++;
+                
+                const percent = (strength / 4) * 100;
+                strengthFill.style.width = percent + '%';
+                
+                if (strength <= 1) {
+                    strengthFill.style.background = '#E53935';
+                    strengthText.textContent = 'Weak';
+                    strengthText.style.color = '#E53935';
+                } else if (strength === 2) {
+                    strengthFill.style.background = '#FFA000';
+                    strengthText.textContent = 'Fair';
+                    strengthText.style.color = '#FFA000';
+                } else if (strength === 3) {
+                    strengthFill.style.background = '#4CAF50';
+                    strengthText.textContent = 'Good';
+                    strengthText.style.color = '#4CAF50';
+                } else {
+                    strengthFill.style.background = '#2E7D32';
+                    strengthText.textContent = 'Strong';
+                    strengthText.style.color = '#2E7D32';
+                }
+            } else {
+                strengthDiv.classList.add('hidden');
+            }
+        });
+        
+        // OTP input auto-focus
+        const otpInputs = document.querySelectorAll('.otp-input');
+        otpInputs.forEach((input, index) => {
+            input.addEventListener('input', function() {
+                if (this.value.length === 1 && index < otpInputs.length - 1) {
+                    otpInputs[index + 1].focus();
+                }
+            });
+            
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Backspace' && !this.value && index > 0) {
+                    otpInputs[index - 1].focus();
+                }
+            });
+        });
+        
+        console.log('✅ Smart Panchayat Auth Ready');
+    </script>
 </body>
 </html>
