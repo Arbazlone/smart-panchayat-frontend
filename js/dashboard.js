@@ -1227,7 +1227,6 @@ showLikedUsersModal(users) {
                             ${createAvatar(user, 'md')}
                             <div style="flex: 1;">
                                 <div class="font-medium">${user.name}</div>
-                                <div class="text-sm text-gray-600">${user.phone || ''}</div>
                             </div>
                             ${user.isVerified ? '<i class="fas fa-check-circle" style="color: var(--primary-green);"></i>' : ''}
                         </div>
