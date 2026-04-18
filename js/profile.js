@@ -46,12 +46,29 @@ class ProfileManager {
     }
     
     hideEditControls() {
-        const ids = ['changeAvatarBtn', 'editBioBtn', 'settingsBtn', 'providerForm', 'editContactBtn'];
-        ids.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.style.setProperty('display', 'none', 'important');
-        });
-    }
+    // Hide all edit buttons
+    const ids = ['changeAvatarBtn', 'editBioBtn', 'editContactBtn', 'settingsBtn', 'shareProfileBtn'];
+    ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+    });
+    
+    // Hide provider toggle section completely
+    const providerSection = document.querySelector('.info-card:has(#providerToggle)');
+    if (providerSection) providerSection.style.display = 'none';
+    
+    // Hide the entire provider form card
+    const providerCard = document.getElementById('providerForm')?.closest('.info-card');
+    if (providerCard) providerCard.style.display = 'none';
+    
+    // Hide settings tab
+    const settingsTab = document.querySelector('.profile-tab[data-tab="settings"]');
+    if (settingsTab) settingsTab.style.display = 'none';
+    
+    // Hide earnings tab
+    const earningsTab = document.querySelector('.profile-tab[data-tab="earnings"]');
+    if (earningsTab) earningsTab.style.display = 'none';
+}
     
     setupEventListeners() {
         document.getElementById('changeAvatarBtn')?.addEventListener('click', () => {
@@ -278,9 +295,11 @@ class ProfileManager {
         const data = await response.json();
         
         // ✅ ALSO FETCH STATS SEPARATELY
-        const statsRes = await fetch(`${this.API_BASE_URL}/users/stats`, {
-            headers: { 'Authorization': `Bearer ${this.user.token}` }
-        });
+       // Use viewed user's ID for stats, not logged-in user
+const statsUserId = this.viewingUserId || this.user.id;
+const statsRes = await fetch(`${this.API_BASE_URL}/users/stats/${statsUserId}`, {
+    headers: { 'Authorization': `Bearer ${this.user.token}` }
+});
         const statsData = await statsRes.json();
         
         if (statsData.success) {
@@ -383,12 +402,19 @@ if (el('userPhone')) {
             this.isProvider = data.isProvider || data.role === 'provider';
             if (el('providerToggle')) el('providerToggle').checked = this.isProvider;
             
-            if (this.isProvider && data.providerDetails) {
-                this.loadProviderDetails(data.providerDetails);
-                if (!this.viewingUserId && el('providerForm')) {
-                    el('providerForm').style.display = 'block';
-                }
-            }
+           if (this.isProvider && data.providerDetails) {
+    this.loadProviderDetails(data.providerDetails);
+    // Only show form for own profile
+    if (!this.viewingUserId) {
+        if (el('providerForm')) el('providerForm').style.display = 'block';
+    }
+} else {
+    // Hide provider toggle for viewed profiles
+    if (this.viewingUserId) {
+        const providerToggle = document.getElementById('providerToggle')?.closest('.info-card');
+        if (providerToggle) providerToggle.style.display = 'none';
+    }
+}
             
             if (this.viewingUserId && this.viewingUserId !== this.user.id) {
                 this.addContactButton(data);
