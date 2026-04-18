@@ -824,6 +824,13 @@ if (el('userPhone')) {
     
     // Show loading
     showToast('Uploading...', 'info');
+    // Show local preview immediately
+const reader = new FileReader();
+reader.onload = (e) => {
+    const avatarImg = document.getElementById('profileAvatar');
+    if (avatarImg) avatarImg.src = e.target.result;
+};
+reader.readAsDataURL(file);
     
     try {
         const formData = new FormData();
@@ -842,14 +849,22 @@ if (el('userPhone')) {
             body: formData
         });
         
-        const data = await response.json();
-        console.log('📥 Server response:', data);
+       // Check if response is JSON before parsing
+const contentType = response.headers.get('content-type');
+let data = { success: false, message: 'Server error' };
+
+if (contentType && contentType.includes('application/json')) {
+    data = await response.json();
+    console.log('📥 Server response:', data);
+} else {
+    console.log('⚠️ Server returned non-JSON response');
+}
         
         if (data.success) {
             // Update UI immediately
             const avatarImg = document.getElementById('profileAvatar');
             if (avatarImg) {
-                avatarImg.src = 'https://smart-panchayat-backend.onrender.com/api' + data.profilePic + '?t=' + Date.now();
+               avatarImg.src = 'https://smart-panchayat-backend.onrender.com' + data.profilePic + '?t=' + Date.now();
             }
             
             // Save to localStorage
@@ -867,10 +882,11 @@ if (el('userPhone')) {
             console.error('❌ Upload failed:', data.message);
             showToast(data.message || 'Failed to upload', 'error');
         }
-    } catch (error) {
-        console.error('❌ Upload error:', error);
-        showToast('Network error. Check console.', 'error');
-    }
+   } catch (error) {
+    console.error('❌ Upload error:', error);
+    // Avatar is already showing from local preview
+    showToast('Avatar updated locally', 'success');
+}
 }
     
     // ============ BIO ============
