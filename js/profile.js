@@ -1,6 +1,6 @@
 /**
- * Smart Panchayat System - Profile Module
- * ULTRA ENHANCED: Badges, Ratings, Progress, Earnings, Share, Editable Contact
+ * Smart Panchayat - Profile Module
+ * Compatible with new profile.html structure
  */
 
 class ProfileManager {
@@ -8,10 +8,10 @@ class ProfileManager {
         this.user = null;
         this.isProvider = false;
         this.API_BASE_URL = 'https://smart-panchayat-backend.onrender.com/api';
-        this.DEV_MODE = false;
         this.viewingUserId = null;
         this.profileData = null;
         this.currentLocation = null;
+        this.allServices = [];
         
         this.init();
     }
@@ -30,7 +30,6 @@ class ProfileManager {
         if (!this.viewingUserId) {
             this.setupEventListeners();
             this.setupTabs();
-            this.setupContactListeners();
             this.loadNotificationPreferences();
         } else {
             this.hideEditControls();
@@ -46,14 +45,15 @@ class ProfileManager {
     }
     
     hideEditControls() {
-        const ids = ['changeAvatarBtn', 'editBioBtn', 'settingsBtn', 'providerForm', 'editContactBtn'];
+        const ids = ['changeAvatarBtn', 'editBioBtn', 'editContactBtn', 'providerForm'];
         ids.forEach(id => {
             const el = document.getElementById(id);
-            if (el) el.style.setProperty('display', 'none', 'important');
+            if (el) el.style.display = 'none';
         });
     }
     
     setupEventListeners() {
+        // Avatar
         document.getElementById('changeAvatarBtn')?.addEventListener('click', () => {
             document.getElementById('avatarInput').click();
         });
@@ -62,14 +62,17 @@ class ProfileManager {
             this.handleAvatarChange(e.target.files[0]);
         });
         
+        // Provider toggle
         document.getElementById('providerToggle')?.addEventListener('change', (e) => {
-            this.toggleProviderForm(e.target.checked);
+            const form = document.getElementById('providerForm');
+            if (form) form.classList.toggle('hidden', !e.target.checked);
         });
         
         document.getElementById('saveProviderBtn')?.addEventListener('click', () => {
             this.registerAsProvider();
         });
         
+        // Edit Bio
         document.getElementById('editBioBtn')?.addEventListener('click', () => {
             this.openEditBioModal();
         });
@@ -79,6 +82,17 @@ class ProfileManager {
             this.saveBio();
         });
         
+        // Edit Contact
+        document.getElementById('editContactBtn')?.addEventListener('click', () => {
+            this.openEditContactModal();
+        });
+        
+        document.getElementById('editContactForm')?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.saveContactInfo();
+        });
+        
+        // Settings
         document.getElementById('profileSettingsForm')?.addEventListener('submit', (e) => {
             e.preventDefault();
             this.saveProfileSettings();
@@ -89,46 +103,52 @@ class ProfileManager {
             this.changePassword();
         });
         
+        // Service filter
         document.getElementById('serviceFilter')?.addEventListener('change', (e) => {
             this.filterServices(e.target.value);
         });
         
+        // Notifications
         document.getElementById('saveNotifSettings')?.addEventListener('click', () => {
             this.saveNotificationSettings();
         });
         
-        document.getElementById('settingsBtn')?.addEventListener('click', () => {
-            this.switchTab('settings');
-        });
-        
+        // Share
         document.getElementById('shareProfileBtn')?.addEventListener('click', () => {
             this.shareProfile();
         });
         
+        // Settings menu
+        document.getElementById('settingsMenuBtn')?.addEventListener('click', () => {
+            this.switchTab('settings');
+        });
+        
+        // Refresh location
         document.getElementById('refreshLocationBtn')?.addEventListener('click', async () => {
             await this.getUserLocation();
             this.updateLocationDisplay();
-            showToast('Location updated!', 'success');
+            this.showToast('Location updated!', 'success');
         });
         
-        if (window.location.hash === '#provider') {
-            setTimeout(() => {
-                document.getElementById('providerToggle')?.scrollIntoView({ behavior: 'smooth' });
-                document.getElementById('providerToggle')?.click();
-            }, 500);
-        }
+        // Danger zone
+        document.getElementById('logoutAllBtn')?.addEventListener('click', () => {
+            if (confirm('Logout from all devices?')) {
+                localStorage.clear();
+                sessionStorage.clear();
+                window.location.href = 'index.html';
+            }
+        });
         
-        if (window.location.hash === '#badges') {
-            setTimeout(() => {
-                document.querySelector('.badges-section')?.scrollIntoView({ behavior: 'smooth' });
-            }, 500);
-        }
+        document.getElementById('deleteAccountBtn')?.addEventListener('click', () => {
+            if (confirm('Are you sure? This cannot be undone!')) {
+                this.deleteAccount();
+            }
+        });
     }
     
     setupTabs() {
-        document.querySelectorAll('.profile-tab').forEach(tab => {
-            tab.addEventListener('click', (e) => {
-                e.preventDefault();
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
                 const tabId = tab.dataset.tab;
                 this.switchTab(tabId);
             });
@@ -136,52 +156,176 @@ class ProfileManager {
     }
     
     switchTab(tabId) {
-        document.querySelectorAll('.profile-tab').forEach(tab => {
+        document.querySelectorAll('.tab').forEach(tab => {
             tab.classList.toggle('active', tab.dataset.tab === tabId);
         });
         
-        document.querySelectorAll('.tab-content').forEach(content => {
-            content.classList.toggle('active', content.id === `${tabId}Tab`);
+        document.querySelectorAll('.section').forEach(section => {
+            section.classList.toggle('active', section.id === `${tabId}Section`);
         });
         
         if (tabId === 'posts') {
             this.loadUserPosts();
         } else if (tabId === 'services') {
             this.loadUserServices();
-        } else if (tabId === 'earnings' && this.isProvider) {
-            this.loadEarnings();
         }
     }
     
-    // ============ CONTACT INFORMATION ============
+    // ============ PROFILE LOADING ============
     
-    setupContactListeners() {
-        document.getElementById('editContactBtn')?.addEventListener('click', () => {
-            this.showContactEditMode();
-        });
-        
-        document.getElementById('cancelContactBtn')?.addEventListener('click', () => {
-            this.hideContactEditMode();
-        });
-        
-        document.getElementById('saveContactBtn')?.addEventListener('click', () => {
-            this.saveContactInfo();
-        });
+    async loadUserProfile() {
+        try {
+            const endpoint = this.viewingUserId 
+                ? `${this.API_BASE_URL}/users/profile/${this.viewingUserId}`
+                : `${this.API_BASE_URL}/users/profile`;
+            
+            const response = await fetch(endpoint, {
+                headers: { 'Authorization': `Bearer ${this.user.token}` }
+            });
+            const data = await response.json();
+            
+            // Fetch stats
+            try {
+                const statsRes = await fetch(`${this.API_BASE_URL}/users/stats`, {
+                    headers: { 'Authorization': `Bearer ${this.user.token}` }
+                });
+                const statsData = await statsRes.json();
+                if (statsData.success) {
+                    data.stats = {
+                        posts: statsData.posts || 0,
+                        helped: statsData.helped || 0,
+                        rating: statsData.rating || 0,
+                        reviews: statsData.reviews || 0
+                    };
+                }
+            } catch (e) {
+                data.stats = { posts: 0, helped: 0, rating: 0, reviews: 0 };
+            }
+            
+            this.profileData = data;
+            this.displayProfile(data);
+            this.updateLocationDisplay();
+            
+        } catch (error) {
+            console.error('Error loading profile:', error);
+            this.showToast('Failed to load profile', 'error');
+            this.loadFallbackProfile();
+        }
     }
     
-    showContactEditMode() {
+    loadFallbackProfile() {
+        const stored = JSON.parse(localStorage.getItem('panchayat_user') || '{}');
+        this.profileData = {
+            name: stored.name || 'User',
+            phone: stored.phone || '',
+            bio: stored.bio || '',
+            role: stored.role || 'user',
+            memberSince: stored.memberSince || new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+            stats: { posts: 0, helped: 0, rating: 0, reviews: 0 }
+        };
+        this.displayProfile(this.profileData);
+    }
+    
+    updateLocationDisplay() {
+        const el = document.getElementById('locationDisplay');
+        if (!el) return;
+        
+        if (this.currentLocation) {
+            el.textContent = '📍 Location detected';
+        } else {
+            el.textContent = '📍 Location unavailable';
+        }
+    }
+    
+    displayProfile(data) {
+        const setText = (id, value) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = value || '';
+        };
+        
+        const setHtml = (id, value) => {
+            const el = document.getElementById(id);
+            if (el) el.innerHTML = value || '';
+        };
+        
+        const setValue = (id, value) => {
+            const el = document.getElementById(id);
+            if (el) el.value = value || '';
+        };
+        
+        setText('profileName', data.name);
+        setText('userBio', data.bio || 'No bio added yet. Tell the community about yourself!');
+        setText('userRole', data.role === 'provider' ? 'Service Provider' : 'Resident');
+        setText('memberSince', data.memberSince || new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }));
+        
+        // Stats
+        setText('totalPosts', data.stats?.posts || 0);
+        setText('helpedCount', data.stats?.helped || 0);
+        setText('ratingValue', (data.stats?.rating || 0).toFixed(1));
+        
+        // Rating stars
+        const rating = data.stats?.rating || 0;
+        const stars = this.renderStars(rating);
+        setHtml('ratingStars', stars);
+        
+        // Contact info
+        setText('displayPhone', data.phone || '--');
+        setText('displayAlternatePhone', data.alternatePhone || 'Not provided');
+        setText('displayEmail', data.email || 'Not provided');
+        setText('displayAddress', data.address || 'Not provided');
+        
+        // Settings form
+        setValue('settingsName', data.name);
+        setValue('settingsEmail', data.email);
+        setValue('settingsPhone', data.phone);
+        setValue('settingsBio', data.bio);
+        setValue('bioInput', data.bio);
+        
+        // Avatar
+        if (data.avatar || data.profilePic) {
+            const avatarEl = document.getElementById('profileAvatar');
+            if (avatarEl) {
+                const url = (data.avatar || data.profilePic).startsWith('http') 
+                    ? data.avatar || data.profilePic 
+                    : `https://smart-panchayat-backend.onrender.com${data.avatar || data.profilePic}`;
+                avatarEl.src = url;
+            }
+        }
+        
+        // Provider status
+        this.isProvider = data.isProvider || data.role === 'provider';
+        const toggle = document.getElementById('providerToggle');
+        if (toggle) toggle.checked = this.isProvider;
+        
+        if (this.isProvider && data.providerDetails) {
+            this.loadProviderDetails(data.providerDetails);
+            const form = document.getElementById('providerForm');
+            if (form) form.classList.remove('hidden');
+        }
+    }
+    
+    renderStars(rating) {
+        const full = Math.floor(rating);
+        const half = rating % 1 >= 0.5 ? 1 : 0;
+        const empty = 5 - full - half;
+        
+        let stars = '';
+        for (let i = 0; i < full; i++) stars += '<i class="fas fa-star" style="color: #FFB300;"></i>';
+        if (half) stars += '<i class="fas fa-star-half-alt" style="color: #FFB300;"></i>';
+        for (let i = 0; i < empty; i++) stars += '<i class="far fa-star" style="color: #FFB300;"></i>';
+        
+        return stars;
+    }
+    
+    // ============ CONTACT INFO ============
+    
+    openEditContactModal() {
         const data = this.profileData || {};
         document.getElementById('editAlternatePhone').value = data.alternatePhone || '';
         document.getElementById('editEmail').value = data.email || '';
         document.getElementById('editAddress').value = data.address || '';
         
-        document.getElementById('contactDisplay').style.display = 'none';
-        document.getElementById('contactEdit').style.display = 'block';
-    }
-    
-    hideContactEditMode() {
-        document.getElementById('contactDisplay').style.display = 'block';
-        document.getElementById('contactEdit').style.display = 'none';
+        document.getElementById('editContactModal').style.display = 'flex';
     }
     
     async saveContactInfo() {
@@ -206,617 +350,268 @@ class ProfileManager {
                 this.profileData.alternatePhone = alternatePhone;
                 this.profileData.address = address;
                 
-                this.updateContactDisplay(this.profileData);
-                this.hideContactEditMode();
-                showToast('Contact information updated!', 'success');
+                document.getElementById('displayAlternatePhone').textContent = alternatePhone || 'Not provided';
+                document.getElementById('displayEmail').textContent = email || 'Not provided';
+                document.getElementById('displayAddress').textContent = address || 'Not provided';
+                
+                document.getElementById('editContactModal').style.display = 'none';
+                this.showToast('Contact updated!', 'success');
             } else {
-                showToast(data.message || 'Failed to update', 'error');
+                this.showToast(data.message || 'Failed to update', 'error');
             }
         } catch (error) {
-            showToast('Network error', 'error');
+            this.showToast('Network error', 'error');
         }
     }
     
-    updateContactDisplay(data) {
-        const el = (id) => document.getElementById(id);
-      if (el('displayPhone')) {
-    if (data._id === this.user._id) {
-        el('displayPhone').textContent = data.phone || '--';
-    } else {
-        el('displayPhone').textContent = "Hidden for privacy";
-    }
-}
-        if (el('displayAlternatePhone')) el('displayAlternatePhone').textContent = data.alternatePhone || 'Not provided';
-        if (el('displayEmail')) el('displayEmail').textContent = data.email || 'Not provided';
-        if (el('displayAddress')) el('displayAddress').textContent = data.address || 'Not provided';
-        if (el('editPhone')) el('editPhone').value = data.phone || '';
+    // ============ BIO ============
+    
+    openEditBioModal() {
+        document.getElementById('bioInput').value = this.profileData?.bio || '';
+        document.getElementById('editBioModal').style.display = 'flex';
     }
     
-    // ============ PROFILE LOADING ============
-    
-   async loadUserProfile() {
-    try {
-        const endpoint = this.viewingUserId 
-            ? `${this.API_BASE_URL}/users/profile/${this.viewingUserId}`
-            : `${this.API_BASE_URL}/users/profile`;
+    async saveBio() {
+        const bio = document.getElementById('bioInput').value.trim();
         
-        const response = await fetch(endpoint, {
-            headers: { 'Authorization': `Bearer ${this.user.token}` }
-        });
-        const data = await response.json();
-        
-        // ✅ ALSO FETCH STATS SEPARATELY
-        const statsRes = await fetch(`${this.API_BASE_URL}/users/stats`, {
-            headers: { 'Authorization': `Bearer ${this.user.token}` }
-        });
-        const statsData = await statsRes.json();
-        
-        if (statsData.success) {
-            data.stats = {
-                posts: statsData.posts || 0,
-                helped: statsData.helped || 0,
-                rating: statsData.rating || 0,
-                reviews: statsData.reviews || 0
-            };
-        }
-        
-        this.profileData = data;
-        this.displayProfile(data);
-        
-        await this.loadBadges();
-        await this.loadBadgeProgress();
-        
-    } catch (error) {
-        console.error('Error loading profile:', error);
-        showToast('Failed to load profile', 'error');
-    }
-}
-    
-    updateLocationDisplay() {
-        const el = document.getElementById('locationDisplay');
-        if (!el) return;
-        
-        if (this.currentLocation) {
-            getAddressFromCoords(this.currentLocation.latitude, this.currentLocation.longitude)
-                .then(address => el.textContent = address)
-                .catch(() => el.textContent = 'Location detected');
-        } else {
-            el.textContent = 'Location not available';
-        }
-    }
-    
-    displayProfile(data) {
         try {
-            const el = (id) => document.getElementById(id);
+            const response = await fetch(`${this.API_BASE_URL}/users/profile`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.user.token}`
+                },
+                body: JSON.stringify({ bio })
+            });
             
-            if (el('profileName')) el('profileName').textContent = data.name || '';
-            if (el('userPhone')) el('userPhone').textContent = data.phone || '';
-            if (el('userBio')) el('userBio').textContent = data.bio || 'No bio added yet.';
-            if (el('userRole')) el('userRole').textContent = (data.role === 'provider') ? 'Service Provider' : 'Community Member';
-            if (el('memberSince')) el('memberSince').textContent = data.memberSince || 'Member';
+            const data = await response.json();
             
-            if (data.isVerified && el('profileName')) {
-                el('profileName').innerHTML += ' <i class="fas fa-check-circle" style="color: var(--primary-green);"></i>';
+            if (data.success) {
+                this.profileData.bio = bio;
+                document.getElementById('userBio').textContent = bio || 'No bio added yet.';
+                document.getElementById('editBioModal').style.display = 'none';
+                this.showToast('Bio updated!', 'success');
             }
-            
-            if (data.avatar || data.profilePic) {
-                const url = (data.avatar || data.profilePic).startsWith('http') 
-                    ? (data.avatar || data.profilePic) 
-                    : 'http://localhost:5000' + (data.avatar || data.profilePic);
-                if (el('profileAvatar')) el('profileAvatar').src = url;
-            }
-            
-            if (el('totalPosts')) el('totalPosts').textContent = data.stats?.posts || 0;
-            if (el('helpedCount')) el('helpedCount').textContent = data.stats?.helped || 0;
-            if (el('ratingValue')) el('ratingValue').textContent = (data.stats?.rating || data.providerDetails?.rating || 0).toFixed(1);
-            if (el('reviewCount')) el('reviewCount').textContent = (data.stats?.reviews || data.providerDetails?.totalReviews || 0) + ' reviews';
-            
-            this.updateContactDisplay(data);
-            
-            if (!this.viewingUserId) {
-                if (el('settingsName')) el('settingsName').value = data.name || '';
-                if (el('settingsEmail')) el('settingsEmail').value = data.email || '';
-                if (el('settingsPhone')) el('settingsPhone').value = data.phone || '';
-                if (el('settingsBio')) el('settingsBio').value = data.bio || '';
-                if (el('bioInput')) el('bioInput').value = data.bio || '';
-            }
-            
-            this.isProvider = data.isProvider || data.role === 'provider';
-            if (el('providerToggle')) el('providerToggle').checked = this.isProvider;
-            
-            if (this.isProvider && data.providerDetails) {
-                this.loadProviderDetails(data.providerDetails);
-                if (!this.viewingUserId && el('providerForm')) {
-                    el('providerForm').style.display = 'block';
-                }
-            }
-            
-            if (this.viewingUserId && this.viewingUserId !== this.user.id) {
-                this.addContactButton(data);
-            }
-            
-            if (this.viewingUserId && data.lastActive) {
-                this.updateOnlineStatus(data.lastActive);
-            }
-        } catch (e) {
-            console.error('Error in displayProfile:', e);
+        } catch (error) {
+            document.getElementById('userBio').textContent = bio || 'No bio added yet.';
+            document.getElementById('editBioModal').style.display = 'none';
+            this.showToast('Bio updated!', 'success');
         }
     }
     
-    updateOnlineStatus(lastActive) {
-        const isOnline = lastActive && new Date(lastActive) > new Date(Date.now() - 5 * 60 * 1000);
-        const headerEl = document.querySelector('.profile-header');
-        if (!headerEl) return;
+    // ============ SETTINGS ============
+    
+    async saveProfileSettings() {
+        const name = document.getElementById('settingsName').value.trim();
+        const email = document.getElementById('settingsEmail').value.trim();
+        const bio = document.getElementById('settingsBio').value.trim();
         
-        let statusEl = headerEl.querySelector('.online-status');
-        if (!statusEl) {
-            statusEl = document.createElement('span');
-            statusEl.className = 'online-status';
-            headerEl.appendChild(statusEl);
-        }
-        statusEl.className = `online-status ${isOnline ? 'online' : 'offline'}`;
-        statusEl.innerHTML = isOnline ? '🟢 Online' : '⚫ Offline';
-    }
-    
-    addContactButton(data) {
-        const headerDiv = document.querySelector('.profile-header .flex');
-        if (!headerDiv) return;
-        
-        const btnContainer = document.createElement('div');
-        btnContainer.className = 'flex gap-sm ml-auto';
-        btnContainer.innerHTML = `
-            <button class="btn btn-primary" onclick="profileManager.contactUser('${this.viewingUserId}', '${data.name}')">
-                <i class="fas fa-comment"></i> Message
-            </button>
-            <button class="btn btn-outline" onclick="profileManager.viewUserPosts('${this.viewingUserId}')">
-                <i class="fas fa-newspaper"></i> Posts
-            </button>
-        `;
-        headerDiv.appendChild(btnContainer);
-    }
-    
-    contactUser(userId, name) {
-        window.location.href = `chat.html?user=${userId}`;
-    }
-    
-    viewUserPosts(userId) {
-        window.location.href = `dashboard.html?filter=user&userId=${userId}`;
-    }
-    
-    shareProfile() {
-        const url = `${window.location.origin}/profile.html?user=${this.user.id}`;
-        navigator.clipboard?.writeText(url);
-        showToast('Profile link copied!', 'success');
-    }
-    
-    // ============ BADGE PROGRESS ============
-    
-    async loadBadgeProgress() {
-        const stats = this.profileData.stats || {};
-        const requirements = [
-            { name: 'First Post', icon: '📝', current: stats.posts || 0, target: 1 },
-            { name: 'Active Contributor', icon: '📰', current: stats.posts || 0, target: 10 },
-            { name: 'Helper', icon: '🤝', current: stats.helped || 0, target: 5 },
-            { name: 'Super Helper', icon: '🦸', current: stats.helped || 0, target: 20 },
-            { name: 'Rising Star', icon: '⭐', current: stats.rating || 0, target: 4.5 }
-        ];
-        
-        this.renderBadgeProgress(requirements);
-    }
-    
-    renderBadgeProgress(requirements) {
-        const container = document.getElementById('progressContainer');
-        if (!container) return;
-        
-        const inProgress = requirements.filter(b => b.current < b.target);
-        
-        if (inProgress.length === 0) {
-            container.innerHTML = '<div class="badge-progress-empty"><i class="fas fa-trophy"></i><p>🎉 All badges unlocked!</p></div>';
+        if (!name) {
+            this.showToast('Name is required', 'error');
             return;
         }
         
-        container.innerHTML = inProgress.slice(0, 4).map(badge => {
-            const percent = Math.min((badge.current / badge.target) * 100, 100);
-            return `
-                <div class="badge-progress-item">
-                    <div class="badge-progress-icon">${badge.icon}</div>
-                    <div class="badge-progress-info">
-                        <div class="badge-progress-header">
-                            <span class="badge-progress-name">${badge.name}</span>
-                            <span class="badge-progress-stats">${badge.current}/${badge.target}</span>
-                        </div>
-                        <div class="badge-progress-bar">
-                            <div class="badge-progress-fill" style="width: ${percent}%;"></div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }).join('');
-        
-        const unlocked = requirements.filter(b => b.current >= b.target).length;
-        const countEl = document.getElementById('unlockedCount');
-        if (countEl) countEl.textContent = `${unlocked}/${requirements.length}`;
-    }
-    
-    // ============ BADGES ============
-    
-    async loadBadges() {
         try {
-            const userId = this.viewingUserId || this.user.id;
-            const response = await fetch(`${this.API_BASE_URL}/badges/user/${userId}`, {
-                headers: { 'Authorization': `Bearer ${this.user.token}` }
+            const response = await fetch(`${this.API_BASE_URL}/users/profile`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.user.token}`
+                },
+                body: JSON.stringify({ name, email, bio })
             });
+            
             const data = await response.json();
-            if (data.success) this.renderBadges(data.badges);
-        } catch (error) {}
+            
+            if (data.success) {
+                this.profileData.name = name;
+                this.profileData.email = email;
+                this.profileData.bio = bio;
+                
+                document.getElementById('profileName').textContent = name;
+                document.getElementById('userBio').textContent = bio || 'No bio added yet.';
+                document.getElementById('displayEmail').textContent = email || 'Not provided';
+                
+                this.showToast('Profile updated!', 'success');
+            }
+        } catch (error) {
+            this.showToast('Profile updated locally!', 'success');
+        }
     }
     
-    renderBadges(badges) {
-        const container = document.getElementById('badgesContainer');
-        if (!container) return;
+    async changePassword() {
+        const current = document.getElementById('currentPassword')?.value;
+        const newPass = document.getElementById('newPassword')?.value;
+        const confirm = document.getElementById('confirmNewPassword')?.value;
         
-        const unlockedBadges = badges?.filter(b => b.unlocked === true) || [];
-        
-        if (unlockedBadges.length === 0) {
-            container.innerHTML = `
-                <div class="text-center p-lg">
-                    <i class="fas fa-trophy" style="font-size: 2.5rem; color: var(--gray-400); opacity: 0.5;"></i>
-                    <p class="text-gray-500 mt-sm">No badges unlocked yet.</p>
-                    <p class="text-xs text-gray-400">Complete tasks to earn badges!</p>
-                </div>
-            `;
+        if (!current || !newPass || !confirm) {
+            this.showToast('All fields required', 'error');
             return;
         }
         
-        container.innerHTML = `
-            <div class="badges-grid">
-                ${unlockedBadges.map(b => `
-                    <div class="badge-card unlocked" title="${b.description}">
-                        <div class="badge-icon">${b.icon}</div>
-                        <div class="badge-name">${b.name}</div>
-                        <div class="badge-desc">${b.description}</div>
-                    </div>
-                `).join('')}
-            </div>
-        `;
-    }
-    
-    // ============ RATINGS ============
-    
-    async loadRatings() {
-        try {
-            const userId = this.viewingUserId || this.user.id;
-            const response = await fetch(`${this.API_BASE_URL}/ratings/provider/${userId}`, {
-                headers: { 'Authorization': `Bearer ${this.user.token}` }
-            });
-            const data = await response.json();
-            if (data.success && data.ratings) this.renderRatings(data.ratings);
-        } catch (error) {}
-    }
-    
-    renderRatings(ratings) {
-        const container = document.getElementById('ratingsContainer');
-        if (!container) return;
-        if (!ratings || ratings.length === 0) {
-            container.innerHTML = '<p class="text-gray-500 text-center p-md">⭐ No ratings yet</p>';
+        if (newPass !== confirm) {
+            this.showToast('Passwords do not match', 'error');
             return;
         }
         
-        const avgRating = ratings.reduce((sum, r) => sum + r.score, 0) / ratings.length;
-        
-        container.innerHTML = `
-            <div class="ratings-summary">
-                <div class="rating-big">${avgRating.toFixed(1)}</div>
-                <div class="rating-stars">${this.renderStars(avgRating)}</div>
-                <div class="rating-count">${ratings.length} reviews</div>
-            </div>
-            <div class="ratings-list">
-                ${ratings.slice(0, 5).map(r => `
-                    <div class="rating-item">
-                        <div class="rating-header">
-                            <span class="rating-score">${this.renderStars(r.score)}</span>
-                            <span class="rating-date">${formatRelativeTime(r.createdAt)}</span>
-                        </div>
-                        ${r.review ? `<p class="rating-review">"${r.review}"</p>` : ''}
-                    </div>
-                `).join('')}
-            </div>
-        `;
-    }
-    
-    renderStars(rating) {
-        return Array(5).fill(0).map((_, i) => 
-            `<i class="${i < Math.floor(rating) ? 'fas' : (i < rating ? 'fas fa-star-half-alt' : 'far')} fa-star" style="color: #FFB300;"></i>`
-        ).join('');
-    }
-    
-    // ============ EARNINGS ============
-    
-    async loadEarnings() {
-        try {
-            const response = await fetch(`${this.API_BASE_URL}/bids/provider/earnings`, {
-                headers: { 'Authorization': `Bearer ${this.user.token}` }
-            });
-            const data = await response.json();
-            if (data.success) this.renderEarnings(data);
-        } catch (error) {}
-    }
-    
-    renderEarnings(data) {
-        const container = document.getElementById('earningsContainer');
-        if (!container) return;
-        container.innerHTML = `
-            <div class="earnings-summary">
-                <div class="earning-card"><div class="earning-label">Total Earned</div><div class="earning-value">₹${data.totalEarned || 0}</div></div>
-                <div class="earning-card"><div class="earning-label">This Month</div><div class="earning-value">₹${data.monthlyEarned || 0}</div></div>
-                <div class="earning-card"><div class="earning-label">Completed Jobs</div><div class="earning-value">${data.completedJobs || 0}</div></div>
-            </div>
-        `;
-    }
-    
-    // ============ RECENT ACTIVITY ============
-    
-    async loadRecentActivity() {
-        try {
-            const userId = this.viewingUserId || this.user.id;
-            const response = await fetch(`${this.API_BASE_URL}/activity/user/${userId}`, {
-                headers: { 'Authorization': `Bearer ${this.user.token}` }
-            });
-            const data = await response.json();
-            if (data.success && data.activity) this.renderActivity(data.activity);
-        } catch (error) {}
-    }
-    
-    renderActivity(activities) {
-        const container = document.getElementById('activityContainer');
-        if (!container) return;
-        if (!activities || activities.length === 0) {
-            container.innerHTML = '<p class="text-gray-500 text-center p-md">📋 No recent activity</p>';
+        if (newPass.length < 6) {
+            this.showToast('Password must be at least 6 characters', 'error');
             return;
         }
-        container.innerHTML = activities.map(a => `
-            <div class="activity-item">
-                <div class="activity-icon">${this.getActivityIcon(a.type)}</div>
-                <div class="activity-content">
-                    <div class="activity-text">${this.getActivityText(a)}</div>
-                    <div class="activity-time">${formatRelativeTime(a.createdAt)}</div>
-                </div>
-            </div>
-        `).join('');
-    }
-    
-    getActivityIcon(type) {
-        const icons = { 'post': '📝', 'offer': '🤝', 'service': '🔧', 'emergency': '🚨', 'badge': '🏆', 'rating': '⭐' };
-        return icons[type] || '📌';
-    }
-    
-    getActivityText(activity) {
-        const texts = {
-            'post': 'Created a new post',
-            'offer': 'Submitted an offer',
-            'service': 'Completed a service',
-            'emergency': 'Responded to emergency',
-            'badge': `Earned "${activity.badgeName}" badge`,
-            'rating': `Received a ${activity.rating}⭐ rating`
-        };
-        return texts[activity.type] || 'Performed an action';
+        
+        try {
+            const response = await fetch(`${this.API_BASE_URL}/users/change-password`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.user.token}`
+                },
+                body: JSON.stringify({ currentPassword: current, newPassword: newPass })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                document.getElementById('passwordChangeForm').reset();
+                this.showToast('Password changed!', 'success');
+            } else {
+                this.showToast(data.message || 'Failed to change password', 'error');
+            }
+        } catch (error) {
+            this.showToast('Network error', 'error');
+        }
     }
     
     // ============ NOTIFICATIONS ============
     
     loadNotificationPreferences() {
         const settings = JSON.parse(localStorage.getItem('notification_settings') || '{}');
-        ['notifEmergency', 'notifPosts', 'notifServices', 'notifMessages'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.checked = settings[id.replace('notif', '').toLowerCase()] !== false;
-        });
+        document.getElementById('notifEmergency').checked = settings.emergency !== false;
+        document.getElementById('notifPosts').checked = settings.posts !== false;
+        document.getElementById('notifServices').checked = settings.services !== false;
+        document.getElementById('notifMessages').checked = settings.messages !== false;
     }
     
-    async saveNotificationSettings() {
+    saveNotificationSettings() {
         const settings = {
-            emergency: document.getElementById('notifEmergency')?.checked || true,
-            posts: document.getElementById('notifPosts')?.checked || true,
-            services: document.getElementById('notifServices')?.checked || true,
-            messages: document.getElementById('notifMessages')?.checked || true
+            emergency: document.getElementById('notifEmergency')?.checked ?? true,
+            posts: document.getElementById('notifPosts')?.checked ?? true,
+            services: document.getElementById('notifServices')?.checked ?? true,
+            messages: document.getElementById('notifMessages')?.checked ?? true
         };
         localStorage.setItem('notification_settings', JSON.stringify(settings));
-        showToast('Notification settings saved!', 'success');
+        this.showToast('Notification settings saved!', 'success');
     }
     
-    // ============ PROVIDER METHODS ============
+    // ============ PROVIDER ============
     
-    toggleProviderForm(show) {
-        const form = document.getElementById('providerForm');
-        if (form) form.style.display = show ? 'block' : 'none';
-    }
-    
-   loadProviderDetails(details) {
-    if (!details) return;
-    
-    if (document.getElementById('serviceCategory')) {
+    loadProviderDetails(details) {
+        if (!details) return;
+        
         document.getElementById('serviceCategory').value = details.category || '';
-    }
-    if (document.getElementById('experience')) {
         document.getElementById('experience').value = details.experience || 0;
-    }
-    if (document.getElementById('hourlyRate')) {
         document.getElementById('hourlyRate').value = details.hourlyRate || 0;
-    }
-    if (document.getElementById('serviceDescription')) {
         document.getElementById('serviceDescription').value = details.description || '';
-    }
-    if (document.getElementById('serviceRadius')) {
-        document.getElementById('serviceRadius').value = details.serviceRadius || details.radius || 10;
-    }
-    if (document.getElementById('availableNow')) {
+        document.getElementById('serviceRadius').value = details.serviceRadius || 10;
         document.getElementById('availableNow').checked = details.available || false;
     }
-}
     
     async registerAsProvider() {
-    const category = document.getElementById('serviceCategory')?.value;
-    const experience = document.getElementById('experience')?.value;
-    const hourlyRate = document.getElementById('hourlyRate')?.value;
-    const description = document.getElementById('serviceDescription')?.value;
-    const radius = document.getElementById('serviceRadius')?.value;
-    const available = document.getElementById('availableNow')?.checked;
-    
-    if (!category) { showToast('Select a category', 'error'); return; }
-    if (!description) { showToast('Describe your services', 'error'); return; }
-    
-    const providerData = {
-        category,
-        experience: parseInt(experience) || 0,
-        hourlyRate: parseFloat(hourlyRate) || 0,
-        description,
-        radius: parseInt(radius) || 10,
-        available: available || false
-    };
-    
-    try {
-        const response = await fetch(`${this.API_BASE_URL}/users/become-provider`, {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json', 
-                'Authorization': `Bearer ${this.user.token}` 
-            },
-            body: JSON.stringify(providerData)
-        });
+        const category = document.getElementById('serviceCategory')?.value;
+        const experience = document.getElementById('experience')?.value;
+        const hourlyRate = document.getElementById('hourlyRate')?.value;
+        const description = document.getElementById('serviceDescription')?.value;
+        const radius = document.getElementById('serviceRadius')?.value;
+        const available = document.getElementById('availableNow')?.checked;
         
-        const data = await response.json();
-        
-        if (response.ok) {
-            this.isProvider = true;
-            const roleEl = document.getElementById('userRole');
-            if (roleEl) roleEl.textContent = 'Service Provider';
-            
-            // Update local storage
-            const storedUser = JSON.parse(localStorage.getItem('panchayat_user') || sessionStorage.getItem('panchayat_user') || '{}');
-            storedUser.isProvider = true;
-            storedUser.role = 'provider';
-            storedUser.providerDetails = providerData;
-            
-            if (localStorage.getItem('panchayat_user')) {
-                localStorage.setItem('panchayat_user', JSON.stringify(storedUser));
-            } else {
-                sessionStorage.setItem('panchayat_user', JSON.stringify(storedUser));
-            }
-            
-            showToast('Registered as provider!', 'success');
-            setTimeout(() => location.href = 'dashboard.html', 1500);
-        } else {
-            showToast(data.message || 'Failed to register', 'error');
+        if (!category) {
+            this.showToast('Select a category', 'error');
+            return;
         }
-    } catch (error) { 
-        showToast('Network error', 'error'); 
+        
+        if (!description) {
+            this.showToast('Describe your services', 'error');
+            return;
+        }
+        
+        const providerData = {
+            category,
+            experience: parseInt(experience) || 0,
+            hourlyRate: parseFloat(hourlyRate) || 0,
+            description,
+            radius: parseInt(radius) || 10,
+            available: available || false
+        };
+        
+        try {
+            const response = await fetch(`${this.API_BASE_URL}/users/become-provider`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.user.token}`
+                },
+                body: JSON.stringify(providerData)
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+                this.isProvider = true;
+                document.getElementById('userRole').textContent = 'Service Provider';
+                this.showToast('Registered as provider!', 'success');
+            } else {
+                this.showToast(data.message || 'Failed to register', 'error');
+            }
+        } catch (error) {
+            this.showToast('Network error', 'error');
+        }
     }
-}
     
     // ============ AVATAR ============
     
-   async handleAvatarChange(file) {
-    if (!file) {
-        console.log('❌ No file selected');
-        return;
-    }
-    
-    console.log('📸 File selected:', file.name, file.type, file.size);
-    
-    if (file.size > 5 * 1024 * 1024) {
-        showToast('Image size should be less than 5MB', 'error');
-        return;
-    }
-    
-    // Show loading
-    showToast('Uploading...', 'info');
-    
-    try {
-        const formData = new FormData();
-        formData.append('avatar', file);
+    async handleAvatarChange(file) {
+        if (!file) return;
         
-        // Get token from storage
-        const token = this.user?.token || JSON.parse(localStorage.getItem('panchayat_user') || '{}').token;
-        
-        console.log('📤 Sending to:', `${this.API_BASE_URL}/users/avatar`);
-        
-        const response = await fetch(`${this.API_BASE_URL}/users/avatar`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            },
-            body: formData
-        });
-        
-        const data = await response.json();
-        console.log('📥 Server response:', data);
-        
-        if (data.success) {
-            // Update UI immediately
-            const avatarImg = document.getElementById('profileAvatar');
-            if (avatarImg) {
-                avatarImg.src = 'http://localhost:5000' + data.profilePic + '?t=' + Date.now();
-            }
-            
-            // Save to localStorage
-            const storedUser = JSON.parse(localStorage.getItem('panchayat_user') || sessionStorage.getItem('panchayat_user') || '{}');
-            storedUser.profilePic = data.profilePic;
-            
-            if (localStorage.getItem('panchayat_user')) {
-                localStorage.setItem('panchayat_user', JSON.stringify(storedUser));
-            } else {
-                sessionStorage.setItem('panchayat_user', JSON.stringify(storedUser));
-            }
-            
-            showToast('Profile picture updated!', 'success');
-        } else {
-            console.error('❌ Upload failed:', data.message);
-            showToast(data.message || 'Failed to upload', 'error');
+        if (file.size > 5 * 1024 * 1024) {
+            this.showToast('Image size should be less than 5MB', 'error');
+            return;
         }
-    } catch (error) {
-        console.error('❌ Upload error:', error);
-        showToast('Network error. Check console.', 'error');
-    }
-}
-    
-    // ============ BIO ============
-    
-    openEditBioModal() {
-        const bioInput = document.getElementById('bioInput');
-        const userBio = document.getElementById('userBio');
-        if (bioInput && userBio) bioInput.value = userBio.textContent;
-        document.getElementById('editBioModal').style.display = 'flex';
-    }
-    
-    async saveBio() {
-        const bio = document.getElementById('bioInput')?.value.trim();
-        if (!bio) return;
-        const userBio = document.getElementById('userBio');
-        if (userBio) userBio.textContent = bio;
-        closeEditBioModal();
-        showToast('Bio updated!', 'success');
-    }
-    
-    async saveProfileSettings() {
-        const name = document.getElementById('settingsName')?.value.trim();
-        if (!name) return;
-        const profileName = document.getElementById('profileName');
-        if (profileName) profileName.textContent = name;
-        showToast('Profile updated!', 'success');
+        
+        this.showToast('Uploading...', 'info');
+        
+        try {
+            const formData = new FormData();
+            formData.append('avatar', file);
+            
+            const response = await fetch(`${this.API_BASE_URL}/users/avatar`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${this.user.token}` },
+                body: formData
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                const avatarImg = document.getElementById('profileAvatar');
+                if (avatarImg) {
+                    avatarImg.src = `https://smart-panchayat-backend.onrender.com${data.profilePic}?t=${Date.now()}`;
+                }
+                this.showToast('Profile picture updated!', 'success');
+            } else {
+                this.showToast(data.message || 'Failed to upload', 'error');
+            }
+        } catch (error) {
+            this.showToast('Network error', 'error');
+        }
     }
     
-    async changePassword() {
-        const newPass = document.getElementById('newPassword')?.value;
-        const confirm = document.getElementById('confirmNewPassword')?.value;
-        if (!newPass || newPass !== confirm) { showToast('Passwords do not match', 'error'); return; }
-        showToast('Password changed!', 'success');
-        document.getElementById('passwordChangeForm')?.reset();
-    }
-    
-    // ============ POSTS & SERVICES ============
+    // ============ POSTS ============
     
     async loadUserPosts() {
         const container = document.getElementById('userPostsContainer');
         if (!container) return;
+        
+        container.innerHTML = '<div class="loading-spinner"><i class="fas fa-spinner fa-pulse"></i><p>Loading posts...</p></div>';
         
         try {
             const response = await fetch(`${this.API_BASE_URL}/users/posts`, {
@@ -826,105 +621,219 @@ class ProfileManager {
             const posts = data.posts || [];
             
             if (posts.length === 0) {
-                container.innerHTML = `<div class="text-center p-xl"><i class="fas fa-newspaper" style="font-size: 3rem; color: var(--gray-400);"></i><h3>No posts yet</h3><a href="dashboard.html" class="btn btn-primary mt-md">Create Your First Post</a></div>`;
-                return;
-            }
-            container.innerHTML = posts.map(post => this.renderPostCard(post)).join('');
-        } catch (error) {
-            container.innerHTML = '<p class="text-error text-center">Failed to load posts</p>';
-        }
-    }
-    
-    renderPostCard(post) {
-        return `<div class="service-card"><div class="flex justify-between items-start mb-sm"><div><h4>${post.title || 'Untitled'}</h4><p class="text-sm text-gray-600">${formatRelativeTime(post.createdAt)}</p></div><span class="service-status status-${post.status || 'active'}">${post.status || 'Active'}</span></div><p class="mb-sm">${post.description}</p><div class="flex gap-sm"><button class="btn btn-outline btn-sm" onclick="location.href='dashboard.html?post=${post._id}'"><i class="fas fa-eye"></i> View</button><button class="btn btn-outline btn-sm" onclick="profileManager.deletePost('${post._id}')"><i class="fas fa-trash"></i> Delete</button></div></div>`;
-    }
-    
-    deletePost(postId) {
-        if (!confirm('Delete this post?')) return;
-        showToast('Post deleted', 'success');
-        this.loadUserPosts();
-    }
-    
-   async loadUserServices() {
-    try {
-        const container = document.getElementById('myServicesContainer');
-        if (!container) return;
-        
-        container.innerHTML = '<p class="text-center p-md"><i class="fas fa-spinner fa-spin"></i> Loading services...</p>';
-        
-        // Fetch user's service requests from POSTS
-        const response = await fetch(`${this.API_BASE_URL}/posts?type=service&author=${this.user.id}`, {
-            headers: { 'Authorization': `Bearer ${this.user.token}` }
-        });
-        const data = await response.json();
-        
-        if (data.success) {
-            const services = data.posts || [];
-            
-            if (services.length === 0) {
                 container.innerHTML = `
-                    <div class="text-center p-xl">
-                        <i class="fas fa-tools" style="font-size: 3rem; color: var(--gray-400);"></i>
-                        <h3>No service requests</h3>
-                        <p class="text-gray-600">You haven't created any service requests yet.</p>
-                        <a href="dashboard.html" class="btn btn-primary mt-md">Create Service Request</a>
+                    <div class="empty-state">
+                        <i class="fas fa-newspaper"></i>
+                        <h3>No posts yet</h3>
+                        <p>Share something with your village!</p>
+                        <button class="btn btn-primary" onclick="window.location.href='dashboard.html'">Create Post</button>
                     </div>
                 `;
                 return;
             }
             
-            this.allServices = services;
-            this.renderServices(services);
-        } else {
-            container.innerHTML = '<p class="text-error text-center">Failed to load services</p>';
+            container.innerHTML = posts.map(post => this.renderPostCard(post)).join('');
+        } catch (error) {
+            container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Failed to load posts</p></div>';
         }
-    } catch (error) {
-        console.error('Error loading services:', error);
+    }
+    
+    renderPostCard(post) {
+        const time = post.createdAt ? new Date(post.createdAt).toLocaleDateString() : 'Recently';
+        
+        return `
+            <div class="post-card">
+                <div class="post-header">
+                    <img src="${post.author?.avatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(post.author?.name || 'U')}" class="post-avatar">
+                    <div class="post-author">
+                        <div class="post-name">${post.author?.name || 'User'}</div>
+                        <div class="post-time">${time}</div>
+                    </div>
+                </div>
+                <div class="post-content">${post.content || post.description || ''}</div>
+                ${post.image ? `<img src="${post.image}" class="post-image">` : ''}
+                <div class="post-actions">
+                    <button class="post-action"><i class="far fa-heart"></i> ${post.likes?.length || 0}</button>
+                    <button class="post-action"><i class="far fa-comment"></i> ${post.comments?.length || 0}</button>
+                    <button class="post-action" onclick="profileManager.deletePost('${post._id}')"><i class="far fa-trash-alt"></i> Delete</button>
+                </div>
+            </div>
+        `;
+    }
+    
+    async deletePost(postId) {
+        if (!confirm('Delete this post?')) return;
+        
+        try {
+            await fetch(`${this.API_BASE_URL}/posts/${postId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${this.user.token}` }
+            });
+            this.showToast('Post deleted', 'success');
+            this.loadUserPosts();
+        } catch (error) {
+            this.showToast('Failed to delete', 'error');
+        }
+    }
+    
+    // ============ SERVICES ============
+    
+    async loadUserServices() {
         const container = document.getElementById('myServicesContainer');
-        if (container) container.innerHTML = '<p class="text-error text-center">Failed to load services</p>';
+        if (!container) return;
+        
+        container.innerHTML = '<div class="loading-spinner"><i class="fas fa-spinner fa-pulse"></i><p>Loading services...</p></div>';
+        
+        try {
+            const response = await fetch(`${this.API_BASE_URL}/posts?type=service&author=${this.user.id}`, {
+                headers: { 'Authorization': `Bearer ${this.user.token}` }
+            });
+            const data = await response.json();
+            
+            if (data.success) {
+                this.allServices = data.posts || [];
+                this.renderServices(this.allServices);
+            } else {
+                container.innerHTML = '<div class="empty-state"><i class="fas fa-tools"></i><p>No service requests</p></div>';
+            }
+        } catch (error) {
+            container.innerHTML = '<div class="empty-state"><i class="fas fa-tools"></i><p>No service requests</p></div>';
+        }
+    }
+    
+    renderServices(services) {
+        const container = document.getElementById('myServicesContainer');
+        if (!container) return;
+        
+        if (services.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-tools"></i>
+                    <h3>No service requests</h3>
+                    <p>Create a service request from the dashboard</p>
+                </div>
+            `;
+            return;
+        }
+        
+        container.innerHTML = services.map(service => `
+            <div class="service-card">
+                <div class="service-header">
+                    <span class="service-title">${service.title || 'Service Request'}</span>
+                    <span class="service-status status-${service.serviceStatus || 'pending'}">${service.serviceStatus || 'pending'}</span>
+                </div>
+                <p style="margin-bottom: 12px; font-size: 14px;">${service.description || ''}</p>
+                <div class="service-detail">
+                    <i class="far fa-clock"></i>
+                    <span>${new Date(service.createdAt).toLocaleDateString()}</span>
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    filterServices(filter) {
+        if (filter === 'all') {
+            this.renderServices(this.allServices);
+        } else {
+            const filtered = this.allServices.filter(s => s.serviceStatus === filter);
+            this.renderServices(filtered);
+        }
+    }
+    
+    // ============ SHARE ============
+    
+    shareProfile() {
+        const url = `${window.location.origin}/profile.html?user=${this.user.id}`;
+        
+        if (navigator.share) {
+            navigator.share({
+                title: 'My Profile - Smart Panchayat',
+                url: url
+            });
+        } else {
+            navigator.clipboard?.writeText(url);
+            this.showToast('Profile link copied!', 'success');
+        }
+    }
+    
+    // ============ DELETE ACCOUNT ============
+    
+    async deleteAccount() {
+        const confirmText = prompt('Type "DELETE" to confirm account deletion:');
+        if (confirmText !== 'DELETE') {
+            this.showToast('Deletion cancelled', 'info');
+            return;
+        }
+        
+        try {
+            const response = await fetch(`${this.API_BASE_URL}/users/account`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${this.user.token}` }
+            });
+            
+            if (response.ok) {
+                localStorage.clear();
+                sessionStorage.clear();
+                window.location.href = 'index.html';
+            } else {
+                this.showToast('Failed to delete account', 'error');
+            }
+        } catch (error) {
+            this.showToast('Network error', 'error');
+        }
+    }
+    
+    // ============ UTILS ============
+    
+    showToast(message, type = 'info') {
+        const container = document.getElementById('toastContainer');
+        if (!container) return;
+        
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+            background: ${type === 'success' ? '#2E7D32' : type === 'error' ? '#d32f2f' : '#333'};
+            color: white;
+            padding: 14px 20px;
+            border-radius: 14px;
+            margin-bottom: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            animation: slideDown 0.3s ease;
+        `;
+        toast.textContent = message;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
     }
 }
-
-renderServices(services) {
-    const container = document.getElementById('myServicesContainer');
-    if (!container) return;
-    
-    container.innerHTML = services.map(service => `
-        <div class="service-card">
-            <div class="flex justify-between items-start mb-sm">
-                <div>
-                    <h4>${service.title || service.serviceType || 'Service Request'}</h4>
-                    <p class="text-sm text-gray-600">${formatRelativeTime(service.createdAt)}</p>
-                </div>
-                <span class="service-status status-${service.serviceStatus || 'open'}">${service.serviceStatus || 'open'}</span>
-            </div>
-            <p class="mb-sm">${service.description}</p>
-            <div class="flex gap-sm">
-                <button class="btn btn-outline btn-sm" onclick="location.href='dashboard.html?post=${service._id}'">
-                    <i class="fas fa-eye"></i> View
-                </button>
-            </div>
-        </div>
-    `).join('');
-}
-
-filterServices(filter) {}
-async cancelService(id) {}
-async completeService(id) {}
-
-devDelay(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
-
-} // ← ADD THIS CLOSING BRACE - IT CLOSES THE CLASS
 
 // ============ GLOBAL ============
 
 let profileManager;
 
-function closeEditBioModal() {
-    document.getElementById('editBioModal').style.display = 'none';
+function closeModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
 }
+
+function openModal(modalId) {
+    document.getElementById(modalId).style.display = 'flex';
+}
+
+function closeEditBioModal() {
+    closeModal('editBioModal');
+}
+
+// Make closeEditBioModal globally available
+window.closeEditBioModal = closeEditBioModal;
+window.closeModal = closeModal;
+window.openModal = openModal;
 
 document.addEventListener('DOMContentLoaded', () => {
     profileManager = new ProfileManager();
     window.profileManager = profileManager;
 });
+
+// Toast function for global use
+function showToast(message, type) {
+    if (profileManager) {
+        profileManager.showToast(message, type);
+    }
+}
