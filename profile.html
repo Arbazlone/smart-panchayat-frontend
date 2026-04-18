@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#2E7D32">
-    <title>Profile - Smart Panchayat</title>
+    <title>My Profile - Smart Panchayat</title>
     
     <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,22 +14,18 @@
     
     <!-- Core CSS -->
     <link rel="stylesheet" href="css/styles.css">
-    
+    <link rel="stylesheet" href="css/darkmode.css">
     
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         body {
             font-family: 'Inter', sans-serif;
             background: #f5f7fa;
             min-height: 100vh;
             padding-bottom: 80px;
         }
-
+        
         /* Header */
         .profile-header {
             background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%);
@@ -38,15 +34,15 @@
             position: relative;
             border-radius: 0 0 30px 30px;
         }
-
+        
         .header-top {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
         }
-
-        .back-btn, .menu-btn {
+        
+        .back-btn, .share-btn, .settings-btn {
             background: rgba(255,255,255,0.15);
             border: none;
             color: white;
@@ -61,21 +57,24 @@
             transition: all 0.2s;
             backdrop-filter: blur(10px);
         }
-
-        .back-btn:hover, .menu-btn:hover {
-            background: rgba(255,255,255,0.25);
+        
+        .share-btn {
+            width: auto;
+            padding: 0 16px;
+            border-radius: 30px;
+            gap: 8px;
         }
-
+        
         .profile-info {
             display: flex;
             align-items: center;
             gap: 16px;
         }
-
+        
         .avatar-wrapper {
             position: relative;
         }
-
+        
         .profile-avatar {
             width: 90px;
             height: 90px;
@@ -85,8 +84,8 @@
             background: #e0e0e0;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
-
-        .avatar-edit {
+        
+        .avatar-edit-btn {
             position: absolute;
             bottom: 0;
             right: 0;
@@ -103,13 +102,16 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.2);
             font-size: 14px;
         }
-
+        
         .user-details h1 {
             font-size: 22px;
             font-weight: 700;
             margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
-
+        
         .user-location {
             display: flex;
             align-items: center;
@@ -118,12 +120,22 @@
             opacity: 0.9;
             margin-bottom: 8px;
         }
-
+        
+        .refresh-location-btn {
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.8);
+            cursor: pointer;
+            padding: 2px 6px;
+            font-size: 12px;
+        }
+        
         .user-badges {
             display: flex;
             gap: 8px;
+            flex-wrap: wrap;
         }
-
+        
         .badge {
             background: rgba(255,255,255,0.2);
             padding: 4px 10px;
@@ -132,8 +144,18 @@
             font-weight: 500;
             backdrop-filter: blur(10px);
         }
-
-        /* Stats Cards */
+        
+        .online-status {
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .online-status.online { color: #4CAF50; }
+        .online-status.offline { color: #9e9e9e; }
+        
+        /* Stats */
         .stats-container {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -141,7 +163,7 @@
             padding: 20px 16px;
             margin-top: -15px;
         }
-
+        
         .stat-card {
             background: white;
             padding: 16px 8px;
@@ -150,44 +172,43 @@
             box-shadow: 0 2px 12px rgba(0,0,0,0.06);
             border: 1px solid #eee;
         }
-
+        
         .stat-number {
             font-size: 24px;
             font-weight: 700;
             color: #2E7D32;
             line-height: 1.2;
         }
-
+        
         .stat-label {
             font-size: 12px;
             color: #666;
             margin-top: 4px;
         }
-
-        .rating-stars {
-            color: #FFB300;
-            font-size: 12px;
-            margin-top: 4px;
-        }
-
+        
         /* Tabs */
         .tabs-container {
             padding: 0 16px;
             margin-bottom: 16px;
         }
-
-        .tabs {
+        
+        .profile-tabs {
             display: flex;
             background: white;
             padding: 6px;
             border-radius: 30px;
             border: 1px solid #eee;
             box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
         }
-
-        .tab {
+        
+        .profile-tabs::-webkit-scrollbar { display: none; }
+        
+        .profile-tab {
             flex: 1;
-            padding: 12px;
+            padding: 12px 16px;
             background: none;
             border: none;
             font-size: 14px;
@@ -196,30 +217,27 @@
             cursor: pointer;
             border-radius: 25px;
             transition: all 0.2s;
+            white-space: nowrap;
         }
-
-        .tab.active {
+        
+        .profile-tab.active {
             background: #2E7D32;
             color: white;
         }
-
-        .tab i {
-            margin-right: 6px;
+        
+        .profile-tab i { margin-right: 6px; }
+        
+        /* Content */
+        .content-section { padding: 0 16px; }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-
-        /* Content Sections */
-        .content-section {
-            padding: 0 16px;
-        }
-
-        .section {
-            display: none;
-        }
-
-        .section.active {
-            display: block;
-        }
-
+        
         /* Cards */
         .info-card {
             background: white;
@@ -229,42 +247,39 @@
             border: 1px solid #eee;
             box-shadow: 0 2px 12px rgba(0,0,0,0.04);
         }
-
+        
         .card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 16px;
         }
-
+        
         .card-header h3 {
             font-size: 16px;
             font-weight: 600;
             color: #333;
         }
-
+        
         .edit-btn {
-            background: none;
+            background: #e8f5e9;
             border: none;
             color: #2E7D32;
-            font-size: 14px;
+            font-size: 13px;
             cursor: pointer;
             padding: 6px 12px;
             border-radius: 20px;
-            background: #e8f5e9;
         }
-
+        
         .info-row {
             display: flex;
             align-items: center;
             padding: 10px 0;
             border-bottom: 1px solid #f0f0f0;
         }
-
-        .info-row:last-child {
-            border-bottom: none;
-        }
-
+        
+        .info-row:last-child { border-bottom: none; }
+        
         .info-icon {
             width: 36px;
             height: 36px;
@@ -276,132 +291,146 @@
             color: #2E7D32;
             margin-right: 14px;
         }
-
-        .info-content {
-            flex: 1;
-        }
-
+        
+        .info-content { flex: 1; }
+        
         .info-label {
             font-size: 11px;
             color: #999;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-
+        
         .info-value {
             font-size: 15px;
             font-weight: 500;
             color: #333;
         }
-
-        /* Post Card */
-        .post-card {
+        
+        /* Badges Section */
+        .badges-section {
             background: white;
-            border-radius: 16px;
-            padding: 16px;
-            margin-bottom: 12px;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 16px;
             border: 1px solid #eee;
         }
-
-        .post-header {
+        
+        .badges-section h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
             display: flex;
             align-items: center;
+            gap: 8px;
+        }
+        
+        .badge-count {
+            font-size: 12px;
+            color: #666;
+            margin-left: auto;
+        }
+        
+        .badges-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 12px;
+        }
+        
+        .badge-card {
+            background: #f9f9f9;
+            border-radius: 16px;
+            padding: 16px 8px;
+            text-align: center;
+            border: 1px solid #eee;
+        }
+        
+        .badge-card.unlocked { background: linear-gradient(135deg, #E8F5E9, #C8E6C9); }
+        
+        .badge-icon { font-size: 28px; margin-bottom: 8px; }
+        .badge-name { font-size: 12px; font-weight: 600; margin-bottom: 4px; }
+        .badge-desc { font-size: 10px; color: #666; }
+        
+        .badge-progress { margin-top: 20px; }
+        
+        .badge-progress h4 {
+            font-size: 14px;
+            margin-bottom: 12px;
+            color: #555;
+        }
+        
+        .badge-progress-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
             margin-bottom: 12px;
         }
-
-        .post-avatar {
+        
+        .badge-progress-icon {
             width: 40px;
             height: 40px;
-            border-radius: 50%;
-            margin-right: 12px;
-            object-fit: cover;
-        }
-
-        .post-author {
-            flex: 1;
-        }
-
-        .post-name {
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .post-time {
-            font-size: 11px;
-            color: #999;
-        }
-
-        .post-content {
-            margin-bottom: 12px;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-
-        .post-image {
-            width: 100%;
+            background: #f0f0f0;
             border-radius: 12px;
-            margin-bottom: 12px;
-        }
-
-        .post-actions {
-            display: flex;
-            gap: 20px;
-            padding-top: 8px;
-            border-top: 1px solid #f0f0f0;
-        }
-
-        .post-action {
-            background: none;
-            border: none;
-            color: #666;
-            font-size: 13px;
-            cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 6px;
+            justify-content: center;
+            font-size: 20px;
         }
-
-        /* Service Card */
-        .service-card {
+        
+        .badge-progress-info { flex: 1; }
+        
+        .badge-progress-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+        
+        .badge-progress-bar {
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .badge-progress-fill {
+            height: 100%;
+            background: #2E7D32;
+            border-radius: 3px;
+        }
+        
+        /* Post Card */
+        .post-card, .service-card {
             background: white;
             border-radius: 16px;
             padding: 16px;
             margin-bottom: 12px;
             border: 1px solid #eee;
         }
-
-        .service-header {
+        
+        .post-header, .service-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
             margin-bottom: 12px;
         }
-
-        .service-title {
+        
+        .post-title, .service-title {
             font-weight: 600;
             font-size: 16px;
         }
-
+        
         .service-status {
             padding: 4px 10px;
             border-radius: 20px;
             font-size: 11px;
             font-weight: 600;
         }
-
+        
+        .status-active, .status-open { background: #E3F2FD; color: #1565C0; }
         .status-pending { background: #FFF3E0; color: #E65100; }
-        .status-accepted { background: #E3F2FD; color: #1565C0; }
         .status-completed { background: #E8F5E9; color: #2E7D32; }
-
-        .service-detail {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 13px;
-            color: #666;
-            margin-bottom: 8px;
-        }
-
+        
         /* Toggle Switch */
         .toggle-item {
             display: flex;
@@ -410,35 +439,20 @@
             padding: 14px 0;
             border-bottom: 1px solid #f0f0f0;
         }
-
-        .toggle-item:last-child {
-            border-bottom: none;
-        }
-
-        .toggle-label {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .toggle-label i {
-            width: 24px;
-            color: #2E7D32;
-        }
-
-        .switch {
+        
+        .toggle-switch {
             position: relative;
             width: 48px;
             height: 26px;
         }
-
-        .switch input {
+        
+        .toggle-switch input {
             opacity: 0;
             width: 0;
             height: 0;
         }
-
-        .slider {
+        
+        .toggle-slider {
             position: absolute;
             cursor: pointer;
             top: 0;
@@ -449,8 +463,8 @@
             transition: .3s;
             border-radius: 26px;
         }
-
-        .slider:before {
+        
+        .toggle-slider:before {
             position: absolute;
             content: "";
             height: 20px;
@@ -461,102 +475,92 @@
             transition: .3s;
             border-radius: 50%;
         }
-
-        input:checked + .slider {
+        
+        input:checked + .toggle-slider {
             background-color: #2E7D32;
         }
-
-        input:checked + .slider:before {
+        
+        input:checked + .toggle-slider:before {
             transform: translateX(22px);
         }
-
-        /* Danger Zone */
-        .danger-btn {
-            background: none;
-            border: 1px solid #ff4444;
-            color: #ff4444;
-            padding: 14px;
-            border-radius: 14px;
+        
+        /* Form Elements */
+        .form-group { margin-bottom: 20px; }
+        
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        
+        .form-input, .form-select, .form-textarea {
             width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 14px;
+            font-size: 15px;
+            font-family: inherit;
+            background: #f9f9f9;
+        }
+        
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #2E7D32;
+            background: white;
+        }
+        
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        /* Buttons */
+        .btn {
+            padding: 14px 20px;
+            border-radius: 14px;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
-            margin-bottom: 8px;
+            border: none;
             transition: all 0.2s;
         }
-
-        .danger-btn:hover {
-            background: #fff5f5;
+        
+        .btn-primary {
+            background: #2E7D32;
+            color: white;
+            width: 100%;
         }
-
-        .danger-btn.fill {
+        
+        .btn-outline {
+            background: none;
+            border: 1px solid #ddd;
+            color: #666;
+        }
+        
+        .btn-danger {
             background: #ff4444;
             color: white;
+            width: 100%;
         }
-
-        .danger-btn.fill:hover {
-            background: #cc0000;
-        }
-
-        /* Bottom Navigation */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: white;
-            display: flex;
-            justify-content: space-around;
-            padding: 10px 16px 20px;
-            border-top: 1px solid #eee;
-            box-shadow: 0 -2px 20px rgba(0,0,0,0.04);
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            background: none;
-            border: none;
-            color: #999;
-            font-size: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .nav-item i {
-            font-size: 22px;
-        }
-
-        .nav-item.active {
-            color: #2E7D32;
-        }
-
-        /* Empty States */
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: #999;
-        }
-
-        .empty-state i {
-            font-size: 48px;
-            margin-bottom: 16px;
-            opacity: 0.5;
-        }
-
-        /* Loading */
-        .loading-spinner {
-            text-align: center;
-            padding: 40px;
-            color: #999;
-        }
-
-        .loading-spinner i {
-            font-size: 32px;
-            margin-bottom: 12px;
-        }
-
+        
+        .btn-sm { padding: 8px 12px; font-size: 13px; }
+        
+        .flex { display: flex; }
+        .justify-between { justify-content: space-between; }
+        .items-center { align-items: center; }
+        .gap-sm { gap: 8px; }
+        .gap-md { gap: 12px; }
+        .mt-md { margin-top: 12px; }
+        .mb-sm { margin-bottom: 8px; }
+        .mb-md { margin-bottom: 16px; }
+        .text-center { text-align: center; }
+        .text-gray-600 { color: #666; }
+        .text-error { color: #d32f2f; }
+        .p-xl { padding: 40px; }
+        .hidden { display: none !important; }
+        
         /* Modal */
         .modal-overlay {
             position: fixed;
@@ -570,7 +574,7 @@
             justify-content: center;
             z-index: 1000;
         }
-
+        
         .modal {
             background: white;
             width: 100%;
@@ -579,24 +583,24 @@
             padding: 24px;
             animation: slideUp 0.3s ease;
         }
-
+        
         @keyframes slideUp {
             from { transform: translateY(100%); }
             to { transform: translateY(0); }
         }
-
+        
         .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
         }
-
+        
         .modal-title {
             font-size: 18px;
             font-weight: 700;
         }
-
+        
         .modal-close {
             background: none;
             border: none;
@@ -604,79 +608,87 @@
             cursor: pointer;
             color: #999;
         }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-label {
-            display: block;
-            font-size: 14px;
-            font-weight: 500;
-            margin-bottom: 8px;
-            color: #333;
-        }
-
-        .form-input, .form-select, .form-textarea {
-            width: 100%;
-            padding: 14px 16px;
-            border: 1px solid #ddd;
-            border-radius: 14px;
-            font-size: 15px;
-            font-family: inherit;
-            background: #f9f9f9;
-            transition: all 0.2s;
-        }
-
-        .form-input:focus, .form-select:focus, .form-textarea:focus {
-            outline: none;
-            border-color: #2E7D32;
+        
+        /* Bottom Nav */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
             background: white;
-        }
-
-        .form-textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-
-        .btn {
-            padding: 14px 20px;
-            border-radius: 14px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            border: none;
-            transition: all 0.2s;
-        }
-
-        .btn-primary {
-            background: #2E7D32;
-            color: white;
-            width: 100%;
-        }
-
-        .btn-primary:hover {
-            background: #1B5E20;
-        }
-
-        .btn-outline {
-            background: none;
-            border: 1px solid #ddd;
-            color: #666;
-        }
-
-        .flex {
             display: flex;
+            justify-content: space-around;
+            padding: 10px 16px 20px;
+            border-top: 1px solid #eee;
+            box-shadow: 0 -2px 20px rgba(0,0,0,0.04);
         }
-
-        .gap-2 { gap: 8px; }
-        .gap-3 { gap: 12px; }
-
-        .hidden {
-            display: none !important;
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            background: none;
+            border: none;
+            color: #999;
+            font-size: 12px;
+            cursor: pointer;
         }
-
-        /* Dark mode overrides handled by darkmode.css */
+        
+        .nav-item i { font-size: 22px; }
+        .nav-item.active { color: #2E7D32; }
+        
+        /* Toast */
+        #toastContainer {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2000;
+            width: 90%;
+            max-width: 400px;
+        }
+        
+        /* Dark mode support */
+        [data-theme="dark"] body { background: #1a1a1a; }
+        [data-theme="dark"] .stat-card,
+        [data-theme="dark"] .info-card,
+        [data-theme="dark"] .badges-section,
+        [data-theme="dark"] .post-card,
+        [data-theme="dark"] .service-card,
+        [data-theme="dark"] .bottom-nav,
+        [data-theme="dark"] .profile-tabs,
+        [data-theme="dark"] .modal {
+            background: #2d2d2d;
+            border-color: #404040;
+        }
+        [data-theme="dark"] .stat-number,
+        [data-theme="dark"] .info-value,
+        [data-theme="dark"] .card-header h3,
+        [data-theme="dark"] .badges-section h3,
+        [data-theme="dark"] .post-title,
+        [data-theme="dark"] .service-title {
+            color: #fff;
+        }
+        [data-theme="dark"] .stat-label,
+        [data-theme="dark"] .info-label,
+        [data-theme="dark"] .text-gray-600 {
+            color: #aaa;
+        }
+        [data-theme="dark"] .form-input,
+        [data-theme="dark"] .form-select,
+        [data-theme="dark"] .form-textarea {
+            background: #404040;
+            border-color: #555;
+            color: #fff;
+        }
+        [data-theme="dark"] .badge-card {
+            background: #3d3d3d;
+            border-color: #555;
+        }
+        [data-theme="dark"] .badge-card.unlocked {
+            background: linear-gradient(135deg, #2E7D32, #1B5E20);
+        }
     </style>
 </head>
 <body>
@@ -687,11 +699,11 @@
                 <i class="fas fa-arrow-left"></i>
             </button>
             <div style="display: flex; gap: 8px;">
-                <button class="menu-btn" id="shareProfileBtn">
-                    <i class="fas fa-share-alt"></i>
+                <button class="share-btn" id="shareProfileBtn">
+                    <i class="fas fa-share-alt"></i> Share
                 </button>
-                <button class="menu-btn" id="settingsMenuBtn">
-                    <i class="fas fa-ellipsis-v"></i>
+                <button class="settings-btn" id="settingsBtn">
+                    <i class="fas fa-cog"></i>
                 </button>
             </div>
         </div>
@@ -699,7 +711,7 @@
         <div class="profile-info">
             <div class="avatar-wrapper">
                 <img src="https://ui-avatars.com/api/?name=User&background=2E7D32&color=fff&size=90" alt="Profile" class="profile-avatar" id="profileAvatar">
-                <button class="avatar-edit" id="changeAvatarBtn">
+                <button class="avatar-edit-btn" id="changeAvatarBtn">
                     <i class="fas fa-camera"></i>
                 </button>
                 <input type="file" id="avatarInput" accept="image/*" style="display: none;">
@@ -708,14 +720,17 @@
                 <h1 id="profileName">Loading...</h1>
                 <div class="user-location">
                     <i class="fas fa-map-marker-alt"></i>
-                    <span id="locationDisplay">Detecting location...</span>
-                    <button id="refreshLocationBtn" style="background: none; border: none; color: rgba(255,255,255,0.8); cursor: pointer; margin-left: 4px;">
+                    <span id="locationDisplay">Detecting...</span>
+                    <button class="refresh-location-btn" id="refreshLocationBtn">
                         <i class="fas fa-sync-alt fa-xs"></i>
                     </button>
                 </div>
                 <div class="user-badges">
-                    <span class="badge" id="userRole">Resident</span>
+                    <span class="badge" id="userRole">Community Member</span>
                     <span class="badge" id="memberSince">Member</span>
+                </div>
+                <div style="margin-top: 8px;">
+                    <span id="userPhone" style="font-size: 13px; opacity: 0.9;"></span>
                 </div>
             </div>
         </div>
@@ -725,93 +740,135 @@
     <div class="stats-container">
         <div class="stat-card">
             <div class="stat-number" id="totalPosts">0</div>
-            <div class="stat-label">Posts</div>
+            <div class="stat-label">Total Posts</div>
         </div>
         <div class="stat-card">
             <div class="stat-number" id="helpedCount">0</div>
-            <div class="stat-label">Helped</div>
+            <div class="stat-label">People Helped</div>
         </div>
         <div class="stat-card">
             <div class="stat-number" id="ratingValue">0.0</div>
             <div class="stat-label">Rating</div>
-            <div class="rating-stars" id="ratingStars">☆☆☆☆☆</div>
+            <div class="text-xs text-gray-600" id="reviewCount">0 reviews</div>
         </div>
     </div>
     
     <!-- Tabs -->
     <div class="tabs-container">
-        <div class="tabs">
-            <button class="tab active" data-tab="overview"><i class="fas fa-user"></i> Overview</button>
-            <button class="tab" data-tab="posts"><i class="fas fa-newspaper"></i> Posts</button>
-            <button class="tab" data-tab="services"><i class="fas fa-tools"></i> Services</button>
-            <button class="tab" data-tab="settings"><i class="fas fa-cog"></i> Settings</button>
+        <div class="profile-tabs">
+            <button class="profile-tab active" data-tab="overview"><i class="fas fa-user"></i> Overview</button>
+            <button class="profile-tab" data-tab="posts"><i class="fas fa-newspaper"></i> My Posts</button>
+            <button class="profile-tab" data-tab="services"><i class="fas fa-tools"></i> My Services</button>
+            <button class="profile-tab" data-tab="earnings"><i class="fas fa-wallet"></i> Earnings</button>
+            <button class="profile-tab" data-tab="settings"><i class="fas fa-cog"></i> Settings</button>
         </div>
     </div>
     
     <!-- Content -->
     <div class="content-section">
-        <!-- Overview Section -->
-        <div class="section active" id="overviewSection">
+        <!-- Overview Tab -->
+        <div class="tab-content active" id="overviewTab">
+            <!-- About -->
             <div class="info-card">
                 <div class="card-header">
-                    <h3><i class="fas fa-info-circle" style="margin-right: 8px;"></i> About</h3>
+                    <h3><i class="fas fa-info-circle"></i> About Me</h3>
                     <button class="edit-btn" id="editBioBtn"><i class="fas fa-pen"></i> Edit</button>
                 </div>
-                <p id="userBio" style="line-height: 1.6; color: #555;">No bio added yet. Tell the community about yourself!</p>
+                <p id="userBio" style="line-height: 1.6; color: #666;">No bio added yet.</p>
             </div>
             
+            <!-- Contact Information -->
             <div class="info-card">
                 <div class="card-header">
-                    <h3><i class="fas fa-address-book" style="margin-right: 8px;"></i> Contact</h3>
+                    <h3><i class="fas fa-address-book"></i> Contact Information</h3>
                     <button class="edit-btn" id="editContactBtn"><i class="fas fa-pen"></i> Edit</button>
                 </div>
-                <div class="info-row">
-                    <div class="info-icon"><i class="fas fa-phone"></i></div>
-                    <div class="info-content">
-                        <div class="info-label">PRIMARY PHONE</div>
-                        <div class="info-value" id="displayPhone">--</div>
+                
+                <!-- Display Mode -->
+                <div id="contactDisplay">
+                    <div class="info-row">
+                        <div class="info-icon"><i class="fas fa-phone"></i></div>
+                        <div class="info-content">
+                            <div class="info-label">PRIMARY PHONE</div>
+                            <div class="info-value" id="displayPhone">--</div>
+                        </div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-icon"><i class="fas fa-phone-alt"></i></div>
+                        <div class="info-content">
+                            <div class="info-label">ALTERNATE PHONE</div>
+                            <div class="info-value" id="displayAlternatePhone">Not provided</div>
+                        </div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-icon"><i class="fas fa-envelope"></i></div>
+                        <div class="info-content">
+                            <div class="info-label">EMAIL</div>
+                            <div class="info-value" id="displayEmail">Not provided</div>
+                        </div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-icon"><i class="fas fa-home"></i></div>
+                        <div class="info-content">
+                            <div class="info-label">ADDRESS</div>
+                            <div class="info-value" id="displayAddress">Not provided</div>
+                        </div>
                     </div>
                 </div>
-                <div class="info-row">
-                    <div class="info-icon"><i class="fas fa-phone-alt"></i></div>
-                    <div class="info-content">
-                        <div class="info-label">ALTERNATE PHONE</div>
-                        <div class="info-value" id="displayAlternatePhone">Not provided</div>
+                
+                <!-- Edit Mode -->
+                <div id="contactEdit" style="display: none;">
+                    <div class="form-group">
+                        <label class="form-label">Alternate Phone (Optional)</label>
+                        <input type="tel" class="form-input" id="editAlternatePhone" placeholder="Enter alternate number">
                     </div>
-                </div>
-                <div class="info-row">
-                    <div class="info-icon"><i class="fas fa-envelope"></i></div>
-                    <div class="info-content">
-                        <div class="info-label">EMAIL</div>
-                        <div class="info-value" id="displayEmail">Not provided</div>
+                    <div class="form-group">
+                        <label class="form-label">Email Address</label>
+                        <input type="email" class="form-input" id="editEmail" placeholder="Enter email address">
                     </div>
-                </div>
-                <div class="info-row">
-                    <div class="info-icon"><i class="fas fa-home"></i></div>
-                    <div class="info-content">
-                        <div class="info-label">ADDRESS</div>
-                        <div class="info-value" id="displayAddress">Not provided</div>
+                    <div class="form-group">
+                        <label class="form-label">Address</label>
+                        <textarea class="form-textarea" id="editAddress" rows="2" placeholder="Enter your address"></textarea>
+                    </div>
+                    <div class="flex gap-sm">
+                        <button class="btn btn-outline flex-1" id="cancelContactBtn">Cancel</button>
+                        <button class="btn btn-primary flex-1" id="saveContactBtn">Save</button>
                     </div>
                 </div>
             </div>
             
-            <div class="info-card">
-                <div class="card-header">
-                    <h3><i class="fas fa-store" style="margin-right: 8px;"></i> Service Provider</h3>
+            <!-- Achievements & Badges -->
+            <div class="badges-section">
+                <h3>
+                    <i class="fas fa-trophy" style="color: #FFB300;"></i>
+                    Achievements & Badges
+                    <span class="badge-count" id="unlockedCount">0/5</span>
+                </h3>
+                
+                <div id="badgesContainer"></div>
+                
+                <div class="badge-progress">
+                    <h4><i class="fas fa-chart-line"></i> Progress to Next Badges</h4>
+                    <div id="progressContainer"></div>
                 </div>
+            </div>
+            
+            <!-- Service Provider Toggle -->
+            <div class="info-card">
                 <div class="toggle-item">
-                    <div class="toggle-label">
-                        <i class="fas fa-briefcase"></i>
-                        <span>Offer services to community</span>
+                    <div>
+                        <h3 style="margin-bottom: 4px;"><i class="fas fa-store"></i> Become a Service Provider</h3>
+                        <p class="text-gray-600" style="font-size: 13px;">Offer your services to the community</p>
                     </div>
-                    <label class="switch">
+                    <label class="toggle-switch">
                         <input type="checkbox" id="providerToggle">
-                        <span class="slider"></span>
+                        <span class="toggle-slider"></span>
                     </label>
                 </div>
-                <div id="providerForm" class="hidden" style="margin-top: 16px;">
+                
+                <div id="providerForm" style="display: none; margin-top: 16px;">
                     <div class="form-group">
-                        <label class="form-label">Category</label>
+                        <label class="form-label">Service Category</label>
                         <select class="form-select" id="serviceCategory">
                             <option value="">Select category</option>
                             <option value="plumber">🔧 Plumber</option>
@@ -821,69 +878,94 @@
                             <option value="cleaner">🧹 Cleaner</option>
                             <option value="mechanic">🔧 Mechanic</option>
                             <option value="tutor">📚 Tutor</option>
+                            <option value="doctor">🏥 Doctor</option>
+                            <option value="other">📌 Other</option>
                         </select>
                     </div>
+                    
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                         <div class="form-group">
-                            <label class="form-label">Experience (yrs)</label>
-                            <input type="number" class="form-input" id="experience" min="0" value="0">
+                            <label class="form-label">Experience (Years)</label>
+                            <input type="number" class="form-input" id="experience" min="0" max="50" value="0">
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Rate (₹/hr)</label>
+                            <label class="form-label">Hourly Rate (₹)</label>
                             <input type="number" class="form-input" id="hourlyRate" min="0" value="0">
                         </div>
                     </div>
+                    
                     <div class="form-group">
-                        <label class="form-label">Description</label>
-                        <textarea class="form-textarea" id="serviceDescription" placeholder="Describe your services..."></textarea>
+                        <label class="form-label">Description of Services</label>
+                        <textarea class="form-textarea" id="serviceDescription" rows="3" placeholder="Describe your services..."></textarea>
                     </div>
+                    
                     <div class="form-group">
-                        <label class="form-label">Service Radius (km)</label>
+                        <label class="form-label">Service Area (km radius)</label>
                         <input type="number" class="form-input" id="serviceRadius" min="1" max="50" value="10">
                     </div>
+                    
                     <div class="form-group">
-                        <label style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" id="availableNow"> Available Now
+                        <label class="flex items-center gap-sm">
+                            <input type="checkbox" id="availableNow"> 🟢 Available Now
                         </label>
                     </div>
-                    <button class="btn btn-primary" id="saveProviderBtn">Register as Provider</button>
+                    
+                    <button class="btn btn-primary" id="saveProviderBtn">Register as Service Provider</button>
                 </div>
             </div>
+            
+            <!-- Ratings Container (Hidden by default, shown when ratings exist) -->
+            <div id="ratingsContainer" style="display: none;"></div>
+            
+            <!-- Recent Activity -->
+            <div id="activityContainer" style="display: none;"></div>
         </div>
         
-        <!-- Posts Section -->
-        <div class="section" id="postsSection">
+        <!-- My Posts Tab -->
+        <div class="tab-content" id="postsTab">
             <div id="userPostsContainer">
-                <div class="loading-spinner">
-                    <i class="fas fa-spinner fa-pulse"></i>
-                    <p>Loading your posts...</p>
+                <div class="text-center p-xl">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #999;"></i>
+                    <p class="text-gray-600 mt-md">Loading posts...</p>
                 </div>
             </div>
         </div>
         
-        <!-- Services Section -->
-        <div class="section" id="servicesSection">
-            <div style="margin-bottom: 16px;">
-                <select class="form-select" id="serviceFilter">
-                    <option value="all">All Requests</option>
+        <!-- My Services Tab -->
+        <div class="tab-content" id="servicesTab">
+            <div class="flex justify-between items-center mb-md">
+                <h3>Service Requests</h3>
+                <select class="form-select" id="serviceFilter" style="width: auto;">
+                    <option value="all">All</option>
                     <option value="pending">Pending</option>
                     <option value="accepted">Accepted</option>
                     <option value="completed">Completed</option>
                 </select>
             </div>
             <div id="myServicesContainer">
-                <div class="loading-spinner">
-                    <i class="fas fa-spinner fa-pulse"></i>
-                    <p>Loading services...</p>
+                <div class="text-center p-xl">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #999;"></i>
+                    <p class="text-gray-600 mt-md">Loading services...</p>
                 </div>
             </div>
         </div>
         
-        <!-- Settings Section -->
-        <div class="section" id="settingsSection">
+        <!-- Earnings Tab -->
+        <div class="tab-content" id="earningsTab">
+            <div id="earningsContainer">
+                <div class="text-center p-xl">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #999;"></i>
+                    <p class="text-gray-600 mt-md">Loading earnings...</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Settings Tab -->
+        <div class="tab-content" id="settingsTab">
+            <!-- Personal Info -->
             <div class="info-card">
                 <div class="card-header">
-                    <h3><i class="fas fa-user-circle"></i> Personal Info</h3>
+                    <h3><i class="fas fa-user-circle"></i> Personal Information</h3>
                 </div>
                 <form id="profileSettingsForm">
                     <div class="form-group">
@@ -891,22 +973,23 @@
                         <input type="text" class="form-input" id="settingsName">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Email</label>
+                        <label class="form-label">Email (Optional)</label>
                         <input type="email" class="form-input" id="settingsEmail">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Phone</label>
+                        <label class="form-label">Phone Number</label>
                         <input type="tel" class="form-input" id="settingsPhone" readonly disabled>
-                        <small style="color: #999;">Phone cannot be changed</small>
+                        <small class="text-gray-600">Phone number cannot be changed</small>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Bio</label>
-                        <textarea class="form-textarea" id="settingsBio" rows="3"></textarea>
+                        <textarea class="form-textarea" id="settingsBio" rows="3" placeholder="Tell us about yourself..."></textarea>
                     </div>
                     <button type="submit" class="btn btn-primary">Save Changes</button>
                 </form>
             </div>
             
+            <!-- Change Password -->
             <div class="info-card">
                 <div class="card-header">
                     <h3><i class="fas fa-lock"></i> Change Password</h3>
@@ -921,68 +1004,58 @@
                         <input type="password" class="form-input" id="newPassword">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Confirm Password</label>
+                        <label class="form-label">Confirm New Password</label>
                         <input type="password" class="form-input" id="confirmNewPassword">
                     </div>
                     <button type="submit" class="btn btn-primary">Update Password</button>
                 </form>
             </div>
             
+            <!-- Notifications -->
             <div class="info-card">
                 <div class="card-header">
-                    <h3><i class="fas fa-bell"></i> Notifications</h3>
+                    <h3><i class="fas fa-bell"></i> Notification Settings</h3>
                 </div>
                 <div class="toggle-item">
-                    <div class="toggle-label">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <span>Emergency Alerts</span>
-                    </div>
-                    <label class="switch">
+                    <span><i class="fas fa-exclamation-triangle" style="margin-right: 8px;"></i> Emergency Alerts</span>
+                    <label class="toggle-switch">
                         <input type="checkbox" id="notifEmergency" checked>
-                        <span class="slider"></span>
+                        <span class="toggle-slider"></span>
                     </label>
                 </div>
                 <div class="toggle-item">
-                    <div class="toggle-label">
-                        <i class="fas fa-newspaper"></i>
-                        <span>New Posts in Area</span>
-                    </div>
-                    <label class="switch">
+                    <span><i class="fas fa-newspaper" style="margin-right: 8px;"></i> New Posts in Area</span>
+                    <label class="toggle-switch">
                         <input type="checkbox" id="notifPosts" checked>
-                        <span class="slider"></span>
+                        <span class="toggle-slider"></span>
                     </label>
                 </div>
                 <div class="toggle-item">
-                    <div class="toggle-label">
-                        <i class="fas fa-tools"></i>
-                        <span>Service Requests</span>
-                    </div>
-                    <label class="switch">
+                    <span><i class="fas fa-tools" style="margin-right: 8px;"></i> Service Requests</span>
+                    <label class="toggle-switch">
                         <input type="checkbox" id="notifServices" checked>
-                        <span class="slider"></span>
+                        <span class="toggle-slider"></span>
                     </label>
                 </div>
                 <div class="toggle-item">
-                    <div class="toggle-label">
-                        <i class="fas fa-comments"></i>
-                        <span>Messages</span>
-                    </div>
-                    <label class="switch">
+                    <span><i class="fas fa-comments" style="margin-right: 8px;"></i> Messages</span>
+                    <label class="toggle-switch">
                         <input type="checkbox" id="notifMessages" checked>
-                        <span class="slider"></span>
+                        <span class="toggle-slider"></span>
                     </label>
                 </div>
-                <button class="btn btn-primary" id="saveNotifSettings" style="margin-top: 16px;">Save Preferences</button>
+                <button class="btn btn-primary mt-md" id="saveNotifSettings">Save Notification Settings</button>
             </div>
             
+            <!-- Danger Zone -->
             <div class="info-card">
                 <div class="card-header">
                     <h3 style="color: #ff4444;"><i class="fas fa-exclamation-triangle"></i> Danger Zone</h3>
                 </div>
-                <button class="danger-btn" id="logoutAllBtn">
-                    <i class="fas fa-sign-out-alt"></i> Logout All Devices
+                <button class="btn btn-outline mb-sm" style="color: #ff4444; border-color: #ff4444;" onclick="localStorage.clear(); sessionStorage.clear(); window.location.href='index.html'">
+                    <i class="fas fa-sign-out-alt"></i> Logout from all devices
                 </button>
-                <button class="danger-btn fill" id="deleteAccountBtn">
+                <button class="btn btn-danger" onclick="if(confirm('Delete account? This cannot be undone!')) profileManager.deleteAccount?.()">
                     <i class="fas fa-trash"></i> Delete Account
                 </button>
             </div>
@@ -1017,153 +1090,31 @@
     <div class="modal-overlay" id="editBioModal">
         <div class="modal">
             <div class="modal-header">
-                <h3 class="modal-title">Edit Bio</h3>
-                <button class="modal-close" onclick="closeModal('editBioModal')">
+                <h3 class="modal-title">✏️ Edit Bio</h3>
+                <button class="modal-close" onclick="closeEditBioModal()">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             <form id="editBioForm">
                 <div class="form-group">
                     <label class="form-label">Your Bio</label>
-                    <textarea class="form-textarea" id="bioInput" rows="4" placeholder="Tell the community about yourself..."></textarea>
+                    <textarea class="form-textarea" id="bioInput" rows="5" placeholder="Tell the community about yourself..."></textarea>
+                    <span class="text-gray-600" style="font-size: 12px;">Maximum 500 characters</span>
                 </div>
-                <div class="flex gap-2">
-                    <button type="button" class="btn btn-outline" onclick="closeModal('editBioModal')">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save</button>
-                </div>
-            </form>
-        </div>
-    </div>
-    
-    <!-- Edit Contact Modal -->
-    <div class="modal-overlay" id="editContactModal">
-        <div class="modal">
-            <div class="modal-header">
-                <h3 class="modal-title">Edit Contact Info</h3>
-                <button class="modal-close" onclick="closeModal('editContactModal')">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <form id="editContactForm">
-                <div class="form-group">
-                    <label class="form-label">Alternate Phone</label>
-                    <input type="tel" class="form-input" id="editAlternatePhone" placeholder="Optional">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Email</label>
-                    <input type="email" class="form-input" id="editEmail" placeholder="your@email.com">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Address</label>
-                    <textarea class="form-textarea" id="editAddress" rows="2" placeholder="Your address"></textarea>
-                </div>
-                <div class="flex gap-2">
-                    <button type="button" class="btn btn-outline" onclick="closeModal('editContactModal')">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save</button>
+                <div class="flex gap-sm">
+                    <button type="button" class="btn btn-outline flex-1" onclick="closeEditBioModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary flex-1">Save Bio</button>
                 </div>
             </form>
         </div>
     </div>
     
     <!-- Toast Container -->
-    <div id="toastContainer" style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 2000; width: 90%; max-width: 400px;"></div>
+    <div id="toastContainer"></div>
     
     <!-- Scripts -->
     <script src="js/utils.js"></script>
-    
+    <script src="js/darkmode.js"></script>
     <script src="js/profile.js"></script>
-    
-    <script>
-        // Modal functions
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
-        
-        function openModal(modalId) {
-            document.getElementById(modalId).style.display = 'flex';
-        }
-        
-        // Tab switching
-        document.querySelectorAll('.tab').forEach(tab => {
-            tab.addEventListener('click', () => {
-                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-                
-                tab.classList.add('active');
-                const tabName = tab.dataset.tab;
-                document.getElementById(tabName + 'Section').classList.add('active');
-            });
-        });
-        
-        // Edit buttons
-        document.getElementById('editBioBtn').addEventListener('click', () => {
-            openModal('editBioModal');
-        });
-        
-        document.getElementById('editContactBtn').addEventListener('click', () => {
-            openModal('editContactModal');
-        });
-        
-        // Provider toggle
-        document.getElementById('providerToggle').addEventListener('change', (e) => {
-            const form = document.getElementById('providerForm');
-            form.classList.toggle('hidden', !e.target.checked);
-        });
-        
-        // Avatar upload
-        document.getElementById('changeAvatarBtn').addEventListener('click', () => {
-            document.getElementById('avatarInput').click();
-        });
-        
-        document.getElementById('avatarInput').addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    document.getElementById('profileAvatar').src = event.target.result;
-                    // TODO: Upload to server
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-        
-        // Share profile
-        document.getElementById('shareProfileBtn').addEventListener('click', () => {
-            if (navigator.share) {
-                navigator.share({
-                    title: 'My Profile - Smart Panchayat',
-                    url: window.location.href
-                });
-            } else {
-                navigator.clipboard.writeText(window.location.href);
-                showToast('Profile link copied!', 'success');
-            }
-        });
-        
-        // Toast function
-        function showToast(message, type = 'info') {
-            const container = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
-            toast.style.cssText = `
-                background: ${type === 'success' ? '#2E7D32' : '#333'};
-                color: white;
-                padding: 14px 20px;
-                border-radius: 14px;
-                margin-bottom: 8px;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-                animation: slideDown 0.3s ease;
-            `;
-            toast.textContent = message;
-            container.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
-        }
-    </script>
-    
-    <style>
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-    </style>
 </body>
 </html>
