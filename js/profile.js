@@ -849,7 +849,7 @@ if (el('userPhone')) {
             // Update UI immediately
             const avatarImg = document.getElementById('profileAvatar');
             if (avatarImg) {
-                avatarImg.src = 'http://localhost:5000' + data.profilePic + '?t=' + Date.now();
+                avatarImg.src = 'https://smart-panchayat-backend.onrender.com/api' + data.profilePic + '?t=' + Date.now();
             }
             
             // Save to localStorage
