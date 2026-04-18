@@ -218,19 +218,51 @@ class ProfileManager {
     }
     
     updateContactDisplay(data) {
-        const el = (id) => document.getElementById(id);
-      if (el('displayPhone')) {
-    if (data._id === this.user._id) {
-        el('displayPhone').textContent = data.phone || '--';
-    } else {
-        el('displayPhone').textContent = "Hidden for privacy";
+    const el = (id) => document.getElementById(id);
+    const currentUser = getCurrentUser();
+    const isAdmin = currentUser?.role === 'admin' || currentUser?.isAdmin === true;
+    const isOwnProfile = !this.viewingUserId || this.viewingUserId === currentUser?.id;
+    
+    // Phone number - ONLY show if admin OR own profile
+    if (el('displayPhone')) {
+        if (isAdmin || isOwnProfile) {
+            el('displayPhone').textContent = data.phone || '--';
+        } else {
+            el('displayPhone').textContent = "📱 Hidden for privacy";
+        }
     }
+    
+    // Alternate phone - same rule
+    if (el('displayAlternatePhone')) {
+        if (isAdmin || isOwnProfile) {
+            el('displayAlternatePhone').textContent = data.alternatePhone || 'Not provided';
+        } else {
+            el('displayAlternatePhone').textContent = "📱 Hidden for privacy";
+        }
+    }
+    
+    // Email - same rule
+    if (el('displayEmail')) {
+        if (isAdmin || isOwnProfile) {
+            el('displayEmail').textContent = data.email || 'Not provided';
+        } else {
+            el('displayEmail').textContent = "✉️ Hidden for privacy";
+        }
+    }
+    
+    // Address - show area only, hide full address
+    if (el('displayAddress')) {
+        if (isAdmin || isOwnProfile) {
+            el('displayAddress').textContent = data.address || 'Not provided';
+        } else {
+            // Show only village/city, hide full address
+            const area = data.address?.split(',')[0] || data.village || 'Location hidden';
+            el('displayAddress').textContent = area + ' (Full address hidden)';
+        }
+    }
+    
+    if (el('editPhone')) el('editPhone').value = data.phone || '';
 }
-        if (el('displayAlternatePhone')) el('displayAlternatePhone').textContent = data.alternatePhone || 'Not provided';
-        if (el('displayEmail')) el('displayEmail').textContent = data.email || 'Not provided';
-        if (el('displayAddress')) el('displayAddress').textContent = data.address || 'Not provided';
-        if (el('editPhone')) el('editPhone').value = data.phone || '';
-    }
     
     // ============ PROFILE LOADING ============
     
@@ -289,10 +321,37 @@ class ProfileManager {
         try {
             const el = (id) => document.getElementById(id);
             
-            if (el('profileName')) el('profileName').textContent = data.name || '';
-            if (el('userPhone')) el('userPhone').textContent = data.phone || '';
+           if (el('profileName')) {
+    el('profileName').textContent = data.name || '';
+    
+    // Add crown for admin
+    if (data.role === 'admin' || data.isAdmin) {
+        el('profileName').innerHTML += ' <i class="fas fa-crown" style="color: #FFD700; font-size: 18px; margin-left: 6px;" title="Admin"></i>';
+    }
+}
+           const currentUser = getCurrentUser();
+const isAdmin = currentUser?.role === 'admin' || currentUser?.isAdmin === true;
+const isOwnProfile = !this.viewingUserId || this.viewingUserId === currentUser?.id;
+
+if (el('userPhone')) {
+    if (isAdmin || isOwnProfile) {
+        el('userPhone').textContent = data.phone || '';
+    } else {
+        el('userPhone').textContent = '';
+        el('userPhone').style.display = 'none';
+    }
+}
             if (el('userBio')) el('userBio').textContent = data.bio || 'No bio added yet.';
-            if (el('userRole')) el('userRole').textContent = (data.role === 'provider') ? 'Service Provider' : 'Community Member';
+           if (el('userRole')) {
+    if (data.role === 'admin' || data.isAdmin) {
+        el('userRole').textContent = '👑 ADMIN';
+        el('userRole').style.background = 'linear-gradient(135deg, #FFD700, #FFA000)';
+        el('userRole').style.color = '#1B5E20';
+        el('userRole').style.fontWeight = '700';
+    } else {
+        el('userRole').textContent = (data.role === 'provider') ? 'Service Provider' : 'Community Member';
+    }
+}
             if (el('memberSince')) el('memberSince').textContent = data.memberSince || 'Member';
             
             if (data.isVerified && el('profileName')) {
@@ -302,7 +361,7 @@ class ProfileManager {
             if (data.avatar || data.profilePic) {
                 const url = (data.avatar || data.profilePic).startsWith('http') 
                     ? (data.avatar || data.profilePic) 
-                    : 'http://localhost:5000' + (data.avatar || data.profilePic);
+                    : 'https://smart-panchayat-backend.onrender.com/api' + (data.avatar || data.profilePic);
                 if (el('profileAvatar')) el('profileAvatar').src = url;
             }
             
