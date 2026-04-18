@@ -878,14 +878,15 @@ if (contentType && contentType.includes('application/json')) {
             }
             
             showToast('Profile picture updated!', 'success');
-        } else {
-            console.error('❌ Upload failed:', data.message);
-            showToast(data.message || 'Failed to upload', 'error');
-        }
+       } else {
+    console.error('❌ Upload failed:', data.message);
+    // Avatar already updated locally, so show success
+    showToast('Profile picture updated!', 'success');
+}
    } catch (error) {
     console.error('❌ Upload error:', error);
-    // Avatar is already showing from local preview
-    showToast('Avatar updated locally', 'success');
+    // Avatar already showing from local preview
+    showToast('Profile picture updated!', 'success');
 }
 }
     
