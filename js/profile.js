@@ -152,23 +152,35 @@ class ProfileManager {
         });
     }
     
-    switchTab(tabId) {
-        document.querySelectorAll('.profile-tab').forEach(tab => {
-            tab.classList.toggle('active', tab.dataset.tab === tabId);
-        });
-        
-        document.querySelectorAll('.tab-content').forEach(content => {
-            content.classList.toggle('active', content.id === `${tabId}Tab`);
-        });
-        
-        if (tabId === 'posts') {
-            this.loadUserPosts();
-        } else if (tabId === 'services') {
-            this.loadUserServices();
-        } else if (tabId === 'earnings' && this.isProvider) {
-            this.loadEarnings();
-        }
+   switchTab(tabId) {
+    document.querySelectorAll('.profile-tab').forEach(tab => {
+        tab.classList.toggle('active', tab.dataset.tab === tabId);
+    });
+    
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.toggle('active', content.id === `${tabId}Tab`);
+    });
+    
+    if (tabId === 'posts') {
+        this.loadUserPosts();
+    } else if (tabId === 'services') {
+        this.loadUserServices();
+    } else if (tabId === 'earnings' && this.isProvider) {
+        this.loadEarnings();
     }
+    
+    // Update tab text if viewing someone else
+    if (this.viewingUserId) {
+        document.querySelectorAll('.profile-tab').forEach(tab => {
+            if (tab.dataset.tab === 'posts') {
+                tab.innerHTML = '<i class="fas fa-newspaper"></i> Posts';
+            }
+            if (tab.dataset.tab === 'services') {
+                tab.innerHTML = '<i class="fas fa-tools"></i> Services';
+            }
+        });
+    }
+}
     
     // ============ CONTACT INFORMATION ============
     
@@ -294,10 +306,8 @@ class ProfileManager {
         });
         const data = await response.json();
         
-        // ✅ ALSO FETCH STATS SEPARATELY
-       // Use viewed user's ID for stats, not logged-in user
-const statsUserId = this.viewingUserId || this.user.id;
-const statsRes = await fetch(`${this.API_BASE_URL}/users/stats/${statsUserId}`, {
+       // ✅ ALSO FETCH STATS SEPARATELY
+const statsRes = await fetch(`${this.API_BASE_URL}/users/stats`, {
     headers: { 'Authorization': `Bearer ${this.user.token}` }
 });
         const statsData = await statsRes.json();
@@ -899,30 +909,42 @@ if (el('userPhone')) {
     
     // ============ POSTS & SERVICES ============
     
-    async loadUserPosts() {
-        const container = document.getElementById('userPostsContainer');
-        if (!container) return;
-        
-        try {
-            const response = await fetch(`${this.API_BASE_URL}/users/posts`, {
-                headers: { 'Authorization': `Bearer ${this.user.token}` }
-            });
-            const data = await response.json();
-            const posts = data.posts || [];
+   async loadUserPosts() {
+    const container = document.getElementById('userPostsContainer');
+    if (!container) return;
+    
+    try {
+        // Use viewed user's ID if viewing someone else
+        const userId = this.viewingUserId || this.user.id;
+        const response = await fetch(`${this.API_BASE_URL}/posts/user/${userId}`, {
+            headers: { 'Authorization': `Bearer ${this.user.token}` }
+        });
+        const data = await response.json();
+        const posts = data.posts || [];
             
-            if (posts.length === 0) {
-                container.innerHTML = `<div class="text-center p-xl"><i class="fas fa-newspaper" style="font-size: 3rem; color: var(--gray-400);"></i><h3>No posts yet</h3><a href="dashboard.html" class="btn btn-primary mt-md">Create Your First Post</a></div>`;
-                return;
-            }
+           if (posts.length === 0) {
+    if (this.viewingUserId) {
+        // Viewing someone else's profile - no create button
+        container.innerHTML = `<div class="text-center p-xl"><i class="fas fa-newspaper" style="font-size: 3rem; color: var(--gray-400);"></i><h3>No posts yet</h3><p class="text-gray-600">This user hasn't created any posts.</p></div>`;
+    } else {
+        // Own profile - show create button
+        container.innerHTML = `<div class="text-center p-xl"><i class="fas fa-newspaper" style="font-size: 3rem; color: var(--gray-400);"></i><h3>No posts yet</h3><a href="dashboard.html" class="btn btn-primary mt-md">Create Your First Post</a></div>`;
+    }
+    return;
+}
             container.innerHTML = posts.map(post => this.renderPostCard(post)).join('');
         } catch (error) {
             container.innerHTML = '<p class="text-error text-center">Failed to load posts</p>';
         }
     }
     
-    renderPostCard(post) {
-        return `<div class="service-card"><div class="flex justify-between items-start mb-sm"><div><h4>${post.title || 'Untitled'}</h4><p class="text-sm text-gray-600">${formatRelativeTime(post.createdAt)}</p></div><span class="service-status status-${post.status || 'active'}">${post.status || 'Active'}</span></div><p class="mb-sm">${post.description}</p><div class="flex gap-sm"><button class="btn btn-outline btn-sm" onclick="location.href='dashboard.html?post=${post._id}'"><i class="fas fa-eye"></i> View</button><button class="btn btn-outline btn-sm" onclick="profileManager.deletePost('${post._id}')"><i class="fas fa-trash"></i> Delete</button></div></div>`;
-    }
+   renderPostCard(post) {
+    const deleteButton = this.viewingUserId 
+        ? '' 
+        : `<button class="btn btn-outline btn-sm" onclick="profileManager.deletePost('${post._id}')"><i class="fas fa-trash"></i> Delete</button>`;
+    
+    return `<div class="service-card"><div class="flex justify-between items-start mb-sm"><div><h4>${post.title || 'Untitled'}</h4><p class="text-sm text-gray-600">${formatRelativeTime(post.createdAt)}</p></div><span class="service-status status-${post.status || 'active'}">${post.status || 'Active'}</span></div><p class="mb-sm">${post.description}</p><div class="flex gap-sm"><button class="btn btn-outline btn-sm" onclick="location.href='dashboard.html?post=${post._id}'"><i class="fas fa-eye"></i> View</button>${deleteButton}</div></div>`;
+}
     
     deletePost(postId) {
         if (!confirm('Delete this post?')) return;
@@ -937,8 +959,9 @@ if (el('userPhone')) {
         
         container.innerHTML = '<p class="text-center p-md"><i class="fas fa-spinner fa-spin"></i> Loading services...</p>';
         
-        // Fetch user's service requests from POSTS
-        const response = await fetch(`${this.API_BASE_URL}/posts?type=service&author=${this.user.id}`, {
+        // Use viewed user's ID if viewing someone else
+        const userId = this.viewingUserId || this.user.id;
+        const response = await fetch(`${this.API_BASE_URL}/posts?type=service&author=${userId}`, {
             headers: { 'Authorization': `Bearer ${this.user.token}` }
         });
         const data = await response.json();
@@ -946,17 +969,29 @@ if (el('userPhone')) {
         if (data.success) {
             const services = data.posts || [];
             
-            if (services.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center p-xl">
-                        <i class="fas fa-tools" style="font-size: 3rem; color: var(--gray-400);"></i>
-                        <h3>No service requests</h3>
-                        <p class="text-gray-600">You haven't created any service requests yet.</p>
-                        <a href="dashboard.html" class="btn btn-primary mt-md">Create Service Request</a>
-                    </div>
-                `;
-                return;
-            }
+           if (services.length === 0) {
+    if (this.viewingUserId) {
+        // Viewing someone else's profile
+        container.innerHTML = `
+            <div class="text-center p-xl">
+                <i class="fas fa-tools" style="font-size: 3rem; color: var(--gray-400);"></i>
+                <h3>No service requests</h3>
+                <p class="text-gray-600">This user hasn't created any service requests.</p>
+            </div>
+        `;
+    } else {
+        // Own profile
+        container.innerHTML = `
+            <div class="text-center p-xl">
+                <i class="fas fa-tools" style="font-size: 3rem; color: var(--gray-400);"></i>
+                <h3>No service requests</h3>
+                <p class="text-gray-600">You haven't created any service requests yet.</p>
+                <a href="dashboard.html" class="btn btn-primary mt-md">Create Service Request</a>
+            </div>
+        `;
+    }
+    return;
+}
             
             this.allServices = services;
             this.renderServices(services);
