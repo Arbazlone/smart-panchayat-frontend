@@ -4,181 +4,453 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#2E7D32">
-    <title>My Profile - Smart Panchayat</title>
+    <title>Profile - Smart Panchayat</title>
     
+    <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="css/styles.css">
     
+    <!-- Core CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/darkmode.css">
     
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+
+        /* Header */
         .profile-header {
-            background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
-            padding: var(--space-2xl) 0 var(--space-xl);
+            background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%);
+            padding: 20px 16px 30px;
             color: white;
-            margin-bottom: var(--space-xl);
-        }
-        
-        .profile-avatar-container {
             position: relative;
-            display: inline-block;
+            border-radius: 0 0 30px 30px;
         }
-        
-        .profile-avatar {
-            width: 120px;
-            height: 120px;
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .back-btn, .menu-btn {
+            background: rgba(255,255,255,0.15);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
-            border: 4px solid white;
-            object-fit: cover;
-            background: var(--gray-300);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.2s;
+            backdrop-filter: blur(10px);
         }
-        
-        .avatar-edit-btn {
+
+        .back-btn:hover, .menu-btn:hover {
+            background: rgba(255,255,255,0.25);
+        }
+
+        .profile-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .avatar-wrapper {
+            position: relative;
+        }
+
+        .profile-avatar {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            border: 3px solid white;
+            object-fit: cover;
+            background: #e0e0e0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .avatar-edit {
             position: absolute;
             bottom: 0;
             right: 0;
             background: white;
-            color: var(--primary-green);
-            width: 36px;
-            height: 36px;
+            color: #2E7D32;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             border: none;
             cursor: pointer;
-            box-shadow: var(--shadow-md);
-            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            font-size: 14px;
         }
-        
-        .avatar-edit-btn:hover {
-            transform: scale(1.1);
-            background: var(--primary-green);
-            color: white;
+
+        .user-details h1 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 4px;
         }
-        
-        .profile-tabs {
+
+        .user-location {
             display: flex;
-            gap: var(--space-sm);
-            border-bottom: 1px solid var(--gray-200);
-            margin-bottom: var(--space-lg);
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            opacity: 0.9;
+            margin-bottom: 8px;
         }
-        
-        .profile-tab {
-            padding: 12px 24px;
-            background: none;
-            border: none;
-            font-weight: 600;
-            color: var(--gray-600);
-            cursor: pointer !important;
-            position: relative;
-            transition: all 0.2s;
-            pointer-events: auto !important;
-            z-index: 10;
+
+        .user-badges {
+            display: flex;
+            gap: 8px;
         }
-        
-        .profile-tab:hover {
-            color: var(--primary-green);
+
+        .badge {
+            background: rgba(255,255,255,0.2);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
         }
-        
-        .profile-tab.active {
-            color: var(--primary-green);
+
+        /* Stats Cards */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            padding: 20px 16px;
+            margin-top: -15px;
         }
-        
-        .profile-tab.active::after {
-            content: '';
-            position: absolute;
-            bottom: -1px;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: var(--primary-green);
-            border-radius: 3px 3px 0 0;
-        }
-        
-        .tab-content {
-            display: none;
-        }
-        
-        .tab-content.active {
-            display: block;
-            animation: fadeIn 0.3s ease;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(5px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
+
         .stat-card {
             background: white;
-            border-radius: var(--radius-lg);
-            padding: var(--space-lg);
+            padding: 16px 8px;
+            border-radius: 16px;
             text-align: center;
-            border: 1px solid var(--gray-200);
-            box-shadow: var(--shadow-sm);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            border: 1px solid #eee;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2E7D32;
+            line-height: 1.2;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .rating-stars {
+            color: #FFB300;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        /* Tabs */
+        .tabs-container {
+            padding: 0 16px;
+            margin-bottom: 16px;
+        }
+
+        .tabs {
+            display: flex;
+            background: white;
+            padding: 6px;
+            border-radius: 30px;
+            border: 1px solid #eee;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px;
+            background: none;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            border-radius: 25px;
             transition: all 0.2s;
         }
-        
-        .stat-card:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
+
+        .tab.active {
+            background: #2E7D32;
+            color: white;
         }
-        
-        .stat-number {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--primary-green);
+
+        .tab i {
+            margin-right: 6px;
         }
-        
+
+        /* Content Sections */
+        .content-section {
+            padding: 0 16px;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        /* Cards */
+        .info-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 1px solid #eee;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .card-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .edit-btn {
+            background: none;
+            border: none;
+            color: #2E7D32;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: 20px;
+            background: #e8f5e9;
+        }
+
+        .info-row {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-icon {
+            width: 36px;
+            height: 36px;
+            background: #e8f5e9;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #2E7D32;
+            margin-right: 14px;
+        }
+
+        .info-content {
+            flex: 1;
+        }
+
+        .info-label {
+            font-size: 11px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-value {
+            font-size: 15px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        /* Post Card */
+        .post-card {
+            background: white;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid #eee;
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .post-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 12px;
+            object-fit: cover;
+        }
+
+        .post-author {
+            flex: 1;
+        }
+
+        .post-name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .post-time {
+            font-size: 11px;
+            color: #999;
+        }
+
+        .post-content {
+            margin-bottom: 12px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .post-image {
+            width: 100%;
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+
+        .post-actions {
+            display: flex;
+            gap: 20px;
+            padding-top: 8px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .post-action {
+            background: none;
+            border: none;
+            color: #666;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Service Card */
         .service-card {
             background: white;
-            border-radius: var(--radius-lg);
-            padding: var(--space-lg);
-            margin-bottom: var(--space-md);
-            border: 1px solid var(--gray-200);
-            box-shadow: var(--shadow-sm);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid #eee;
         }
-        
+
+        .service-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .service-title {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
         .service-status {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: var(--radius-full);
-            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
             font-weight: 600;
         }
-        
-        .status-active { background: rgba(67, 160, 71, 0.1); color: var(--success); }
-        .status-pending { background: rgba(255, 160, 0, 0.1); color: var(--warning); }
-        .status-completed { background: rgba(30, 136, 229, 0.1); color: var(--info); }
-        
-        .toggle-switch {
+
+        .status-pending { background: #FFF3E0; color: #E65100; }
+        .status-accepted { background: #E3F2FD; color: #1565C0; }
+        .status-completed { background: #E8F5E9; color: #2E7D32; }
+
+        .service-detail {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        /* Toggle Switch */
+        .toggle-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .toggle-item:last-child {
+            border-bottom: none;
+        }
+
+        .toggle-label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .toggle-label i {
+            width: 24px;
+            color: #2E7D32;
+        }
+
+        .switch {
             position: relative;
-            width: 50px;
+            width: 48px;
             height: 26px;
         }
-        
-        .toggle-switch input {
+
+        .switch input {
             opacity: 0;
             width: 0;
             height: 0;
         }
-        
-        .toggle-slider {
+
+        .slider {
             position: absolute;
             cursor: pointer;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: var(--gray-400);
+            background-color: #ccc;
             transition: .3s;
-            border-radius: 34px;
+            border-radius: 26px;
         }
-        
-        .toggle-slider:before {
+
+        .slider:before {
             position: absolute;
             content: "";
             height: 20px;
@@ -189,254 +461,358 @@
             transition: .3s;
             border-radius: 50%;
         }
-        
-        input:checked + .toggle-slider {
-            background-color: var(--primary-green);
+
+        input:checked + .slider {
+            background-color: #2E7D32;
         }
-        
-        input:checked + .toggle-slider:before {
-            transform: translateX(24px);
+
+        input:checked + .slider:before {
+            transform: translateX(22px);
         }
-        
-        /* Share Button */
-        .share-btn {
-            background: rgba(255,255,255,0.2);
-            border: 1px solid rgba(255,255,255,0.3);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.9rem;
+
+        /* Danger Zone */
+        .danger-btn {
+            background: none;
+            border: 1px solid #ff4444;
+            color: #ff4444;
+            padding: 14px;
+            border-radius: 14px;
+            width: 100%;
+            font-weight: 600;
             cursor: pointer;
+            margin-bottom: 8px;
             transition: all 0.2s;
         }
-        
-        .share-btn:hover {
-            background: rgba(255,255,255,0.3);
+
+        .danger-btn:hover {
+            background: #fff5f5;
         }
-        
-        /* Refresh Location Button */
-        .refresh-location-btn {
+
+        .danger-btn.fill {
+            background: #ff4444;
+            color: white;
+        }
+
+        .danger-btn.fill:hover {
+            background: #cc0000;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 16px 20px;
+            border-top: 1px solid #eee;
+            box-shadow: 0 -2px 20px rgba(0,0,0,0.04);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
             background: none;
             border: none;
-            color: rgba(255,255,255,0.8);
+            color: #999;
+            font-size: 12px;
             cursor: pointer;
-            padding: 4px 8px;
-            font-size: 0.9rem;
             transition: all 0.2s;
         }
-        
-        .refresh-location-btn:hover {
+
+        .nav-item i {
+            font-size: 22px;
+        }
+
+        .nav-item.active {
+            color: #2E7D32;
+        }
+
+        /* Empty States */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        /* Loading */
+        .loading-spinner {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .loading-spinner i {
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: flex-end;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal {
+            background: white;
+            width: 100%;
+            max-width: 500px;
+            border-radius: 24px 24px 0 0;
+            padding: 24px;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 14px;
+            font-size: 15px;
+            font-family: inherit;
+            background: #f9f9f9;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #2E7D32;
+            background: white;
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn {
+            padding: 14px 20px;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #2E7D32;
             color: white;
+            width: 100%;
         }
-        
-        /* Responsive */
-        @media (max-width: 640px) {
-            .profile-tabs {
-                overflow-x: auto;
-                flex-wrap: nowrap;
-                -webkit-overflow-scrolling: touch;
-                scrollbar-width: none;
-            }
-            
-            .profile-tabs::-webkit-scrollbar {
-                display: none;
-            }
-            
-            .profile-tab {
-                white-space: nowrap;
-                padding: 12px 16px;
-            }
-            
-            .grid-cols-3 {
-                grid-template-columns: 1fr;
-                gap: 12px;
-            }
+
+        .btn-primary:hover {
+            background: #1B5E20;
         }
+
+        .btn-outline {
+            background: none;
+            border: 1px solid #ddd;
+            color: #666;
+        }
+
+        .flex {
+            display: flex;
+        }
+
+        .gap-2 { gap: 8px; }
+        .gap-3 { gap: 12px; }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Dark mode overrides handled by darkmode.css */
     </style>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="container navbar-container">
-            <a href="dashboard.html" class="navbar-brand">
-                <i class="fas fa-arrow-left"></i>
-                <span>Back to Feed</span>
-            </a>
-            <div class="flex items-center gap-md">
-                <button class="share-btn" id="shareProfileBtn">
-                    <i class="fas fa-share-alt"></i> Share
-                </button>
-                <button class="btn btn-icon" id="settingsBtn">
-                    <i class="fas fa-cog"></i>
-                </button>
-            </div>
-        </div>
-    </nav>
-    
+    <!-- Header -->
     <div class="profile-header">
-        <div class="container">
-            <div class="flex items-center gap-lg">
-                <div class="profile-avatar-container">
-                    <img src="" alt="Profile" class="profile-avatar" id="profileAvatar">
-                    <button class="avatar-edit-btn" id="changeAvatarBtn">
-                        <i class="fas fa-camera"></i>
-                    </button>
-                    <input type="file" id="avatarInput" accept="image/*" style="display: none;">
-                </div>
-                <div>
-                    <h1 style="color: white; margin-bottom: 4px;" id="profileName">Loading...</h1>
-                    <p style="color: rgba(255,255,255,0.9); margin: 0;" id="profileLocation">
-                        <i class="fas fa-map-marker-alt"></i> 
-                        <span id="locationDisplay">Detecting...</span>
-                        <button class="refresh-location-btn" id="refreshLocationBtn" title="Refresh Location">
-                            <i class="fas fa-sync-alt"></i>
-                        </button>
-                    </p>
-                    <div class="flex gap-sm mt-sm">
-                        <span class="badge" style="background: rgba(255,255,255,0.2); color: white;" id="userRole">User</span>
-                        <span class="badge" style="background: rgba(255,255,255,0.2); color: white;" id="memberSince"></span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="container">
-        <!-- Profile Tabs -->
-        <div class="profile-tabs">
-            <button class="profile-tab active" data-tab="overview">📋 Overview</button>
-            <button class="profile-tab" data-tab="posts">📝 My Posts</button>
-            <button class="profile-tab" data-tab="services">🔧 My Services</button>
-            <button class="profile-tab" data-tab="settings">⚙️ Settings</button>
-        </div>
-        
-        <!-- Overview Tab -->
-        <div class="tab-content active" id="overviewTab">
-           <!-- Stats Cards -->
-<div class="grid grid-cols-3 gap-md mb-xl">
-    <div class="stat-card">
-        <div class="stat-number" id="totalPosts">0</div>
-        <div class="stat-label">Total Posts</div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-number" id="helpedCount">0</div>
-        <div class="stat-label">People Helped</div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-number" id="ratingValue">0.0</div>
-        <div class="stat-label">Rating</div>
-        <div class="text-xs text-gray-600" id="reviewCount">0 reviews</div>
-    </div>
-</div>
-            
-            <!-- About Me -->
-            <div class="card mb-lg">
-                <h3>📄 About Me</h3>
-                <p id="userBio">No bio added yet.</p>
-                <button class="btn btn-outline btn-sm mt-sm" id="editBioBtn">
-                    <i class="fas fa-edit"></i> Edit Bio
+        <div class="header-top">
+            <button class="back-btn" onclick="window.location.href='dashboard.html'">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <div style="display: flex; gap: 8px;">
+                <button class="menu-btn" id="shareProfileBtn">
+                    <i class="fas fa-share-alt"></i>
+                </button>
+                <button class="menu-btn" id="settingsMenuBtn">
+                    <i class="fas fa-ellipsis-v"></i>
                 </button>
             </div>
-            
-           <!-- Contact Information -->
-<div class="card mb-lg">
-    <div class="flex justify-between items-center mb-md">
-        <h3>📞 Contact Information</h3>
-        <button class="btn btn-outline btn-sm" id="editContactBtn">
-            <i class="fas fa-edit"></i> Edit
-        </button>
-    </div>
-    
-    <!-- Display Mode -->
-    <div id="contactDisplay">
-        <div class="flex items-center gap-md mb-sm">
-            <i class="fas fa-phone" style="width: 24px; color: var(--primary-green);"></i>
-            <span id="displayPhone">--</span>
-            <span class="badge badge-info" style="margin-left: 8px;">📱 Primary</span>
         </div>
-        <div class="flex items-center gap-md mb-sm">
-            <i class="fas fa-phone-alt" style="width: 24px; color: var(--primary-green);"></i>
-            <span id="displayAlternatePhone">Not provided</span>
-        </div>
-        <div class="flex items-center gap-md mb-sm">
-            <i class="fas fa-envelope" style="width: 24px; color: var(--primary-green);"></i>
-            <span id="displayEmail">Not provided</span>
-        </div>
-        <div class="flex items-center gap-md">
-            <i class="fas fa-map-marker-alt" style="width: 24px; color: var(--primary-green);"></i>
-            <span id="displayAddress">Not provided</span>
+        
+        <div class="profile-info">
+            <div class="avatar-wrapper">
+                <img src="https://ui-avatars.com/api/?name=User&background=2E7D32&color=fff&size=90" alt="Profile" class="profile-avatar" id="profileAvatar">
+                <button class="avatar-edit" id="changeAvatarBtn">
+                    <i class="fas fa-camera"></i>
+                </button>
+                <input type="file" id="avatarInput" accept="image/*" style="display: none;">
+            </div>
+            <div class="user-details">
+                <h1 id="profileName">Loading...</h1>
+                <div class="user-location">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span id="locationDisplay">Detecting location...</span>
+                    <button id="refreshLocationBtn" style="background: none; border: none; color: rgba(255,255,255,0.8); cursor: pointer; margin-left: 4px;">
+                        <i class="fas fa-sync-alt fa-xs"></i>
+                    </button>
+                </div>
+                <div class="user-badges">
+                    <span class="badge" id="userRole">Resident</span>
+                    <span class="badge" id="memberSince">Member</span>
+                </div>
+            </div>
         </div>
     </div>
     
-    <!-- Edit Mode (Hidden by default) -->
-    <div id="contactEdit" style="display: none;">
-        <div class="form-group">
-            <label class="form-label">Phone Number (Primary)</label>
-            <input type="tel" class="form-input" id="editPhone" placeholder="Enter phone number" readonly disabled>
-            <p class="text-xs text-gray-600 mt-xs">Primary phone cannot be changed</p>
+    <!-- Stats -->
+    <div class="stats-container">
+        <div class="stat-card">
+            <div class="stat-number" id="totalPosts">0</div>
+            <div class="stat-label">Posts</div>
         </div>
-        
-        <div class="form-group">
-            <label class="form-label">Alternate Phone (Optional)</label>
-            <input type="tel" class="form-input" id="editAlternatePhone" placeholder="Enter alternate number">
+        <div class="stat-card">
+            <div class="stat-number" id="helpedCount">0</div>
+            <div class="stat-label">Helped</div>
         </div>
-        
-        <div class="form-group">
-            <label class="form-label">Email Address</label>
-            <input type="email" class="form-input" id="editEmail" placeholder="Enter email address">
-        </div>
-        
-        <div class="form-group">
-            <label class="form-label">Address</label>
-            <textarea class="form-input" id="editAddress" rows="2" placeholder="Enter your address"></textarea>
-        </div>
-        
-        <div class="flex gap-md">
-            <button class="btn btn-outline flex-1" id="cancelContactBtn">Cancel</button>
-            <button class="btn btn-primary flex-1" id="saveContactBtn">
-                <i class="fas fa-save"></i> Save Changes
-            </button>
+        <div class="stat-card">
+            <div class="stat-number" id="ratingValue">0.0</div>
+            <div class="stat-label">Rating</div>
+            <div class="rating-stars" id="ratingStars">☆☆☆☆☆</div>
         </div>
     </div>
-</div>
+    
+    <!-- Tabs -->
+    <div class="tabs-container">
+        <div class="tabs">
+            <button class="tab active" data-tab="overview"><i class="fas fa-user"></i> Overview</button>
+            <button class="tab" data-tab="posts"><i class="fas fa-newspaper"></i> Posts</button>
+            <button class="tab" data-tab="services"><i class="fas fa-tools"></i> Services</button>
+            <button class="tab" data-tab="settings"><i class="fas fa-cog"></i> Settings</button>
+        </div>
+    </div>
+    
+    <!-- Content -->
+    <div class="content-section">
+        <!-- Overview Section -->
+        <div class="section active" id="overviewSection">
+            <div class="info-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-info-circle" style="margin-right: 8px;"></i> About</h3>
+                    <button class="edit-btn" id="editBioBtn"><i class="fas fa-pen"></i> Edit</button>
+                </div>
+                <p id="userBio" style="line-height: 1.6; color: #555;">No bio added yet. Tell the community about yourself!</p>
+            </div>
             
-            <!-- Achievements & Badges -->
-            <div class="badges-section">
-                <h3>
-                    <i class="fas fa-trophy" style="color: #FFB300;"></i>
-                    Achievements & Badges
-                    <span class="badge-count" id="unlockedCount">0/7</span>
-                </h3>
-                
-                <!-- Unlocked Badges -->
-                <div id="badgesContainer"></div>
-                
-                <!-- Progress to Next Badges -->
-                <div class="badge-progress">
-                    <h4>
-                        <i class="fas fa-chart-line"></i>
-                        Progress to Next Badges
-                    </h4>
-                    <div id="progressContainer" class="badge-progress-list"></div>
+            <div class="info-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-address-book" style="margin-right: 8px;"></i> Contact</h3>
+                    <button class="edit-btn" id="editContactBtn"><i class="fas fa-pen"></i> Edit</button>
+                </div>
+                <div class="info-row">
+                    <div class="info-icon"><i class="fas fa-phone"></i></div>
+                    <div class="info-content">
+                        <div class="info-label">PRIMARY PHONE</div>
+                        <div class="info-value" id="displayPhone">--</div>
+                    </div>
+                </div>
+                <div class="info-row">
+                    <div class="info-icon"><i class="fas fa-phone-alt"></i></div>
+                    <div class="info-content">
+                        <div class="info-label">ALTERNATE PHONE</div>
+                        <div class="info-value" id="displayAlternatePhone">Not provided</div>
+                    </div>
+                </div>
+                <div class="info-row">
+                    <div class="info-icon"><i class="fas fa-envelope"></i></div>
+                    <div class="info-content">
+                        <div class="info-label">EMAIL</div>
+                        <div class="info-value" id="displayEmail">Not provided</div>
+                    </div>
+                </div>
+                <div class="info-row">
+                    <div class="info-icon"><i class="fas fa-home"></i></div>
+                    <div class="info-content">
+                        <div class="info-label">ADDRESS</div>
+                        <div class="info-value" id="displayAddress">Not provided</div>
+                    </div>
                 </div>
             </div>
             
-            <!-- Service Provider Toggle -->
-            <div class="card mt-lg">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <h3>🔧 Become a Service Provider</h3>
-                        <p class="text-sm text-gray-600">Offer your services to the community</p>
+            <div class="info-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-store" style="margin-right: 8px;"></i> Service Provider</h3>
+                </div>
+                <div class="toggle-item">
+                    <div class="toggle-label">
+                        <i class="fas fa-briefcase"></i>
+                        <span>Offer services to community</span>
                     </div>
-                    <label class="toggle-switch">
+                    <label class="switch">
                         <input type="checkbox" id="providerToggle">
-                        <span class="toggle-slider"></span>
+                        <span class="slider"></span>
                     </label>
                 </div>
-                
-                <div id="providerForm" style="display: none;" class="mt-lg">
+                <div id="providerForm" class="hidden" style="margin-top: 16px;">
                     <div class="form-group">
-                        <label class="form-label">Service Category</label>
-                        <select class="form-input" id="serviceCategory">
+                        <label class="form-label">Category</label>
+                        <select class="form-select" id="serviceCategory">
                             <option value="">Select category</option>
                             <option value="plumber">🔧 Plumber</option>
                             <option value="electrician">⚡ Electrician</option>
@@ -445,208 +821,349 @@
                             <option value="cleaner">🧹 Cleaner</option>
                             <option value="mechanic">🔧 Mechanic</option>
                             <option value="tutor">📚 Tutor</option>
-                            <option value="doctor">🏥 Doctor</option>
-                            <option value="other">📌 Other</option>
                         </select>
                     </div>
-                    
-                    <div class="grid grid-cols-2 gap-md">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                         <div class="form-group">
-                            <label class="form-label">Experience (Years)</label>
-                            <input type="number" class="form-input" id="experience" min="0" max="50" value="0">
+                            <label class="form-label">Experience (yrs)</label>
+                            <input type="number" class="form-input" id="experience" min="0" value="0">
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Hourly Rate (₹)</label>
+                            <label class="form-label">Rate (₹/hr)</label>
                             <input type="number" class="form-input" id="hourlyRate" min="0" value="0">
                         </div>
                     </div>
-                    
                     <div class="form-group">
-                        <label class="form-label">Description of Services</label>
-                        <textarea class="form-input" id="serviceDescription" rows="3" placeholder="Describe your services..."></textarea>
+                        <label class="form-label">Description</label>
+                        <textarea class="form-textarea" id="serviceDescription" placeholder="Describe your services..."></textarea>
                     </div>
-                    
                     <div class="form-group">
-                        <label class="form-label">Service Area (km radius)</label>
+                        <label class="form-label">Service Radius (km)</label>
                         <input type="number" class="form-input" id="serviceRadius" min="1" max="50" value="10">
                     </div>
-                    
                     <div class="form-group">
-                        <label class="flex items-center gap-sm">
-                            <input type="checkbox" id="availableNow"> 🟢 Available Now
+                        <label style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="availableNow"> Available Now
                         </label>
                     </div>
-                    
-                    <button class="btn btn-primary btn-block" id="saveProviderBtn">
-                        <i class="fas fa-check"></i> Register as Service Provider
-                    </button>
+                    <button class="btn btn-primary" id="saveProviderBtn">Register as Provider</button>
                 </div>
             </div>
         </div>
         
-        <!-- My Posts Tab -->
-        <div class="tab-content" id="postsTab">
+        <!-- Posts Section -->
+        <div class="section" id="postsSection">
             <div id="userPostsContainer">
-                <div class="text-center p-xl">
-                    <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--gray-400);"></i>
-                    <p class="text-gray-600 mt-md">Loading posts...</p>
+                <div class="loading-spinner">
+                    <i class="fas fa-spinner fa-pulse"></i>
+                    <p>Loading your posts...</p>
                 </div>
             </div>
         </div>
         
-        <!-- My Services Tab -->
-        <div class="tab-content" id="servicesTab">
-            <div class="flex justify-between items-center mb-lg">
-                <h3>Service Requests</h3>
-                <div class="flex gap-sm">
-                    <select class="form-input" id="serviceFilter" style="width: auto;">
-                        <option value="all">All</option>
-                        <option value="pending">Pending</option>
-                        <option value="accepted">Accepted</option>
-                        <option value="completed">Completed</option>
-                    </select>
-                </div>
+        <!-- Services Section -->
+        <div class="section" id="servicesSection">
+            <div style="margin-bottom: 16px;">
+                <select class="form-select" id="serviceFilter">
+                    <option value="all">All Requests</option>
+                    <option value="pending">Pending</option>
+                    <option value="accepted">Accepted</option>
+                    <option value="completed">Completed</option>
+                </select>
             </div>
             <div id="myServicesContainer">
-                <div class="text-center p-xl">
-                    <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--gray-400);"></i>
-                    <p class="text-gray-600 mt-md">Loading services...</p>
+                <div class="loading-spinner">
+                    <i class="fas fa-spinner fa-pulse"></i>
+                    <p>Loading services...</p>
                 </div>
             </div>
         </div>
         
-        <!-- Settings Tab -->
-        <div class="tab-content" id="settingsTab">
-            <div class="card mb-lg">
-                <h3>👤 Personal Information</h3>
+        <!-- Settings Section -->
+        <div class="section" id="settingsSection">
+            <div class="info-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-user-circle"></i> Personal Info</h3>
+                </div>
                 <form id="profileSettingsForm">
                     <div class="form-group">
                         <label class="form-label">Full Name</label>
                         <input type="text" class="form-input" id="settingsName">
                     </div>
-                    
                     <div class="form-group">
-                        <label class="form-label">Email (Optional)</label>
+                        <label class="form-label">Email</label>
                         <input type="email" class="form-input" id="settingsEmail">
                     </div>
-                    
                     <div class="form-group">
-                        <label class="form-label">Phone Number</label>
+                        <label class="form-label">Phone</label>
                         <input type="tel" class="form-input" id="settingsPhone" readonly disabled>
-                        <p class="text-xs text-gray-600 mt-xs">Phone number cannot be changed</p>
+                        <small style="color: #999;">Phone cannot be changed</small>
                     </div>
-                    
                     <div class="form-group">
                         <label class="form-label">Bio</label>
-                        <textarea class="form-input" id="settingsBio" rows="3" placeholder="Tell us about yourself..."></textarea>
+                        <textarea class="form-textarea" id="settingsBio" rows="3"></textarea>
                     </div>
-                    
                     <button type="submit" class="btn btn-primary">Save Changes</button>
                 </form>
             </div>
             
-            <div class="card mb-lg">
-                <h3>🔐 Change Password</h3>
+            <div class="info-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-lock"></i> Change Password</h3>
+                </div>
                 <form id="passwordChangeForm">
                     <div class="form-group">
                         <label class="form-label">Current Password</label>
                         <input type="password" class="form-input" id="currentPassword">
                     </div>
-                    
                     <div class="form-group">
                         <label class="form-label">New Password</label>
                         <input type="password" class="form-input" id="newPassword">
                     </div>
-                    
                     <div class="form-group">
-                        <label class="form-label">Confirm New Password</label>
+                        <label class="form-label">Confirm Password</label>
                         <input type="password" class="form-input" id="confirmNewPassword">
                     </div>
-                    
                     <button type="submit" class="btn btn-primary">Update Password</button>
                 </form>
             </div>
             
-            <div class="card mb-lg">
-                <h3>🔔 Notification Settings</h3>
-                <div class="form-group">
-                    <label class="flex items-center justify-between">
-                        <span>🚨 Emergency Alerts</span>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="notifEmergency" checked>
-                            <span class="toggle-slider"></span>
-                        </label>
+            <div class="info-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-bell"></i> Notifications</h3>
+                </div>
+                <div class="toggle-item">
+                    <div class="toggle-label">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>Emergency Alerts</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="notifEmergency" checked>
+                        <span class="slider"></span>
                     </label>
                 </div>
-                <div class="form-group">
-                    <label class="flex items-center justify-between">
-                        <span>📰 New Posts in Area</span>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="notifPosts" checked>
-                            <span class="toggle-slider"></span>
-                        </label>
+                <div class="toggle-item">
+                    <div class="toggle-label">
+                        <i class="fas fa-newspaper"></i>
+                        <span>New Posts in Area</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="notifPosts" checked>
+                        <span class="slider"></span>
                     </label>
                 </div>
-                <div class="form-group">
-                    <label class="flex items-center justify-between">
-                        <span>🔧 Service Requests</span>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="notifServices" checked>
-                            <span class="toggle-slider"></span>
-                        </label>
+                <div class="toggle-item">
+                    <div class="toggle-label">
+                        <i class="fas fa-tools"></i>
+                        <span>Service Requests</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="notifServices" checked>
+                        <span class="slider"></span>
                     </label>
                 </div>
-                <div class="form-group">
-                    <label class="flex items-center justify-between">
-                        <span>💬 Messages</span>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="notifMessages" checked>
-                            <span class="toggle-slider"></span>
-                        </label>
+                <div class="toggle-item">
+                    <div class="toggle-label">
+                        <i class="fas fa-comments"></i>
+                        <span>Messages</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="notifMessages" checked>
+                        <span class="slider"></span>
                     </label>
                 </div>
-                <button class="btn btn-primary" id="saveNotifSettings">Save Notification Settings</button>
+                <button class="btn btn-primary" id="saveNotifSettings" style="margin-top: 16px;">Save Preferences</button>
             </div>
             
-            <div class="card">
-                <h3 style="color: var(--error);">⚠️ Danger Zone</h3>
-                <button class="btn btn-outline mb-sm" style="color: var(--error); border-color: var(--error);" id="logoutAllBtn">
-                    <i class="fas fa-sign-out-alt"></i> Logout from all devices
+            <div class="info-card">
+                <div class="card-header">
+                    <h3 style="color: #ff4444;"><i class="fas fa-exclamation-triangle"></i> Danger Zone</h3>
+                </div>
+                <button class="danger-btn" id="logoutAllBtn">
+                    <i class="fas fa-sign-out-alt"></i> Logout All Devices
                 </button>
-                <button class="btn btn-danger" id="deleteAccountBtn">
+                <button class="danger-btn fill" id="deleteAccountBtn">
                     <i class="fas fa-trash"></i> Delete Account
                 </button>
             </div>
         </div>
     </div>
     
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <button class="nav-item" onclick="window.location.href='dashboard.html'">
+            <i class="fas fa-home"></i>
+            <span>Feed</span>
+        </button>
+        <button class="nav-item" onclick="window.location.href='map.html'">
+            <i class="fas fa-map-marked-alt"></i>
+            <span>Map</span>
+        </button>
+        <button class="nav-item" onclick="window.location.href='chat.html'">
+            <i class="fas fa-comments"></i>
+            <span>Chat</span>
+        </button>
+        <button class="nav-item" onclick="window.location.href='users.html'">
+            <i class="fas fa-users"></i>
+            <span>Users</span>
+        </button>
+        <button class="nav-item active">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </button>
+    </div>
+    
     <!-- Edit Bio Modal -->
-    <div id="editBioModal" class="modal-overlay" style="display: none;">
+    <div class="modal-overlay" id="editBioModal">
         <div class="modal">
             <div class="modal-header">
-                <h3 class="modal-title">✏️ Edit Bio</h3>
-                <button class="modal-close" onclick="closeEditBioModal()">
+                <h3 class="modal-title">Edit Bio</h3>
+                <button class="modal-close" onclick="closeModal('editBioModal')">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             <form id="editBioForm">
                 <div class="form-group">
                     <label class="form-label">Your Bio</label>
-                    <textarea class="form-input" id="bioInput" rows="5" placeholder="Tell the community about yourself..."></textarea>
-                    <span class="text-sm text-gray-600">Maximum 500 characters</span>
+                    <textarea class="form-textarea" id="bioInput" rows="4" placeholder="Tell the community about yourself..."></textarea>
                 </div>
-                <div class="flex gap-md">
-                    <button type="button" class="btn btn-outline flex-1" onclick="closeEditBioModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary flex-1">Save Bio</button>
+                <div class="flex gap-2">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('editBioModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
                 </div>
             </form>
         </div>
     </div>
     
-    <div id="toastContainer" class="toast-container"></div>
+    <!-- Edit Contact Modal -->
+    <div class="modal-overlay" id="editContactModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Edit Contact Info</h3>
+                <button class="modal-close" onclick="closeModal('editContactModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="editContactForm">
+                <div class="form-group">
+                    <label class="form-label">Alternate Phone</label>
+                    <input type="tel" class="form-input" id="editAlternatePhone" placeholder="Optional">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-input" id="editEmail" placeholder="your@email.com">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Address</label>
+                    <textarea class="form-textarea" id="editAddress" rows="2" placeholder="Your address"></textarea>
+                </div>
+                <div class="flex gap-2">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('editContactModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
     
+    <!-- Toast Container -->
+    <div id="toastContainer" style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 2000; width: 90%; max-width: 400px;"></div>
+    
+    <!-- Scripts -->
     <script src="js/utils.js"></script>
+    <script src="js/darkmode.js"></script>
     <script src="js/profile.js"></script>
     
+    <script>
+        // Modal functions
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+        
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'flex';
+        }
+        
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                
+                tab.classList.add('active');
+                const tabName = tab.dataset.tab;
+                document.getElementById(tabName + 'Section').classList.add('active');
+            });
+        });
+        
+        // Edit buttons
+        document.getElementById('editBioBtn').addEventListener('click', () => {
+            openModal('editBioModal');
+        });
+        
+        document.getElementById('editContactBtn').addEventListener('click', () => {
+            openModal('editContactModal');
+        });
+        
+        // Provider toggle
+        document.getElementById('providerToggle').addEventListener('change', (e) => {
+            const form = document.getElementById('providerForm');
+            form.classList.toggle('hidden', !e.target.checked);
+        });
+        
+        // Avatar upload
+        document.getElementById('changeAvatarBtn').addEventListener('click', () => {
+            document.getElementById('avatarInput').click();
+        });
+        
+        document.getElementById('avatarInput').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    document.getElementById('profileAvatar').src = event.target.result;
+                    // TODO: Upload to server
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        // Share profile
+        document.getElementById('shareProfileBtn').addEventListener('click', () => {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'My Profile - Smart Panchayat',
+                    url: window.location.href
+                });
+            } else {
+                navigator.clipboard.writeText(window.location.href);
+                showToast('Profile link copied!', 'success');
+            }
+        });
+        
+        // Toast function
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                background: ${type === 'success' ? '#2E7D32' : '#333'};
+                color: white;
+                padding: 14px 20px;
+                border-radius: 14px;
+                margin-bottom: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                animation: slideDown 0.3s ease;
+            `;
+            toast.textContent = message;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+    </script>
+    
+    <style>
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
 </body>
 </html>
