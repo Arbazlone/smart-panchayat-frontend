@@ -270,25 +270,23 @@ function getInitials(name) {
 function createAvatar(user, size = 'md') {
     const sizeClass = `avatar-${size}`;
     
-    // Check multiple possible profile picture fields
-    const profilePic = user?.profilePic || user?.avatar || user?.profile_pic;
+    // Check user object first
+    let profilePic = user?.profilePic || user?.avatar || user?.profile_pic;
+    
+    // If not found, check storage
+    if (!profilePic || profilePic === 'null' || profilePic === 'undefined') {
+        const stored = JSON.parse(localStorage.getItem('panchayat_user') || sessionStorage.getItem('panchayat_user') || '{}');
+        profilePic = stored.profilePic || stored.avatar;
+    }
     
     if (profilePic && profilePic !== 'null' && profilePic !== 'undefined') {
         let imageUrl = profilePic;
         
-        // Add full URL if relative path
         if (!imageUrl.startsWith('http') && !imageUrl.startsWith('data:')) {
-          imageUrl = 'https://smart-panchayat-backend.onrender.com' + imageUrl;
+            imageUrl = 'https://smart-panchayat-backend.onrender.com' + imageUrl;
         }
         
-        // Add cache buster only for local images
-        if (imageUrl.includes('localhost:5000')) {
-            imageUrl = imageUrl.split('?')[0] + '?t=' + Date.now();
-        }
-        
-        console.log('Creating avatar with image:', imageUrl);
-        
-       return `<img src="${imageUrl}" class="avatar ${sizeClass}" alt="${user?.name || 'User'}" style="object-fit: cover;" onerror="if(this&&this.style)this.style.display='none';">`;
+        return `<img src="${imageUrl}" class="avatar ${sizeClass}" alt="${user?.name || 'User'}" style="object-fit: cover;" onerror="if(this&&this.style)this.style.display='none';">`;
     }
     
     // Fallback to initials
