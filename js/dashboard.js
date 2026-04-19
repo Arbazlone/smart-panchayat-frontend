@@ -81,13 +81,15 @@ class DashboardManager {
         this.currentUser.profilePic = storedUser.profilePic;
     }
     
-    // Ensure full URL
-    if (this.currentUser.profilePic && !this.currentUser.profilePic.startsWith('http')) {
-        this.currentUser.profilePic = 'http://localhost:5000' + this.currentUser.profilePic;
+    // Only add backend URL if it's a relative path (not http, not data:)
+    if (this.currentUser.profilePic && 
+        !this.currentUser.profilePic.startsWith('http') && 
+        !this.currentUser.profilePic.startsWith('data:')) {
+        this.currentUser.profilePic = 'https://smart-panchayat-backend.onrender.com' + this.currentUser.profilePic;
     }
     
-    // Add cache buster to force refresh
-    if (this.currentUser.profilePic) {
+    // Add cache buster only for non-base64 images
+    if (this.currentUser.profilePic && !this.currentUser.profilePic.startsWith('data:')) {
         this.currentUser.profilePic = this.currentUser.profilePic.split('?')[0] + '?t=' + Date.now();
     }
     
@@ -98,7 +100,7 @@ class DashboardManager {
     document.getElementById('userAvatarSmall').innerHTML = createAvatar(this.currentUser, 'sm');
     document.getElementById('createPostAvatar').innerHTML = createAvatar(this.currentUser, 'md');
 }
-    
+
     setupEventListeners() {
         document.querySelectorAll('.filter-tab').forEach(tab => {
             tab.addEventListener('click', (e) => this.switchFilter(e.target.dataset.filter));
