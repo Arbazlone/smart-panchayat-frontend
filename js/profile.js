@@ -387,18 +387,24 @@ if (el('userPhone')) {
                 el('profileName').innerHTML += ' <i class="fas fa-check-circle" style="color: var(--primary-green);"></i>';
             }
             
-           if (data.avatar || data.profilePic) {
+         if (data.avatar || data.profilePic) {
     const pic = data.avatar || data.profilePic;
+    let imageUrl = pic;
+    
     // Handle both base64 and URL paths
     if (pic.startsWith('data:image')) {
-        // Base64 image - use directly
-        if (el('profileAvatar')) el('profileAvatar').src = pic;
+        imageUrl = pic;
     } else if (pic.startsWith('http')) {
-        if (el('profileAvatar')) el('profileAvatar').src = pic;
+        imageUrl = pic;
     } else {
-        // Relative path
-        if (el('profileAvatar')) el('profileAvatar').src = 'https://smart-panchayat-backend.onrender.com' + pic;
+        imageUrl = 'https://smart-panchayat-backend.onrender.com' + pic;
     }
+    
+    // Update all avatar elements
+    if (el('profileAvatar')) el('profileAvatar').src = imageUrl;
+    if (el('userAvatarLarge')) el('userAvatarLarge').src = imageUrl;
+    if (el('userAvatarSmall')) el('userAvatarSmall').src = imageUrl;
+    if (el('sidebarAvatar')) el('sidebarAvatar').src = imageUrl;
 }
             
             if (el('totalPosts')) el('totalPosts').textContent = data.stats?.posts || 0;
