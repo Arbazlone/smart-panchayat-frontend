@@ -388,14 +388,21 @@ if (el('userPhone')) {
                 el('profileName').innerHTML += ' <i class="fas fa-check-circle" style="color: var(--primary-green);"></i>';
             }
             
-      // Get picture from data OR sessionStorage
+// Get picture from data OR sessionStorage OR localStorage
 let pic = data.avatar || data.profilePic;
 
 if (!pic) {
     // Fallback to sessionStorage
-    const stored = JSON.parse(sessionStorage.getItem('panchayat_user') || '{}');
+    let stored = JSON.parse(sessionStorage.getItem('panchayat_user') || '{}');
     pic = stored.profilePic || stored.avatar;
-    console.log('📸 Using fallback from sessionStorage:', pic ? 'Found ✅' : 'Still missing ❌');
+    
+    // If still not found, try localStorage
+    if (!pic) {
+        stored = JSON.parse(localStorage.getItem('panchayat_user') || '{}');
+        pic = stored.profilePic || stored.avatar;
+    }
+    
+    console.log('📸 Using fallback from storage:', pic ? 'Found ✅' : 'Still missing ❌');
 }
 
 if (pic) {
