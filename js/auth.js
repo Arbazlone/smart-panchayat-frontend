@@ -146,13 +146,11 @@ class AuthManager {
                     role: data.user?.role || 'user',
                     token: data.token,
                     verified: data.user?.isVerified || data.user?.verified || true
+                    
                 };
                 
-                if (rememberMe) {
-                    localStorage.setItem('panchayat_user', JSON.stringify(userData));
-                } else {
-                    sessionStorage.setItem('panchayat_user', JSON.stringify(userData));
-                }
+               // Always save to localStorage
+localStorage.setItem('panchayat_user', JSON.stringify(userData));
                 
                 showToast('Login successful! Redirecting...', 'success');
                 
