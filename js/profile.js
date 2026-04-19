@@ -349,6 +349,7 @@ const statsRes = await fetch(`${this.API_BASE_URL}/users/stats`, {
     displayProfile(data) {
         try {
             const el = (id) => document.getElementById(id);
+            console.log('📸 Profile data from API:', { avatar: data.avatar, profilePic: data.profilePic });
             
            if (el('profileName')) {
     el('profileName').textContent = data.name || '';
@@ -387,8 +388,17 @@ if (el('userPhone')) {
                 el('profileName').innerHTML += ' <i class="fas fa-check-circle" style="color: var(--primary-green);"></i>';
             }
             
-        if (data.avatar || data.profilePic) {
-    const pic = data.avatar || data.profilePic;
+      // Get picture from data OR sessionStorage
+let pic = data.avatar || data.profilePic;
+
+if (!pic) {
+    // Fallback to sessionStorage
+    const stored = JSON.parse(sessionStorage.getItem('panchayat_user') || '{}');
+    pic = stored.profilePic || stored.avatar;
+    console.log('📸 Using fallback from sessionStorage:', pic ? 'Found ✅' : 'Still missing ❌');
+}
+
+if (pic) {
     let imageUrl = pic;
     
     if (!pic.startsWith('data:image') && !pic.startsWith('http')) {
@@ -406,7 +416,7 @@ if (el('userPhone')) {
         smallAvatar.style.backgroundImage = `url('${imageUrl}')`;
         smallAvatar.style.backgroundSize = 'cover';
         smallAvatar.style.backgroundPosition = 'center';
-        smallAvatar.innerHTML = ''; // Remove "AH" text
+        smallAvatar.innerHTML = '';
     }
     
     if (largeAvatar) {
