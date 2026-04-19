@@ -278,7 +278,7 @@ function createAvatar(user, size = 'md') {
         
         // Add full URL if relative path
         if (!imageUrl.startsWith('http') && !imageUrl.startsWith('data:')) {
-            imageUrl = 'https://smart-panchayat-backend.onrender.com/api' + imageUrl;
+          imageUrl = 'https://smart-panchayat-backend.onrender.com' + imageUrl;
         }
         
         // Add cache buster only for local images
