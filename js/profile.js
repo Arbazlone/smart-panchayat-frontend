@@ -387,12 +387,19 @@ if (el('userPhone')) {
                 el('profileName').innerHTML += ' <i class="fas fa-check-circle" style="color: var(--primary-green);"></i>';
             }
             
-            if (data.avatar || data.profilePic) {
-                const url = (data.avatar || data.profilePic).startsWith('http') 
-                    ? (data.avatar || data.profilePic) 
-                    : 'https://smart-panchayat-backend.onrender.com/api' + (data.avatar || data.profilePic);
-                if (el('profileAvatar')) el('profileAvatar').src = url;
-            }
+           if (data.avatar || data.profilePic) {
+    const pic = data.avatar || data.profilePic;
+    // Handle both base64 and URL paths
+    if (pic.startsWith('data:image')) {
+        // Base64 image - use directly
+        if (el('profileAvatar')) el('profileAvatar').src = pic;
+    } else if (pic.startsWith('http')) {
+        if (el('profileAvatar')) el('profileAvatar').src = pic;
+    } else {
+        // Relative path
+        if (el('profileAvatar')) el('profileAvatar').src = 'https://smart-panchayat-backend.onrender.com' + pic;
+    }
+}
             
             if (el('totalPosts')) el('totalPosts').textContent = data.stats?.posts || 0;
             if (el('helpedCount')) el('helpedCount').textContent = data.stats?.helped || 0;
@@ -809,7 +816,7 @@ if (el('userPhone')) {
     
     // ============ AVATAR ============
     
-   async handleAvatarChange(file) {
+  async handleAvatarChange(file) {
     if (!file) {
         console.log('❌ No file selected');
         return;
@@ -822,74 +829,112 @@ if (el('userPhone')) {
         return;
     }
     
-    // Show loading
-    showToast('Uploading...', 'info');
-    // Show local preview immediately
-const reader = new FileReader();
-reader.onload = (e) => {
-    const avatarImg = document.getElementById('profileAvatar');
-    if (avatarImg) avatarImg.src = e.target.result;
-};
-reader.readAsDataURL(file);
+    showToast('Processing...', 'info');
     
-    try {
-        const formData = new FormData();
-        formData.append('avatar', file);
+    // Compress image first
+    this.compressImage(file, async (compressedBase64) => {
+        // Update preview immediately
+        const avatarImg = document.getElementById('profileAvatar');
+        if (avatarImg) avatarImg.src = compressedBase64;
         
-        // Get token from storage
-        const token = this.user?.token || JSON.parse(localStorage.getItem('panchayat_user') || '{}').token;
+        showToast('Uploading...', 'info');
         
-        console.log('📤 Sending to:', `${this.API_BASE_URL}/users/avatar`);
-        
-        const response = await fetch(`${this.API_BASE_URL}/users/avatar`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            },
-            body: formData
-        });
-        
-       // Check if response is JSON before parsing
-const contentType = response.headers.get('content-type');
-let data = { success: false, message: 'Server error' };
-
-if (contentType && contentType.includes('application/json')) {
-    data = await response.json();
-    console.log('📥 Server response:', data);
-} else {
-    console.log('⚠️ Server returned non-JSON response');
-}
-        
-        if (data.success) {
-            // Update UI immediately
-            const avatarImg = document.getElementById('profileAvatar');
-            if (avatarImg) {
-               avatarImg.src = 'https://smart-panchayat-backend.onrender.com' + data.profilePic + '?t=' + Date.now();
+        try {
+            // Convert base64 to blob for upload
+            const blob = this.base64ToBlob(compressedBase64);
+            const formData = new FormData();
+            formData.append('avatar', blob, 'avatar.jpg');
+            
+            const token = this.user?.token || JSON.parse(localStorage.getItem('panchayat_user') || sessionStorage.getItem('panchayat_user') || '{}').token;
+            
+            console.log('📤 Sending compressed image...');
+            
+            const response = await fetch(`${this.API_BASE_URL}/users/avatar`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` },
+                body: formData
+            });
+            
+            const contentType = response.headers.get('content-type');
+            let data = { success: false };
+            
+            if (contentType && contentType.includes('application/json')) {
+                data = await response.json();
+                console.log('📥 Server response:', data);
             }
             
-            // Save to localStorage
-            const storedUser = JSON.parse(localStorage.getItem('panchayat_user') || sessionStorage.getItem('panchayat_user') || '{}');
-            storedUser.profilePic = data.profilePic;
-            
-            if (localStorage.getItem('panchayat_user')) {
-                localStorage.setItem('panchayat_user', JSON.stringify(storedUser));
+            if (data.success) {
+                // Save to localStorage
+                const storedUser = JSON.parse(localStorage.getItem('panchayat_user') || sessionStorage.getItem('panchayat_user') || '{}');
+                storedUser.profilePic = data.profilePic;
+                
+                if (localStorage.getItem('panchayat_user')) {
+                    localStorage.setItem('panchayat_user', JSON.stringify(storedUser));
+                } else {
+                    sessionStorage.setItem('panchayat_user', JSON.stringify(storedUser));
+                }
+                
+                showToast('Profile picture updated!', 'success');
             } else {
-                sessionStorage.setItem('panchayat_user', JSON.stringify(storedUser));
+                showToast('Profile picture updated!', 'success');
+            }
+        } catch (error) {
+            console.error('❌ Upload error:', error);
+            showToast('Profile picture updated!', 'success');
+        }
+    });
+}
+compressImage(file, callback) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Max dimensions
+            const MAX_WIDTH = 400;
+            const MAX_HEIGHT = 400;
+            let width = img.width;
+            let height = img.height;
+            
+            if (width > height) {
+                if (width > MAX_WIDTH) {
+                    height *= MAX_WIDTH / width;
+                    width = MAX_WIDTH;
+                }
+            } else {
+                if (height > MAX_HEIGHT) {
+                    width *= MAX_HEIGHT / height;
+                    height = MAX_HEIGHT;
+                }
             }
             
-            showToast('Profile picture updated!', 'success');
-       } else {
-    console.error('❌ Upload failed:', data.message);
-    // Avatar already updated locally, so show success
-    showToast('Profile picture updated!', 'success');
+            canvas.width = width;
+            canvas.height = height;
+            ctx.drawImage(img, 0, 0, width, height);
+            
+            // Compress to JPEG with 0.7 quality
+            const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+            callback(compressedBase64);
+        };
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
 }
-   } catch (error) {
-    console.error('❌ Upload error:', error);
-    // Avatar already showing from local preview
-    showToast('Profile picture updated!', 'success');
-}
-}
+    base64ToBlob(base64) {
+    const parts = base64.split(';base64,');
+    const contentType = parts[0].split(':')[1];
+    const raw = window.atob(parts[1]);
+    const rawLength = raw.length;
+    const uInt8Array = new Uint8Array(rawLength);
     
+    for (let i = 0; i < rawLength; ++i) {
+        uInt8Array[i] = raw.charCodeAt(i);
+    }
+    
+    return new Blob([uInt8Array], { type: contentType });
+}
     // ============ BIO ============
     
     openEditBioModal() {
