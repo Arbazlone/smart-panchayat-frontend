@@ -288,7 +288,7 @@ function createAvatar(user, size = 'md') {
         
         console.log('Creating avatar with image:', imageUrl);
         
-        return `<img src="${imageUrl}" class="avatar ${sizeClass}" alt="${user?.name || 'User'}" style="object-fit: cover;" onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';">`;
+       return `<img src="${imageUrl}" class="avatar ${sizeClass}" alt="${user?.name || 'User'}" style="object-fit: cover;" onerror="if(this&&this.style)this.style.display='none';">`;
     }
     
     // Fallback to initials
