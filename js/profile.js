@@ -387,24 +387,34 @@ if (el('userPhone')) {
                 el('profileName').innerHTML += ' <i class="fas fa-check-circle" style="color: var(--primary-green);"></i>';
             }
             
-         if (data.avatar || data.profilePic) {
+        if (data.avatar || data.profilePic) {
     const pic = data.avatar || data.profilePic;
     let imageUrl = pic;
     
-    // Handle both base64 and URL paths
-    if (pic.startsWith('data:image')) {
-        imageUrl = pic;
-    } else if (pic.startsWith('http')) {
-        imageUrl = pic;
-    } else {
+    if (!pic.startsWith('data:image') && !pic.startsWith('http')) {
         imageUrl = 'https://smart-panchayat-backend.onrender.com' + pic;
     }
     
-    // Update all avatar elements
+    // For img tags
     if (el('profileAvatar')) el('profileAvatar').src = imageUrl;
-    if (el('userAvatarLarge')) el('userAvatarLarge').src = imageUrl;
-    if (el('userAvatarSmall')) el('userAvatarSmall').src = imageUrl;
-    if (el('sidebarAvatar')) el('sidebarAvatar').src = imageUrl;
+    
+    // For div avatars - use background-image
+    const smallAvatar = el('userAvatarSmall');
+    const largeAvatar = el('userAvatarLarge');
+    
+    if (smallAvatar) {
+        smallAvatar.style.backgroundImage = `url('${imageUrl}')`;
+        smallAvatar.style.backgroundSize = 'cover';
+        smallAvatar.style.backgroundPosition = 'center';
+        smallAvatar.innerHTML = ''; // Remove "AH" text
+    }
+    
+    if (largeAvatar) {
+        largeAvatar.style.backgroundImage = `url('${imageUrl}')`;
+        largeAvatar.style.backgroundSize = 'cover';
+        largeAvatar.style.backgroundPosition = 'center';
+        largeAvatar.innerHTML = '';
+    }
 }
             
             if (el('totalPosts')) el('totalPosts').textContent = data.stats?.posts || 0;
@@ -840,8 +850,27 @@ if (el('userPhone')) {
     // Compress image first
     this.compressImage(file, async (compressedBase64) => {
         // Update preview immediately
-        const avatarImg = document.getElementById('profileAvatar');
-        if (avatarImg) avatarImg.src = compressedBase64;
+       // Update img tag
+const avatarImg = document.getElementById('profileAvatar');
+if (avatarImg) avatarImg.src = compressedBase64;
+
+// Also update div avatars with background-image
+const smallAvatar = document.getElementById('userAvatarSmall');
+const largeAvatar = document.getElementById('userAvatarLarge');
+
+if (smallAvatar) {
+    smallAvatar.style.backgroundImage = `url('${compressedBase64}')`;
+    smallAvatar.style.backgroundSize = 'cover';
+    smallAvatar.style.backgroundPosition = 'center';
+    smallAvatar.innerHTML = '';
+}
+
+if (largeAvatar) {
+    largeAvatar.style.backgroundImage = `url('${compressedBase64}')`;
+    largeAvatar.style.backgroundSize = 'cover';
+    largeAvatar.style.backgroundPosition = 'center';
+    largeAvatar.innerHTML = '';
+}
         
         showToast('Uploading...', 'info');
         
