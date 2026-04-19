@@ -274,10 +274,7 @@ function createAvatar(user, size = 'md') {
     let profilePic = user?.profilePic || user?.avatar || user?.profile_pic;
     
     // If not found, check storage
-    if (!profilePic || profilePic === 'null' || profilePic === 'undefined') {
-        const stored = JSON.parse(localStorage.getItem('panchayat_user') || sessionStorage.getItem('panchayat_user') || '{}');
-        profilePic = stored.profilePic || stored.avatar;
-    }
+    
     
     if (profilePic && profilePic !== 'null' && profilePic !== 'undefined') {
         let imageUrl = profilePic;
