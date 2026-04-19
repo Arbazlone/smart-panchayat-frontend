@@ -41,35 +41,45 @@ class DashboardManager {
         setInterval(() => this.loadNotificationCount(), 30000);
     }
     
-    async refreshUserData() {
-        try {
-            const response = await fetch(`${this.API_BASE_URL}/auth/me`, {
-                headers: { 'Authorization': `Bearer ${this.currentUser.token}` }
-            });
-            const data = await response.json();
+   async refreshUserData() {
+    try {
+        const response = await fetch(`${this.API_BASE_URL}/auth/me`, {
+            headers: { 'Authorization': `Bearer ${this.currentUser.token}` }
+        });
+        const data = await response.json();
+        
+        if (data.success && data.user) {
+            this.currentUser.isProvider = data.user.isProvider || false;
+            this.currentUser.role = data.user.role || 'user';
+            this.currentUser.providerDetails = data.user.providerDetails || null;
+            this.currentUser.isVerified = data.user.isVerified || false;
             
-            if (data.success && data.user) {
-                this.currentUser.isProvider = data.user.isProvider || false;
-                this.currentUser.role = data.user.role || 'user';
-                this.currentUser.providerDetails = data.user.providerDetails || null;
-                this.currentUser.isVerified = data.user.isVerified || false;
-                
-                const storedUser = JSON.parse(localStorage.getItem('panchayat_user') || sessionStorage.getItem('panchayat_user') || '{}');
-                storedUser.isProvider = data.user.isProvider;
-                storedUser.role = data.user.role;
-                storedUser.providerDetails = data.user.providerDetails;
-                storedUser.isVerified = data.user.isVerified;
-                
-                if (localStorage.getItem('panchayat_user')) {
-                    localStorage.setItem('panchayat_user', JSON.stringify(storedUser));
-                } else {
-                    sessionStorage.setItem('panchayat_user', JSON.stringify(storedUser));
-                }
+            // ✅ ADD THIS: Get profile picture from API
+            if (data.user.profilePic || data.user.avatar) {
+                this.currentUser.profilePic = data.user.profilePic || data.user.avatar;
             }
-        } catch (error) {
-            console.warn('Could not refresh user data:', error);
+            
+            const storedUser = JSON.parse(localStorage.getItem('panchayat_user') || sessionStorage.getItem('panchayat_user') || '{}');
+            storedUser.isProvider = data.user.isProvider;
+            storedUser.role = data.user.role;
+            storedUser.providerDetails = data.user.providerDetails;
+            storedUser.isVerified = data.user.isVerified;
+            
+            // ✅ ADD THIS: Save profilePic to storage too
+            if (data.user.profilePic || data.user.avatar) {
+                storedUser.profilePic = data.user.profilePic || data.user.avatar;
+            }
+            
+            if (localStorage.getItem('panchayat_user')) {
+                localStorage.setItem('panchayat_user', JSON.stringify(storedUser));
+            } else {
+                sessionStorage.setItem('panchayat_user', JSON.stringify(storedUser));
+            }
         }
+    } catch (error) {
+        console.warn('Could not refresh user data:', error);
     }
+}
     
     initUI() {
     document.getElementById('userNameDisplay').textContent = this.currentUser.name || 'User';
