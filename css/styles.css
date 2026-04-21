@@ -3878,3 +3878,8 @@ textarea:disabled {
     background: var(--gray-50) !important;
     cursor: default !important;
 }
+[data-theme="dark"] #langSwitcher {
+    background: #2d2d2d;
+    color: #fff;
+    border-color: #404040;
+}
