@@ -1,52 +1,56 @@
-// Smart Panchayat - Fast Translation with Caching
+// Smart Panchayat - Google Translate (Unlimited Free + Dynamic Content)
 class PageTranslator {
     constructor() {
         this.currentLang = localStorage.getItem('language') || 'en';
-        this.translationCache = new Map();
-        this.originalTexts = new Map();
-        this.apiUrl = 'https://api.mymemory.translated.net/get';
+        this.retryAttempts = 0;
+        this.maxRetries = 10;
         this.init();
     }
     
     init() {
-        this.captureOriginalTexts();
         this.addLanguageSwitcherToTopBar();
+        this.addGoogleTranslateWidget();
+        
         if (this.currentLang !== 'en') {
-            setTimeout(() => this.translatePage(this.currentLang), 300);
+            setTimeout(() => this.triggerGoogleTranslate(this.currentLang), 500);
         }
+        
+        // Make available globally
+        window.translator = this;
     }
     
-    captureOriginalTexts() {
-        this.originalTexts.clear();
-        const walker = document.createTreeWalker(
-            document.body,
-            NodeFilter.SHOW_TEXT,
-            {
-                acceptNode: (node) => {
-                    const parent = node.parentElement;
-                    if (!parent || parent.tagName === 'SCRIPT' || parent.tagName === 'STYLE' || 
-                        parent.tagName === 'NOSCRIPT' || parent.tagName === 'CODE' ||
-                        parent.id === 'languageSwitcher' || parent.closest('#langSwitcher')) {
-                        return NodeFilter.FILTER_REJECT;
-                    }
-                    const text = node.textContent.trim();
-                    if (text.length < 2) return NodeFilter.FILTER_REJECT;
-                    return NodeFilter.FILTER_ACCEPT;
-                }
-            }
-        );
+    addGoogleTranslateWidget() {
+        // Skip if already added
+        if (document.getElementById('google_translate_element')) return;
         
-        while (walker.nextNode()) {
-            const node = walker.currentNode;
-            const text = node.textContent.trim();
-            if (!this.originalTexts.has(node)) {
-                this.originalTexts.set(node, text);
+        const div = document.createElement('div');
+        div.id = 'google_translate_element';
+        div.style.display = 'none';
+        document.body.appendChild(div);
+        
+        const script = document.createElement('script');
+        script.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateInit';
+        document.body.appendChild(script);
+        
+        window.googleTranslateInit = () => {
+            new google.translate.TranslateElement({
+                pageLanguage: 'en',
+                includedLanguages: 'hi,ur,pa',
+                layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+                autoDisplay: false
+            }, 'google_translate_element');
+            
+            // Retry if language was set before widget loaded
+            if (this.currentLang !== 'en') {
+                setTimeout(() => this.triggerGoogleTranslate(this.currentLang), 300);
             }
-        }
+        };
     }
     
     addLanguageSwitcherToTopBar() {
-        // Create wrapper for top bar placement
+        // Skip if already exists
+        if (document.getElementById('langSwitcher')) return;
+        
         const wrapper = document.createElement('div');
         wrapper.className = 'lang-switcher-wrapper';
         wrapper.style.cssText = `
@@ -84,106 +88,60 @@ class PageTranslator {
             select.appendChild(opt);
         });
         
-        select.addEventListener('change', async (e) => {
+        select.addEventListener('change', (e) => {
             const lang = e.target.value;
             localStorage.setItem('language', lang);
+            this.currentLang = lang;
             
             if (lang === 'en') {
-                this.restoreOriginalTexts();
-                document.body.style.direction = 'ltr';
+                location.reload();
             } else {
                 select.disabled = true;
                 select.style.opacity = '0.6';
-                await this.translatePage(lang);
-                select.disabled = false;
-                select.style.opacity = '1';
-                document.body.style.direction = lang === 'ur' ? 'rtl' : 'ltr';
+                this.triggerGoogleTranslate(lang);
+                setTimeout(() => {
+                    select.disabled = false;
+                    select.style.opacity = '1';
+                }, 1000);
             }
+            document.body.style.direction = lang === 'ur' ? 'rtl' : 'ltr';
         });
         
         wrapper.appendChild(select);
         
-        // Try to add to multiple possible top bar locations
         const topBar = document.querySelector('.header-top, .navbar, nav, header, .top-bar, .flex.items-center');
         if (topBar) {
             topBar.appendChild(wrapper);
         } else {
-            // Fallback - fixed position top right
-            wrapper.style.cssText += `
-                position: fixed;
-                top: 10px;
-                right: 10px;
-                z-index: 9999;
-            `;
+            wrapper.style.cssText += `position: fixed; top: 10px; right: 10px; z-index: 9999;`;
             document.body.appendChild(wrapper);
         }
     }
     
-    async translatePage(targetLang) {
-        const nodes = [];
-        const texts = [];
+    triggerGoogleTranslate(lang, attempts = 0) {
+        const googleSelect = document.querySelector('.goog-te-combo');
         
-        for (const [node, text] of this.originalTexts) {
-            if (text.length > 0) {
-                nodes.push(node);
-                texts.push(text);
-            }
-        }
-        
-        // Process in batches of 5 for speed
-        const batchSize = 5;
-        for (let i = 0; i < texts.length; i += batchSize) {
-            const batchTexts = texts.slice(i, i + batchSize);
-            const batchNodes = nodes.slice(i, i + batchSize);
-            
-            await Promise.all(batchTexts.map(async (text, idx) => {
-                const node = batchNodes[idx];
-                const cacheKey = `${targetLang}:${text}`;
-                
-                // Check cache first
-                if (this.translationCache.has(cacheKey)) {
-                    node.textContent = this.translationCache.get(cacheKey);
-                    return;
-                }
-                
-                try {
-                    const url = `${this.apiUrl}?q=${encodeURIComponent(text)}&langpair=en|${targetLang}`;
-                    const response = await fetch(url);
-                    const data = await response.json();
-                    
-                    if (data.responseData?.translatedText) {
-                        const translated = data.responseData.translatedText;
-                        this.translationCache.set(cacheKey, translated);
-                        node.textContent = translated;
-                    }
-                } catch (error) {
-                    // Silent fail - keep original text
-                }
-            }));
-            
-            // Tiny delay between batches
-            await this.sleep(50);
+        if (googleSelect) {
+            googleSelect.value = lang;
+            googleSelect.dispatchEvent(new Event('change'));
+            this.retryAttempts = 0;
+        } else if (attempts < this.maxRetries) {
+            setTimeout(() => this.triggerGoogleTranslate(lang, attempts + 1), 200);
+        } else {
+            console.warn('Google Translate widget failed to load');
         }
     }
     
-    restoreOriginalTexts() {
-        for (const [node, text] of this.originalTexts) {
-            node.textContent = text;
+    // Call this after dynamic content loads (Load More, new posts, etc.)
+    refreshDynamicContent() {
+        if (this.currentLang !== 'en') {
+            // Small delay to let DOM update
+            setTimeout(() => this.triggerGoogleTranslate(this.currentLang), 100);
         }
-    }
-    
-        sleep(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
-    
-    async refreshTranslation() {
-        if (this.currentLang === 'en') return;
-        this.captureOriginalTexts();
-        await this.translatePage(this.currentLang);
     }
 }
 
-// Initialize
+// Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
-    window.translator = new PageTranslator();
+    new PageTranslator();
 });

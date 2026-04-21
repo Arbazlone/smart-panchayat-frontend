@@ -373,11 +373,7 @@ async markAllRead() {
             
             this.hasMore = data.hasMore || false;
             this.renderFeed();
-            setTimeout(() => {
-    if (window.translator && window.translator.currentLang !== 'en') {
-        window.translator.refreshTranslation();
-    }
-}, 100);
+        
         } else {
             this.showEmptyFeed();
         }
@@ -428,14 +424,10 @@ async markAllRead() {
             return;
         }
         container.innerHTML = this.posts.map(post => this.renderPostCard(post)).join('');
+        if (window.translator) window.translator.refreshDynamicContent();
         
 
-// ✅ ADD THIS
-setTimeout(() => {
-    if (window.translator && window.translator.currentLang !== 'en') {
-        window.translator.refreshTranslation();
-    }
-}, 100);
+
     }
     
     renderPostCard(post) {
@@ -1164,6 +1156,7 @@ overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.rem
                 this.posts.unshift(data.post);
                 this.renderFeed();
                 await this.loadUserStats();
+                if (window.translator) window.translator.refreshDynamicContent();
             } else { showToast(data.message || 'Failed', 'error'); }
         } catch (error) { showToast('Network error', 'error'); }
         finally { submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Post'; submitBtn.disabled = false; }
