@@ -1,54 +1,66 @@
-// Smart Panchayat - Google Translate (Unlimited Free + Dynamic Content)
+// Smart Panchayat - Microsoft Translator (Free, No Limits, Reliable)
 class PageTranslator {
     constructor() {
         this.currentLang = localStorage.getItem('language') || 'en';
-        this.retryAttempts = 0;
-        this.maxRetries = 10;
+        this.apiKey = null;
+        this.originalTexts = new Map();
+        this.translationCache = new Map();
         this.init();
     }
     
-    init() {
+    async init() {
+        await this.getToken();
+        this.captureOriginalTexts();
         this.addLanguageSwitcherToTopBar();
-        this.addGoogleTranslateWidget();
         
         if (this.currentLang !== 'en') {
-            setTimeout(() => this.triggerGoogleTranslate(this.currentLang), 500);
+            setTimeout(() => this.translatePage(this.currentLang), 500);
         }
         
-        // Make available globally
         window.translator = this;
     }
     
-    addGoogleTranslateWidget() {
-        // Skip if already added
-        if (document.getElementById('google_translate_element')) return;
+    async getToken() {
+        try {
+            const res = await fetch('https://edge.microsoft.com/translate/auth');
+            this.apiKey = await res.text();
+            console.log('✅ Microsoft Translator ready');
+        } catch (e) {
+            console.warn('⚠️ Microsoft Translator unavailable');
+        }
+    }
+    
+    captureOriginalTexts() {
+        this.originalTexts.clear();
         
-        const div = document.createElement('div');
-        div.id = 'google_translate_element';
-        div.style.display = 'none';
-        document.body.appendChild(div);
-        
-        const script = document.createElement('script');
-        script.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateInit';
-        document.body.appendChild(script);
-        
-        window.googleTranslateInit = () => {
-            new google.translate.TranslateElement({
-                pageLanguage: 'en',
-                includedLanguages: 'hi,ur,pa',
-                layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
-                autoDisplay: false
-            }, 'google_translate_element');
-            
-            // Retry if language was set before widget loaded
-            if (this.currentLang !== 'en') {
-                setTimeout(() => this.triggerGoogleTranslate(this.currentLang), 300);
+        const walker = document.createTreeWalker(
+            document.body,
+            NodeFilter.SHOW_TEXT,
+            {
+                acceptNode: (node) => {
+                    const parent = node.parentElement;
+                    if (!parent || parent.tagName === 'SCRIPT' || parent.tagName === 'STYLE' || 
+                        parent.tagName === 'NOSCRIPT' || parent.tagName === 'CODE' ||
+                        parent.id === 'langSwitcher' || parent.closest('#langSwitcher')) {
+                        return NodeFilter.FILTER_REJECT;
+                    }
+                    const text = node.textContent.trim();
+                    if (text.length < 2) return NodeFilter.FILTER_REJECT;
+                    return NodeFilter.FILTER_ACCEPT;
+                }
             }
-        };
+        );
+        
+        while (walker.nextNode()) {
+            const node = walker.currentNode;
+            const text = node.textContent.trim();
+            if (!this.originalTexts.has(node)) {
+                this.originalTexts.set(node, text);
+            }
+        }
     }
     
     addLanguageSwitcherToTopBar() {
-        // Skip if already exists
         if (document.getElementById('langSwitcher')) return;
         
         const wrapper = document.createElement('div');
@@ -88,23 +100,22 @@ class PageTranslator {
             select.appendChild(opt);
         });
         
-        select.addEventListener('change', (e) => {
+        select.addEventListener('change', async (e) => {
             const lang = e.target.value;
             localStorage.setItem('language', lang);
             this.currentLang = lang;
             
             if (lang === 'en') {
-                location.reload();
+                this.restoreOriginalTexts();
+                document.body.style.direction = 'ltr';
             } else {
                 select.disabled = true;
                 select.style.opacity = '0.6';
-                this.triggerGoogleTranslate(lang);
-                setTimeout(() => {
-                    select.disabled = false;
-                    select.style.opacity = '1';
-                }, 1000);
+                await this.translatePage(lang);
+                select.disabled = false;
+                select.style.opacity = '1';
+                document.body.style.direction = lang === 'ur' ? 'rtl' : 'ltr';
             }
-            document.body.style.direction = lang === 'ur' ? 'rtl' : 'ltr';
         });
         
         wrapper.appendChild(select);
@@ -118,30 +129,74 @@ class PageTranslator {
         }
     }
     
-    triggerGoogleTranslate(lang, attempts = 0) {
-        const googleSelect = document.querySelector('.goog-te-combo');
+    async translatePage(targetLang) {
+        if (!this.apiKey) {
+            console.warn('No API key available');
+            return;
+        }
         
-        if (googleSelect) {
-            googleSelect.value = lang;
-            googleSelect.dispatchEvent(new Event('change'));
-            this.retryAttempts = 0;
-        } else if (attempts < this.maxRetries) {
-            setTimeout(() => this.triggerGoogleTranslate(lang, attempts + 1), 200);
-        } else {
-            console.warn('Google Translate widget failed to load');
+        const nodes = [];
+        const texts = [];
+        
+        for (const [node, text] of this.originalTexts) {
+            if (text.length > 0) {
+                nodes.push(node);
+                texts.push(text);
+            }
+        }
+        
+        // Process in batches of 25
+        const batchSize = 25;
+        for (let i = 0; i < texts.length; i += batchSize) {
+            const batch = texts.slice(i, i + batchSize);
+            const nodeBatch = nodes.slice(i, i + batchSize);
+            
+            try {
+                const url = `https://api.cognitive.microsofttranslator.com/translate?api-version=3.0&to=${targetLang}`;
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${this.apiKey}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(batch.map(t => ({ Text: t })))
+                });
+                
+                const data = await response.json();
+                
+                data.forEach((item, idx) => {
+                    if (nodeBatch[idx] && item.translations[0]) {
+                        nodeBatch[idx].textContent = item.translations[0].text;
+                        this.translationCache.set(`${targetLang}:${batch[idx]}`, item.translations[0].text);
+                    }
+                });
+            } catch (error) {
+                console.warn('Translation batch failed:', error);
+            }
+            
+            await this.sleep(50);
         }
     }
     
-    // Call this after dynamic content loads (Load More, new posts, etc.)
-    refreshDynamicContent() {
-        if (this.currentLang !== 'en') {
-            // Small delay to let DOM update
-            setTimeout(() => this.triggerGoogleTranslate(this.currentLang), 100);
+    restoreOriginalTexts() {
+        for (const [node, text] of this.originalTexts) {
+            node.textContent = text;
         }
+    }
+    
+    async refreshDynamicContent() {
+        if (this.currentLang !== 'en') {
+            this.captureOriginalTexts();
+            await this.translatePage(this.currentLang);
+        }
+    }
+    
+    sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 }
 
-// Initialize on page load
+// Initialize
 document.addEventListener('DOMContentLoaded', () => {
     new PageTranslator();
 });
