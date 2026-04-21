@@ -373,6 +373,11 @@ async markAllRead() {
             
             this.hasMore = data.hasMore || false;
             this.renderFeed();
+            setTimeout(() => {
+    if (window.translator && window.translator.currentLang !== 'en') {
+        window.translator.refreshTranslation();
+    }
+}, 100);
         } else {
             this.showEmptyFeed();
         }
@@ -423,6 +428,14 @@ async markAllRead() {
             return;
         }
         container.innerHTML = this.posts.map(post => this.renderPostCard(post)).join('');
+        
+
+// ✅ ADD THIS
+setTimeout(() => {
+    if (window.translator && window.translator.currentLang !== 'en') {
+        window.translator.refreshTranslation();
+    }
+}, 100);
     }
     
     renderPostCard(post) {
@@ -1189,6 +1202,7 @@ overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.rem
     }
     
     this.renderFeed();
+    
     
     try {
         const response = await fetch(`${this.API_BASE_URL}/posts/${postId}/like`, {

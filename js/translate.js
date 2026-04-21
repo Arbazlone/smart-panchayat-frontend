@@ -17,6 +17,7 @@ class PageTranslator {
     }
     
     captureOriginalTexts() {
+        this.originalTexts.clear();
         const walker = document.createTreeWalker(
             document.body,
             NodeFilter.SHOW_TEXT,
@@ -171,8 +172,14 @@ class PageTranslator {
         }
     }
     
-    sleep(ms) {
+        sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
+    }
+    
+    async refreshTranslation() {
+        if (this.currentLang === 'en') return;
+        this.captureOriginalTexts();
+        await this.translatePage(this.currentLang);
     }
 }
 
