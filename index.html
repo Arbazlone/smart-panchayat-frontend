@@ -6,7 +6,7 @@
     
     <!-- Enhanced Meta Tags for SEO & Social Sharing -->
     <title>Smart Panchayat — Digital Rural Governance</title>
-    <meta name="description" content="Empowering Gram Panchayats with complaint tracking, service marketplace, emergency SOS, and local language support. Connect with your village community.">
+    <meta name="description" content="Empowering Gram Panchayats with complaint tracking, service marketplace, emergency SOS, and local language support.">
     <meta name="theme-color" content="#2E7D32">
     
     <!-- Open Graph / WhatsApp / LinkedIn Preview -->
@@ -20,6 +20,10 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Smart Panchayat">
     <meta name="twitter:description" content="Digital governance for Gram Panchayats">
+    
+    <!-- Preload critical assets for faster loading -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style">
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style">
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -58,8 +62,8 @@
             --success: #43A047;
             --error: #E53935;
             --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
-            --shadow-md: 0 8px 24px rgba(0,0,0,0.1);
-            --shadow-lg: 0 16px 32px rgba(0,0,0,0.12);
+            --shadow-md: 0 8px 24px rgba(0,0,0,0.08);
+            --shadow-lg: 0 16px 32px rgba(0,0,0,0.1);
         }
         
         body {
@@ -78,11 +82,11 @@
             width: 100%;
             max-width: 420px;
             margin: 0 auto;
-            animation: slideUp 0.5s ease;
+            animation: slideUp 0.4s ease-out;
         }
         
         @keyframes slideUp {
-            from { opacity: 0; transform: translateY(30px); }
+            from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
         
@@ -90,6 +94,12 @@
         .logo-section {
             text-align: center;
             margin-bottom: 24px;
+            animation: fadeIn 0.6s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
         
         .logo-icon {
@@ -102,12 +112,11 @@
             justify-content: center;
             margin: 0 auto 16px;
             box-shadow: var(--shadow-md);
-            animation: pulse 2s infinite;
+            transition: transform 0.3s ease;
         }
         
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.02); }
+        .logo-icon:hover {
+            transform: scale(1.02);
         }
         
         .logo-icon i {
@@ -136,7 +145,13 @@
             padding: 28px 24px;
             box-shadow: var(--shadow-lg);
             backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: cardPop 0.5s ease-out;
+        }
+        
+        @keyframes cardPop {
+            0% { opacity: 0; transform: scale(0.95); }
+            100% { opacity: 1; transform: scale(1); }
         }
         
         /* Tabs */
@@ -171,15 +186,15 @@
         /* Forms */
         .auth-form {
             display: none;
-            animation: fadeIn 0.3s ease;
+            animation: formFade 0.3s ease;
         }
         
         .auth-form.active {
             display: block;
         }
         
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateX(-10px); }
+        @keyframes formFade {
+            from { opacity: 0; transform: translateX(-8px); }
             to { opacity: 1; transform: translateX(0); }
         }
         
@@ -237,6 +252,13 @@
         
         .input-field.error {
             border-color: var(--error);
+            animation: shake 0.3s ease;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-4px); }
+            75% { transform: translateX(4px); }
         }
         
         .error-message {
@@ -300,7 +322,7 @@
             font-weight: 500;
         }
         
-        /* Buttons - Enhanced with Accent Color */
+        /* Buttons */
         .btn {
             width: 100%;
             padding: 16px;
@@ -317,14 +339,14 @@
         }
         
         .btn-primary {
-            background: linear-gradient(135deg, var(--accent-orange), #E55A2B);
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white;
-            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+            box-shadow: 0 4px 12px rgba(46, 125, 50, 0.25);
         }
         
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(255, 107, 53, 0.4);
+            box-shadow: 0 6px 16px rgba(46, 125, 50, 0.35);
         }
         
         .btn-primary:active {
@@ -450,9 +472,15 @@
         .how-it-works {
             margin-top: 32px;
             padding: 24px 16px;
-            background: rgba(255,255,255,0.8);
+            background: rgba(255,255,255,0.85);
             border-radius: 28px;
             backdrop-filter: blur(10px);
+            animation: fadeUp 0.7s ease-out 0.2s both;
+        }
+        
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
         .how-it-works h3 {
@@ -472,6 +500,11 @@
         .step-item {
             text-align: center;
             flex: 1;
+            transition: transform 0.2s ease;
+        }
+        
+        .step-item:hover {
+            transform: translateY(-3px);
         }
         
         .step-num {
@@ -507,6 +540,7 @@
             justify-content: center;
             gap: 32px;
             margin-top: 20px;
+            animation: fadeUp 0.7s ease-out 0.3s both;
         }
         
         .feature {
@@ -514,6 +548,11 @@
             flex-direction: column;
             align-items: center;
             gap: 4px;
+            transition: transform 0.2s ease;
+        }
+        
+        .feature:hover {
+            transform: scale(1.05);
         }
         
         .feature i {
@@ -535,6 +574,7 @@
             margin-top: 20px;
             font-size: 14px;
             color: var(--gray-600);
+            animation: fadeIn 0.8s ease-out 0.4s both;
         }
         
         .auth-footer a {
@@ -553,6 +593,10 @@
             body {
                 padding: 12px;
                 align-items: flex-start;
+            }
+            
+            .auth-container {
+                margin-top: 10px;
             }
             
             .auth-card {
@@ -635,7 +679,7 @@
                 <div class="checkbox-wrapper">
                     <input type="checkbox" id="rememberMe" checked>
                     <label for="rememberMe">Remember me</label>
-                    <a href="#" onclick="showToast('Contact Panchayat Secretary', 'info'); return false;" style="margin-left: auto;">Forgot?</a>
+                    <a href="#" onclick="showToast('Contact Panchayat Secretary to reset password', 'info'); return false;" style="margin-left: auto;">Forgot?</a>
                 </div>
                 
                 <button type="submit" class="btn btn-primary" id="loginBtn">
@@ -648,10 +692,10 @@
                 </div>
                 
                 <div class="social-login">
-                    <button type="button" class="social-btn" onclick="showToast('Coming soon!', 'info')">
+                    <button type="button" class="social-btn" onclick="showToast('Google login coming soon!', 'info')">
                         <i class="fab fa-google"></i> Google
                     </button>
-                    <button type="button" class="social-btn" onclick="showToast('Coming soon!', 'info')">
+                    <button type="button" class="social-btn" onclick="showToast('Facebook login coming soon!', 'info')">
                         <i class="fab fa-facebook"></i> Facebook
                     </button>
                 </div>
@@ -718,7 +762,7 @@
                 
                 <div class="checkbox-wrapper">
                     <input type="checkbox" id="termsCheck">
-                    <label for="termsCheck">I agree to the <a href="#">Terms</a> and <a href="#">Privacy Policy</a></label>
+                    <label for="termsCheck">I agree to the <a href="#" onclick="showToast('Terms of Service', 'info'); return false;">Terms</a> and <a href="#" onclick="showToast('Privacy Policy', 'info'); return false;">Privacy Policy</a></label>
                 </div>
                 
                 <button type="submit" class="btn btn-primary" id="signupBtn">
@@ -795,7 +839,7 @@
         
         <!-- Footer -->
         <div class="auth-footer">
-            <p>By continuing, you agree to our <a href="#">Terms</a> • Made for Rural India 🇮🇳</p>
+            <p>By continuing, you agree to our <a href="#" onclick="showToast('Terms of Service', 'info'); return false;">Terms</a> • Made for Rural India 🇮🇳</p>
         </div>
     </div>
     
@@ -804,7 +848,6 @@
     
     <script src="js/utils.js"></script>
     <script src="js/auth.js"></script>
-    <script src="js/translate.js"></script>
     
     <script>
         // Smooth tab switching

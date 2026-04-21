@@ -30,6 +30,7 @@ class DashboardManager {
         
         this.initUI();
         this.setupEventListeners();
+         this.setupDashboardMenu();
         
         await this.getUserLocation();
         await this.loadFeed();
@@ -1438,7 +1439,128 @@ copyPostLink(postId) {
     toggleUserDropdown() { const d = document.getElementById('userDropdownMenu'); d.style.display = d.style.display === 'none' ? 'block' : 'none'; }
     
     logout() { localStorage.removeItem('panchayat_user'); sessionStorage.removeItem('panchayat_user'); location.href = 'index.html'; }
+
+    setupDashboardMenu() {
+        const avatarBtn = document.getElementById('userAvatarSmall');
+        if (!avatarBtn) return;
+        
+        avatarBtn.style.cursor = 'pointer';
+        avatarBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.showDashboardMenu();
+        });
+    }
+
+    showDashboardMenu() {
+        const menu = document.createElement('div');
+        menu.className = 'dashboard-menu-dropdown';
+        menu.style.cssText = `
+            position: fixed;
+            top: 60px;
+            right: 16px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            padding: 8px;
+            z-index: 10000;
+            min-width: 180px;
+            animation: slideDown 0.2s ease;
+        `;
+        
+        menu.innerHTML = `
+            <div class="menu-item" onclick="dashboardManager.goToProfile()">
+                <i class="fas fa-user"></i> My Profile
+            </div>
+            <div class="menu-item" onclick="dashboardManager.goToMyPosts()">
+                <i class="fas fa-newspaper"></i> My Posts
+            </div>
+            <div class="menu-item" onclick="dashboardManager.goToMyServices()">
+                <i class="fas fa-tools"></i> My Services
+            </div>
+            <div class="menu-item" onclick="dashboardManager.shareApp()">
+                <i class="fas fa-share-alt"></i> Share App
+            </div>
+            <div class="menu-divider" style="height:1px;background:#eee;margin:8px 0;"></div>
+            <div class="menu-item danger" onclick="dashboardManager.logout()">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </div>
+        `;
+        
+        const style = document.createElement('style');
+        style.textContent = `
+            .menu-item {
+                padding: 12px 16px;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                font-size: 14px;
+                font-weight: 500;
+                color: #333;
+                border-radius: 12px;
+                cursor: pointer;
+                transition: background 0.2s;
+            }
+            .menu-item:hover {
+                background: #f5f5f5;
+            }
+            .menu-item.danger {
+                color: #E53935;
+            }
+            .menu-item i {
+                width: 20px;
+            }
+            @keyframes slideDown {
+                from { opacity: 0; transform: translateY(-10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+        `;
+        document.head.appendChild(style);
+        document.body.appendChild(menu);
+        
+        setTimeout(() => {
+            document.addEventListener('click', function closeMenu(e) {
+                if (!menu.contains(e.target)) {
+                    menu.remove();
+                    document.removeEventListener('click', closeMenu);
+                }
+            });
+        }, 10);
+    }
+
+    goToProfile() {
+        window.location.href = 'profile.html';
+    }
+
+    goToMyPosts() {
+        this.switchFilter('all');
+        document.querySelector('.dashboard-menu-dropdown')?.remove();
+    }
+
+    goToMyServices() {
+        this.switchFilter('services');
+        document.querySelector('.dashboard-menu-dropdown')?.remove();
+    }
+
+    shareApp() {
+        const url = window.location.origin;
+        const text = 'Join Smart Panchayat — Digital Governance for Rural India';
+        
+        if (navigator.share) {
+            navigator.share({
+                title: 'Smart Panchayat',
+                text: text,
+                url: url
+            }).catch(() => {
+                navigator.clipboard?.writeText(url);
+                showToast('Link copied!', 'success');
+            });
+        } else {
+            navigator.clipboard?.writeText(url);
+            showToast('Link copied!', 'success');
+        }
+    }
 }
+
 
 // Global
 let dashboardManager;

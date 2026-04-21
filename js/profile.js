@@ -18,8 +18,11 @@ class ProfileManager {
     
     async init() {
         if (!requireAuth()) return;
-        
-        this.user = getCurrentUser();
+         this.setupProfileMenu();  // ✅ ADD THIS
+          const langSwitcher = document.getElementById('langSwitcher') || document.querySelector('.lang-switcher-wrapper');
+    if (langSwitcher) langSwitcher.style.display = 'none';
+    
+    this.user = getCurrentUser();
         
         const urlParams = new URLSearchParams(window.location.search);
         this.viewingUserId = urlParams.get('user');
@@ -518,11 +521,27 @@ if (pic) {
         window.location.href = `dashboard.html?filter=user&userId=${userId}`;
     }
     
-    shareProfile() {
-        const url = `${window.location.origin}/profile.html?user=${this.user.id}`;
+   shareProfile() {
+    const url = `${window.location.origin}/profile.html?user=${this.user.id}`;
+    const name = this.profileData?.name || 'my';
+    const text = `Check out ${name}'s profile on Smart Panchayat`;
+    
+    if (navigator.share) {
+        navigator.share({
+            title: 'Smart Panchayat Profile',
+            text: text,
+            url: url
+        }).catch((err) => {
+            if (err.name !== 'AbortError') {
+                navigator.clipboard?.writeText(url);
+                showToast('Profile link copied!', 'success');
+            }
+        });
+    } else {
         navigator.clipboard?.writeText(url);
         showToast('Profile link copied!', 'success');
     }
+}
     
     // ============ BADGE PROGRESS ============
     
@@ -1020,6 +1039,106 @@ compressImage(file, callback) {
         showToast('Password changed!', 'success');
         document.getElementById('passwordChangeForm')?.reset();
     }
+    setupProfileMenu() {
+    const avatarBtn = document.getElementById('userAvatarSmall') || document.getElementById('profileAvatar');
+    if (!avatarBtn) return;
+    
+    avatarBtn.style.cursor = 'pointer';
+    avatarBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.showProfileMenu();
+    });
+}
+
+showProfileMenu() {
+    const menu = document.createElement('div');
+    menu.className = 'profile-menu-dropdown';
+    menu.style.cssText = `
+        position: fixed;
+        top: 60px;
+        right: 16px;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        padding: 8px;
+        z-index: 10000;
+        min-width: 180px;
+        animation: slideDown 0.2s ease;
+    `;
+    
+    menu.innerHTML = `
+        <div class="profile-menu-item" onclick="profileManager.goToProfile()">
+            <i class="fas fa-user"></i> View Profile
+        </div>
+        <div class="profile-menu-item" onclick="profileManager.goToSettings()">
+            <i class="fas fa-cog"></i> Settings
+        </div>
+        <div class="profile-menu-item" onclick="profileManager.shareProfile()">
+            <i class="fas fa-share-alt"></i> Share Profile
+        </div>
+        <div class="profile-menu-divider" style="height:1px;background:#eee;margin:8px 0;"></div>
+        <div class="profile-menu-item danger" onclick="profileManager.logout()">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </div>
+    `;
+    
+    // Add styles
+    const style = document.createElement('style');
+    style.textContent = `
+        .profile-menu-item {
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .profile-menu-item:hover {
+            background: #f5f5f5;
+        }
+        .profile-menu-item.danger {
+            color: #E53935;
+        }
+        .profile-menu-item i {
+            width: 20px;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    `;
+    document.head.appendChild(style);
+    document.body.appendChild(menu);
+    
+    // Close on outside click
+    setTimeout(() => {
+        document.addEventListener('click', function closeMenu(e) {
+            if (!menu.contains(e.target)) {
+                menu.remove();
+                document.removeEventListener('click', closeMenu);
+            }
+        });
+    }, 10);
+}
+
+goToProfile() {
+    window.location.href = 'profile.html';
+}
+
+goToSettings() {
+    document.querySelector('.profile-tab[data-tab="settings"]')?.click();
+    document.querySelector('.profile-menu-dropdown')?.remove();
+}
+
+logout() {
+    localStorage.removeItem('panchayat_user');
+    sessionStorage.removeItem('panchayat_user');
+    window.location.href = 'index.html';
+}
     
     // ============ POSTS & SERVICES ============
     
@@ -1149,6 +1268,7 @@ async completeService(id) {}
 devDelay(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
 
 } // ← ADD THIS CLOSING BRACE - IT CLOSES THE CLASS
+
 
 // ============ GLOBAL ============
 
