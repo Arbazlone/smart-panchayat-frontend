@@ -76,6 +76,7 @@ class EmergencyManager {
     }
     
     async triggerEmergency() {
+         console.log('🚨 Emergency triggered! Type:', this.selectedEmergencyType);
         if (this.isTriggeringEmergency) return;
         
         if (!this.selectedEmergencyType) {
