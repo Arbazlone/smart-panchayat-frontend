@@ -262,7 +262,6 @@
 <body>
   <script>
     const userCheck = JSON.parse(localStorage.getItem('panchayat_user') || sessionStorage.getItem('panchayat_user') || '{}');
-    console.log('Role check:', userCheck.role);
     if (!userCheck.role || userCheck.role !== 'admin') {
         window.location.href = 'dashboard.html';
     }
