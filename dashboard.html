@@ -1010,6 +1010,19 @@
     <script src="js/emergency.js"></script>
     <script src="js/translate.js"></script>
     <script src="js/voice.js"></script>
+    <script>
+    // Simple voice button test
+    if (window.SpeechRecognition || window.webkitSpeechRecognition) {
+        const btn = document.createElement('button');
+        btn.innerHTML = '🎤';
+        btn.style.cssText = 'position:fixed;bottom:25px;right:20px;width:56px;height:56px;border-radius:50%;border:none;background:#FF6B35;color:white;font-size:24px;z-index:999;cursor:pointer;';
+        btn.onclick = () => alert('Voice button works! Add full voice.js for commands');
+        document.body.appendChild(btn);
+        console.log('✅ Voice test button added');
+    } else {
+        console.log('❌ Speech recognition not supported');
+    }
+</script>
     
 </body>
 </html>
