@@ -232,7 +232,7 @@ localStorage.setItem('panchayat_user', JSON.stringify(userData));
                 isProvider: data.user.isProvider
             };
             
-            sessionStorage.setItem('panchayat_user', JSON.stringify(userData));
+           localStorage.setItem('panchayat_user', JSON.stringify(userData));
             
             showToast('Account created! Redirecting...', 'success');
             
@@ -279,7 +279,7 @@ localStorage.setItem('panchayat_user', JSON.stringify(userData));
                     verified: true
                 };
                 
-                sessionStorage.setItem('panchayat_user', JSON.stringify(userData));
+              localStorage.setItem('panchayat_user', JSON.stringify(userData));
                 
                 setTimeout(() => {
                     window.location.href = 'dashboard.html';
