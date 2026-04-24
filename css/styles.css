@@ -3883,3 +3883,23 @@ textarea:disabled {
     color: #fff;
     border-color: #404040;
 }
+/* Voice Button Pulse */
+#voiceBtn.listening {
+    animation: voicePulse 1.5s infinite;
+    box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.5);
+}
+
+@keyframes voicePulse {
+    0% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.5); }
+    70% { box-shadow: 0 0 0 20px rgba(255, 0, 0, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
+}
+
+/* Voice floating buttons */
+#voiceBtn:hover {
+    transform: scale(1.1);
+}
+
+#voiceBtn .fa-beat {
+    animation: fa-beat 1s infinite;
+}
