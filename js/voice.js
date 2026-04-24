@@ -1,6 +1,5 @@
 /**
- * Smart Panchayat - Advanced Voice Command Module
- * Supports: English, Hindi, Urdu, Punjabi
+ * Smart Panchayat - Voice Command Module (Fixed)
  */
 
 class VoiceAssistant {
@@ -8,17 +7,6 @@ class VoiceAssistant {
         this.recognition = null;
         this.isListening = false;
         this.currentLang = localStorage.getItem('voiceLang') || 'en-IN';
-        this.wakeWordEnabled = true;
-        this.wakeWord = 'smart panchayat';
-        this.wakeWordDetected = false;
-        this.commandHistory = [];
-        
-        this.languages = {
-            'en-IN': { name: 'English', flag: '🇬🇧' },
-            'hi-IN': { name: 'हिन्दी', flag: '🇮🇳' },
-            'ur-IN': { name: 'اردو', flag: '🇵🇰' },
-            'pa-IN': { name: 'ਪੰਜਾਬੀ', flag: '🇮🇳' }
-        };
         
         this.init();
     }
@@ -27,113 +15,119 @@ class VoiceAssistant {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         
         if (!SpeechRecognition) {
-            console.warn('Voice recognition not supported in this browser');
+            console.warn('Voice recognition not supported');
             return;
         }
         
         this.recognition = new SpeechRecognition();
         this.recognition.continuous = false;
-        this.recognition.interimResults = false;
-        this.recognition.maxAlternatives = 1;
+        this.recognition.interimResults = true;
+        this.recognition.maxAlternatives = 3;
+        this.recognition.lang = this.currentLang;
         
         this.recognition.onresult = (event) => {
-            const transcript = event.results[0][0].transcript.toLowerCase().trim();
-            console.log('🎤 Heard:', transcript);
-            this.showFeedback(`"${transcript}"`);
-            this.processCommand(transcript);
+            let transcript = '';
+            for (let i = 0; i < event.results.length; i++) {
+                transcript += event.results[i][0].transcript;
+            }
+            transcript = transcript.toLowerCase().trim();
+            
+            if (event.results[0].isFinal) {
+                console.log('🎤 Final:', transcript);
+                this.showFeedback(`"${transcript}"`);
+                this.processCommand(transcript);
+            } else {
+                this.showFeedback(`...${transcript}`);
+            }
         };
         
         this.recognition.onerror = (event) => {
             console.error('🎤 Error:', event.error);
             if (event.error === 'not-allowed') {
-                showToast('Please allow microphone access in browser settings', 'error');
+                showToast('Please allow microphone access', 'error');
             }
             this.stopListening();
         };
         
         this.recognition.onend = () => {
+            if (this.isListening) {
+                this.updateButton(false);
+            }
             this.isListening = false;
-            this.updateButtonState();
+            this.updateButton(false);
         };
         
         this.buildUI();
     }
     
-    // ============ BUILD UI ============
-    
     buildUI() {
-        // Voice Button
+        // Mic Button Only - positioned above bottom nav
         const btn = document.createElement('button');
         btn.id = 'voiceBtn';
-        btn.className = 'voice-btn';
         btn.innerHTML = '<i class="fas fa-microphone"></i>';
-        btn.title = 'Voice Commands (Click to speak)';
+        btn.title = 'Voice Commands - Click to speak';
         btn.addEventListener('click', () => this.toggleListening());
+        btn.style.cssText = `
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #FF6B35, #E55A2B);
+            color: white;
+            font-size: 22px;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(255, 107, 53, 0.4);
+            z-index: 996;
+            transition: all 0.3s ease;
+        `;
         document.body.appendChild(btn);
         
-        // Language Selector
-        const langWrap = document.createElement('div');
-        langWrap.className = 'voice-lang-wrapper';
-        
-        const langBtn = document.createElement('button');
-        langBtn.className = 'voice-lang-btn';
-        langBtn.innerHTML = '🌐';
-        langBtn.title = 'Change voice language';
-        langBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const dropdown = document.getElementById('voiceLangDropdown');
-            if (dropdown) dropdown.classList.toggle('show');
-        });
-        langWrap.appendChild(langBtn);
-        
-        const dropdown = document.createElement('div');
-        dropdown.id = 'voiceLangDropdown';
-        dropdown.className = 'voice-lang-dropdown';
-        
-        Object.entries(this.languages).forEach(([code, lang]) => {
-            const item = document.createElement('div');
-            item.className = 'voice-lang-item';
-            item.innerHTML = `${lang.flag} ${lang.name}`;
-            if (code === this.currentLang) item.classList.add('active');
-            item.addEventListener('click', () => {
-                this.currentLang = code;
-                localStorage.setItem('voiceLang', code);
-                dropdown.classList.remove('show');
-                showToast(`Voice: ${lang.name}`, 'success');
-            });
-            dropdown.appendChild(item);
-        });
-        
-        document.body.appendChild(langWrap);
-        document.body.appendChild(dropdown);
-        
-        // Close dropdown on outside click
-        document.addEventListener('click', () => dropdown.classList.remove('show'));
-        
-        // Feedback Display
+        // Small feedback text near mic
         const feedback = document.createElement('div');
         feedback.id = 'voiceFeedback';
-        feedback.className = 'voice-feedback';
+        feedback.style.cssText = `
+            position: fixed;
+            bottom: 138px;
+            right: 16px;
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-size: 12px;
+            z-index: 996;
+            max-width: 200px;
+            display: none;
+            text-align: right;
+        `;
         document.body.appendChild(feedback);
         
-        // Help Button
-        const helpBtn = document.createElement('button');
-        helpBtn.className = 'voice-help-btn';
-        helpBtn.innerHTML = '?';
-        helpBtn.title = 'Voice Commands Help';
-        helpBtn.addEventListener('click', () => this.showHelp());
-        document.body.appendChild(helpBtn);
+        // Add pulse animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes voicePulse {
+                0% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.6); }
+                70% { box-shadow: 0 0 0 20px rgba(211, 47, 47, 0); }
+                100% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0); }
+            }
+            #voiceBtn:hover { transform: scale(1.08); }
+        `;
+        document.head.appendChild(style);
     }
     
-    updateButtonState() {
+    updateButton(listening) {
         const btn = document.getElementById('voiceBtn');
         if (!btn) return;
         
-        if (this.isListening) {
-            btn.classList.add('listening');
+        if (listening) {
+            btn.style.background = 'linear-gradient(135deg, #D32F2F, #B71C1C)';
+            btn.style.animation = 'voicePulse 1.5s infinite';
             btn.innerHTML = '<i class="fas fa-microphone-alt"></i>';
         } else {
-            btn.classList.remove('listening');
+            btn.style.background = 'linear-gradient(135deg, #FF6B35, #E55A2B)';
+            btn.style.animation = '';
             btn.innerHTML = '<i class="fas fa-microphone"></i>';
         }
     }
@@ -142,12 +136,10 @@ class VoiceAssistant {
         const fb = document.getElementById('voiceFeedback');
         if (!fb) return;
         fb.textContent = msg;
-        fb.classList.add('show');
-        clearTimeout(this.feedbackTimeout);
-        this.feedbackTimeout = setTimeout(() => fb.classList.remove('show'), 2000);
+        fb.style.display = 'block';
+        clearTimeout(this.fbTimeout);
+        this.fbTimeout = setTimeout(() => fb.style.display = 'none', 3000);
     }
-    
-    // ============ LISTENING ============
     
     toggleListening() {
         if (this.isListening) {
@@ -168,266 +160,274 @@ class VoiceAssistant {
         
         try {
             this.recognition.start();
-            this.updateButtonState();
-            this.showFeedback('🎤 Listening... Speak now');
+            this.updateButton(true);
+            this.showFeedback('🎤 Listening...');
         } catch (e) {
-            console.warn('Recognition error:', e);
             this.isListening = false;
-            this.updateButtonState();
+            this.updateButton(false);
         }
     }
     
     stopListening() {
         this.isListening = false;
-        try {
-            this.recognition.stop();
-        } catch (e) {}
-        this.updateButtonState();
-        this.showFeedback('');
+        try { this.recognition.stop(); } catch (e) {}
+        this.updateButton(false);
     }
     
-    // ============ SPEAK BACK ============
-    
-    speak(text) {
-        if ('speechSynthesis' in window) {
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = this.currentLang;
-            utterance.rate = 0.9;
-            utterance.volume = 0.8;
-            window.speechSynthesis.speak(utterance);
-        }
-    }
-    
-    // ============ COMMAND PROCESSING ============
-    
-    processCommand(transcript) {
-        // Service Creation
-        if (this.matchKeywords(transcript, ['service', 'plumber', 'electrician', 'carpenter', 'painter', 'सर्विस', 'प्लंबर', 'इलेक्ट्रीशियन', 'बढ़ई', 'पेंटर', 'kaam'])) {
-            this.createService(transcript);
+    processCommand(text) {
+        console.log('🔍 Processing:', text);
+        
+        // Detect language and set voice
+        if (/[अ-ह]/.test(text)) this.currentLang = 'hi-IN';
+        else if (/[أ-ي]/.test(text)) this.currentLang = 'ur-IN';
+        else if (/[ਅ-ੲ]/.test(text)) this.currentLang = 'pa-IN';
+        else this.currentLang = 'en-IN';
+        
+        // ============ SERVICE REQUEST ============
+        const serviceKeywords = [
+            'chahiye', 'service', 'kaam', 'karwana', 'carpenter', 'electrician',
+            'plumber', 'painter', 'mechanic', 'tutor', 'cleaner', 'doctor',
+            'सर्विस', 'सेवा', 'चाहिए', 'काम', 'प्लंबर', 'इलेक्ट्रीशियन',
+            'बढ़ई', 'पेंटर', 'मैकेनिक', 'टीचर', 'डॉक्टर', 'बिजली',
+            'plumber', 'electric', 'repair', 'fix', 'need'
+        ];
+        
+        if (serviceKeywords.some(k => text.includes(k))) {
+            this.createService(text);
             return;
         }
         
-        // Issue Reporting
-        if (this.matchKeywords(transcript, ['issue', 'report', 'problem', 'complain', 'समस्या', 'शिकायत', 'रिपोर्ट', 'खराब', 'टूटा'])) {
-            this.createIssue(transcript);
+        // ============ ISSUE REPORT ============
+        const issueKeywords = [
+            'problem', 'issue', 'report', 'complain', 'broken', 'not working',
+            'समस्या', 'शिकायत', 'खराब', 'टूटा', 'नहीं', 'रिपोर्ट',
+            'kharab', 'problem hai', 'gadbad'
+        ];
+        
+        if (issueKeywords.some(k => text.includes(k))) {
+            this.createIssue(text);
             return;
         }
         
-        // Emergency
-        if (this.matchKeywords(transcript, ['emergency', 'sos', 'help me', 'बचाओ', 'मदद', 'आपातकाल', 'इमरजेंसी'])) {
+        // ============ EMERGENCY ============
+        const emergencyKeywords = [
+            'emergency', 'sos', 'help', 'बचाओ', 'मदद', 'आपातकाल',
+            'इमरजेंसी', 'bachao', 'madad'
+        ];
+        
+        if (emergencyKeywords.some(k => text.includes(k))) {
             this.handleEmergency();
             return;
         }
         
-        // Navigation
-        if (this.matchKeywords(transcript, ['go to', 'open', 'show', 'जाओ', 'खोलो', 'दिखाओ'])) {
-            this.handleNavigation(transcript);
+        // ============ NAVIGATION ============
+        if (text.includes('profile') || text.includes('प्रोफाइल')) {
+            window.location.href = 'profile.html';
+            this.stopListening();
+            return;
+        }
+        if (text.includes('home') || text.includes('feed') || text.includes('होम') || text.includes('फीड')) {
+            window.location.href = 'dashboard.html';
+            this.stopListening();
+            return;
+        }
+        if (text.includes('map') || text.includes('नक्शा')) {
+            window.location.href = 'map.html';
+            this.stopListening();
+            return;
+        }
+        if (text.includes('chat') || text.includes('message') || text.includes('चैट')) {
+            window.location.href = 'chat.html';
+            this.stopListening();
+            return;
+        }
+        if (text.includes('users') || text.includes('लोग') || text.includes('directory')) {
+            window.location.href = 'users.html';
+            this.stopListening();
             return;
         }
         
-        // Search
-        if (this.matchKeywords(transcript, ['search', 'find', 'खोज', 'ढूंढ', 'kaha hai'])) {
-            this.handleSearch(transcript);
-            return;
-        }
-        
-        // Status
-        if (this.matchKeywords(transcript, ['status', 'stats', 'how many', 'कितने', 'स्थिति'])) {
-            this.handleStatus();
-            return;
-        }
-        
-        // Help
-        if (this.matchKeywords(transcript, ['help', 'commands', 'what can', 'मदद', 'सहायता'])) {
+        // ============ HELP ============
+        if (text.includes('help') || text.includes('command') || text.includes('मदद')) {
             this.showHelp();
+            this.stopListening();
             return;
         }
         
         // No match
-        this.speak('Command not recognized. Say help for available commands.');
+        showToast(`Not recognized: "${text}". Try: electrician chahiye, report water problem`, 'info');
         this.stopListening();
     }
     
-    matchKeywords(text, keywords) {
-        return keywords.some(k => text.includes(k));
-    }
-    
-    // ============ ACTIONS ============
-    
-    createService(transcript) {
-        const types = {
-            'plumber': ['plumber', 'प्लंबर'],
-            'electrician': ['electrician', 'इलेक्ट्रीशियन', 'बिजली'],
-            'carpenter': ['carpenter', 'बढ़ई'],
-            'painter': ['painter', 'पेंटर'],
-            'cleaner': ['cleaner', 'सफाई'],
-            'mechanic': ['mechanic', 'मैकेनिक'],
-            'tutor': ['tutor', 'teacher', 'टीचर']
+    createService(text) {
+        // Detect service type
+        const serviceMap = {
+            'plumber': ['plumber', 'प्लंबर', 'plumbing'],
+            'electrician': ['electrician', 'electric', 'इलेक्ट्रीशियन', 'बिजली', 'bijli'],
+            'carpenter': ['carpenter', 'बढ़ई', 'furniture', 'lakdi'],
+            'painter': ['painter', 'पेंटर', 'paint', 'rang'],
+            'cleaner': ['cleaner', 'सफाई', 'safai', 'cleaning'],
+            'mechanic': ['mechanic', 'मैकेनिक', 'repair', 'thik'],
+            'tutor': ['tutor', 'teacher', 'टीचर', 'padhai', 'पढ़ाई'],
+            'doctor': ['doctor', 'डॉक्टर', 'medical', 'ilaj']
         };
         
         let serviceType = 'other';
-        for (const [type, keys] of Object.entries(types)) {
-            if (keys.some(k => transcript.includes(k))) {
+        let serviceName = 'Service';
+        for (const [type, keywords] of Object.entries(serviceMap)) {
+            if (keywords.some(k => text.includes(k))) {
                 serviceType = type;
+                serviceName = type.charAt(0).toUpperCase() + type.slice(1);
                 break;
             }
         }
         
         // Extract budget
         let budget = null;
-        const budgetMatch = transcript.match(/(\d+)\s*(rupees|rs|rupay|रुपये|₹)/i) || transcript.match(/budget\s*(\d+)/i) || transcript.match(/₹\s*(\d+)/i);
-        if (budgetMatch) {
-            budget = budgetMatch[1] || budgetMatch[2];
+        const patterns = [
+            /(\d+)\s*(?:rupay|rupees|rs|रुपये|₹|rupaye)/i,
+            /(?:budget|price|rate)\s*(?:is\s*)?(\d+)/i,
+            /(?:₹|rs\.?)\s*(\d+)/i,
+            /(\d+)\s*(?:ka|mein|main|me)/i
+        ];
+        
+        for (const pattern of patterns) {
+            const match = text.match(pattern);
+            if (match) {
+                budget = match[1];
+                break;
+            }
         }
         
-        this.speak(`Creating ${serviceType} service request`);
+        // Create title
+        const title = `Need ${serviceName}${budget ? ' - ₹' + budget : ''}`;
         
+        // Extract description
+        let description = text;
+        Object.values(serviceMap).flat().forEach(k => description = description.replace(k, ''));
+        ['chahiye', 'service', 'kaam', 'karwana', 'create', 'new', 'need', 'want', 'mujhe', 'mere'].forEach(k => {
+            description = description.replace(new RegExp(k, 'gi'), '');
+        });
+        description = description.replace(/\d+/g, '').replace(/₹|rs|rupay|rupees|rupaye/gi, '').trim();
+        if (!description) description = `Need ${serviceName} service`;
+        description = '🎤 ' + description.charAt(0).toUpperCase() + description.slice(1);
+        
+        // Speak back
+        this.speak(`Creating ${serviceName} service request`);
+        showToast(`✅ ${title}`, 'success');
+        
+        // Open modal and fill
         if (window.openCreatePostModal) {
             openCreatePostModal('service');
             setTimeout(() => {
                 const typeEl = document.getElementById('serviceType');
                 if (typeEl) typeEl.value = serviceType;
+                
                 const budgetEl = document.getElementById('serviceBudget');
                 if (budgetEl && budget) budgetEl.value = budget;
+                
+                const titleEl = document.getElementById('postTitle');
+                if (titleEl) titleEl.value = title;
+                
                 const descEl = document.getElementById('postDescription');
-                if (descEl) descEl.value = `🎤 Voice request: ${transcript}`;
-            }, 500);
+                if (descEl) descEl.value = description;
+                
+                // Trigger char count update
+                if (descEl) descEl.dispatchEvent(new Event('input'));
+            }, 600);
         }
         
-        showToast(`✅ Service: ${serviceType}`, 'success');
         this.stopListening();
     }
     
-    createIssue(transcript) {
-        const categories = {
-            'water': ['water', 'पानी', 'paani'],
-            'electricity': ['electricity', 'light', 'बिजली', 'bijli'],
-            'road': ['road', 'सड़क', 'rasta'],
-            'sanitation': ['sanitation', 'clean', 'सफाई', 'garbage', 'kachra']
+    createIssue(text) {
+        const categoryMap = {
+            'water': ['water', 'पानी', 'paani', 'nal'],
+            'electricity': ['electric', 'light', 'बिजली', 'bijli', 'current', 'power'],
+            'road': ['road', 'सड़क', 'rasta', 'path', 'road'],
+            'sanitation': ['sanitation', 'clean', 'सफाई', 'garbage', 'kachra', 'गंदगी', 'safai']
         };
         
         let category = 'other';
-        for (const [cat, keys] of Object.entries(categories)) {
-            if (keys.some(k => transcript.includes(k))) {
+        for (const [cat, keywords] of Object.entries(categoryMap)) {
+            if (keywords.some(k => text.includes(k))) {
                 category = cat;
                 break;
             }
         }
         
         let priority = 'medium';
-        if (transcript.match(/urgent|high|तुरंत|जरूरी/i)) priority = 'high';
+        if (text.match(/urgent|high|तुरंत|जरूरी|fast|quick/i)) priority = 'high';
+        
+        const title = `Issue: ${category.charAt(0).toUpperCase() + category.slice(1)} Problem`;
+        let description = text;
+        ['report', 'issue', 'problem', 'complaint', 'समस्या', 'शिकायत', 'रिपोर्ट', 'kharab'].forEach(k => {
+            description = description.replace(new RegExp(k, 'gi'), '');
+        });
+        description = '🎤 ' + description.trim();
         
         this.speak(`Reporting ${category} issue`);
+        showToast(`✅ Issue: ${category}`, 'success');
         
         if (window.openCreatePostModal) {
             openCreatePostModal('issue');
             setTimeout(() => {
                 const catEl = document.getElementById('issueCategory');
                 if (catEl) catEl.value = category;
+                
                 const priEl = document.getElementById('issuePriority');
                 if (priEl) priEl.value = priority;
+                
+                const titleEl = document.getElementById('postTitle');
+                if (titleEl) titleEl.value = title;
+                
                 const descEl = document.getElementById('postDescription');
-                if (descEl) descEl.value = `🎤 Voice report: ${transcript}`;
-            }, 500);
+                if (descEl) descEl.value = description;
+            }, 600);
         }
         
-        showToast(`✅ Issue: ${category}`, 'success');
         this.stopListening();
     }
     
     handleEmergency() {
         this.speak('Opening emergency alert');
-        if (window.openEmergencyModal) {
-            openEmergencyModal();
-        }
+        if (window.openEmergencyModal) openEmergencyModal();
         this.stopListening();
     }
     
-    handleNavigation(transcript) {
-        const pages = {
-            'dashboard.html': ['home', 'feed', 'dashboard', 'होम', 'फीड', 'घर'],
-            'profile.html': ['profile', 'प्रोफाइल'],
-            'map.html': ['map', 'नक्शा', 'maps'],
-            'users.html': ['users', 'people', 'लोग', 'directory'],
-            'chat.html': ['chat', 'message', 'चैट', 'बात']
-        };
-        
-        for (const [page, keys] of Object.entries(pages)) {
-            if (keys.some(k => transcript.includes(k))) {
-                this.speak(`Opening ${page.replace('.html', '')}`);
-                setTimeout(() => window.location.href = page, 500);
-                this.stopListening();
-                return;
-            }
+    speak(text) {
+        if ('speechSynthesis' in window) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = this.currentLang;
+            utterance.rate = 0.9;
+            window.speechSynthesis.speak(utterance);
         }
     }
-    
-    handleSearch(transcript) {
-        let query = transcript.replace(/search|find|खोज|ढूंढ|kaha hai/gi, '').trim();
-        if (query) {
-            this.speak(`Searching for ${query}`);
-            if (window.dashboardManager) {
-                window.dashboardManager.searchQuery = query;
-                window.dashboardManager.switchFilter('all');
-            }
-            showToast(`🔍 "${query}"`, 'info');
-        }
-        this.stopListening();
-    }
-    
-    handleStatus() {
-        const posts = document.getElementById('postCount')?.textContent || '0';
-        const helped = document.getElementById('helpedCount')?.textContent || '0';
-        const rating = document.getElementById('ratingValue')?.textContent || '0.0';
-        
-        const msg = `You have ${posts} posts, helped ${helped} people, rating ${rating}`;
-        this.speak(msg);
-        showToast(`📊 ${msg}`, 'success');
-        this.stopListening();
-    }
-    
-    // ============ HELP ============
     
     showHelp() {
-        const commands = [
-            { icon: '🔧', en: 'Create service for plumber budget 500', hi: 'प्लंबर सर्विस बजट 500' },
-            { icon: '⚠️', en: 'Report water issue', hi: 'पानी की समस्या रिपोर्ट' },
-            { icon: '🚨', en: 'Emergency / SOS', hi: 'इमरजेंसी / मदद' },
-            { icon: '👤', en: 'Open profile', hi: 'प्रोफाइल खोलो' },
-            { icon: '🔍', en: 'Search for electrician', hi: 'इलेक्ट्रीशियन ढूंढो' },
-            { icon: '📊', en: 'Check my status', hi: 'मेरा स्टेटस दिखाओ' },
-            { icon: '🏠', en: 'Go to home', hi: 'होम पे जाओ' },
-            { icon: '💬', en: 'Open chat', hi: 'चैट खोलो' }
-        ];
-        
         const overlay = document.createElement('div');
-        overlay.className = 'voice-help-overlay';
-        overlay.addEventListener('click', (e) => {
-            if (e.target === overlay) overlay.remove();
-        });
+        overlay.style.cssText = `
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6); z-index: 9999;
+            display: flex; align-items: center; justify-content: center;
+        `;
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
         
         overlay.innerHTML = `
-            <div class="voice-help-card">
-                <div class="voice-help-header">
-                    <h3>🎤 Voice Commands</h3>
-                    <button onclick="this.closest('.voice-help-overlay').remove()">✕</button>
+            <div style="background: white; border-radius: 20px; padding: 24px; max-width: 350px; width: 90%;" onclick="event.stopPropagation()">
+                <h3 style="margin-bottom: 16px;">🎤 Voice Commands</h3>
+                <div style="max-height: 300px; overflow-y: auto;">
+                    <p>🔧 "Electrician chahiye 200 mein"</p>
+                    <p>⚠️ "Water problem hai"</p>
+                    <p>🚨 "Emergency" / "Help"</p>
+                    <p>👤 "Open profile"</p>
+                    <p>🏠 "Go to home"</p>
+                    <p>💬 "Open chat"</p>
                 </div>
-                <div class="voice-help-list">
-                    ${commands.map(c => `
-                        <div class="voice-help-item">
-                            <span class="voice-help-icon">${c.icon}</span>
-                            <div>
-                                <div class="voice-help-en">${c.en}</div>
-                                <div class="voice-help-hi">${c.hi}</div>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
+                <button style="margin-top: 16px; width:100%; padding:12px; background:#FF6B35; color:white; border:none; border-radius:12px; font-size:16px; font-weight:600;" onclick="this.closest('div').parentElement.remove()">Got it</button>
             </div>
         `;
-        
         document.body.appendChild(overlay);
-        this.stopListening();
     }
 }
 
