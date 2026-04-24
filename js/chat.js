@@ -1,6 +1,5 @@
 /**
- * Smart Panchayat System - Village Chat Module
- * FULL FEATURED: Village Chat + Personal Chats + Typing Indicators + Online Users
+ * Smart Panchayat System - Village Chat Module (FIXED)
  */
 
 class ChatManager {
@@ -9,8 +8,7 @@ class ChatManager {
         this.currentChat = 'village';
         this.messages = [];
         this.conversations = [];
-        this.onlineUsers = [];
-       this.API_BASE_URL = 'https://smart-panchayat-backend.onrender.com/api';
+        this.API_BASE_URL = 'https://smart-panchayat-backend.onrender.com/api';
         this.pollInterval = null;
         this.isLoading = false;
         this.typingTimeout = null;
@@ -28,10 +26,8 @@ class ChatManager {
         await this.loadVillageMessages();
         await this.loadConversations();
         this.startPolling();
-        this.updateOnlineStatus();
     }
     
-    // ============ SETUP ============
     setupEventListeners() {
         // Send message
         document.getElementById('sendMessageBtn')?.addEventListener('click', () => this.sendMessage());
@@ -43,86 +39,54 @@ class ChatManager {
             }
         });
         
-        // Typing indicator
-        document.getElementById('messageInput')?.addEventListener('input', (e) => {
-            e.target.style.height = 'auto';
-            e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
-            this.handleTyping();
-        });
-        
-        // New chat
+        // New chat button
         document.getElementById('newChatBtn')?.addEventListener('click', () => this.openNewChatModal());
+        
+        // Search users
         document.getElementById('userSearchInput')?.addEventListener('input', (e) => this.searchUsers(e.target.value));
         
         // Village chat click
-        document.querySelector('[data-chat="village"]')?.addEventListener('click', () => {
-            this.switchToVillageChat();
+        const villageChat = document.getElementById('villageChatItem');
+        if (villageChat) {
+            villageChat.addEventListener('click', () => this.switchToVillageChat());
+        }
+        
+        // Close modal
+        document.getElementById('newChatModal')?.addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) closeNewChatModal();
         });
         
-        // Close modal on overlay click
-        document.querySelector('.modal-overlay')?.addEventListener('click', (e) => {
-            if (e.target.classList.contains('modal-overlay')) {
-                closeNewChatModal();
-            }
+        // Search in sidebar
+        document.getElementById('searchChatInput')?.addEventListener('input', (e) => {
+            this.filterChats(e.target.value);
         });
     }
     
     // ============ POLLING ============
     startPolling() {
         if (this.pollInterval) clearInterval(this.pollInterval);
-        this.pollInterval = setInterval(() => this.checkForNewMessages(), 3000);
-    }
-    
-    stopPolling() {
-        if (this.pollInterval) {
-            clearInterval(this.pollInterval);
-            this.pollInterval = null;
-        }
+        this.pollInterval = setInterval(() => this.checkForNewMessages(), 5000);
     }
     
     async checkForNewMessages() {
         if (this.isLoading) return;
-        
         try {
-            const token = this.user?.token || JSON.parse(localStorage.getItem('panchayat_user') || '{}').token;
             const endpoint = this.currentChat === 'village'
                 ? `${this.API_BASE_URL}/chat/village/messages`
                 : `${this.API_BASE_URL}/chat/${this.currentChat}/messages`;
             
             const response = await fetch(endpoint, {
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: { 'Authorization': `Bearer ${this.user.token}` }
             });
             const data = await response.json();
             
             if (data.success && data.messages) {
                 if (data.messages.length > this.messages.length) {
-                    const newMessages = data.messages.slice(this.messages.length);
                     this.messages = data.messages;
                     this.renderMessages();
-                    
-                    // Show notification and play sound for new messages
-                    newMessages.forEach(msg => {
-                      const senderId = msg.sender?._id || msg.sender;
-if (senderId !== this.user.id) {
-                            showToast(`📨 ${msg.sender?.name || 'User'}: ${(msg.content || '').substring(0, 30)}...`, 'info');
-                            this.playMessageSound();
-                        }
-                    });
                 }
             }
-        } catch (error) {
-            console.error('Polling error:', error);
-        }
-    }
-    
-    playMessageSound() {
-        // Simple beep using Web Audio API
-        try {
-            const audio = new Audio();
-            audio.src = 'data:audio/wav;base64,UklGRlwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YVoAAACAgYGBgYCAgICAf39/f39/f39/f39/f3+AgICAf39/f39/f39/f3+AgICAf39/f39/f39/f3+AgICAf39/f39/f39/f39/fw==';
-            audio.volume = 0.3;
-            audio.play();
-        } catch (e) {}
+        } catch (error) {}
     }
     
     // ============ VILLAGE CHAT ============
@@ -133,14 +97,12 @@ if (senderId !== this.user.id) {
                 headers: { 'Authorization': `Bearer ${this.user.token}` }
             });
             const data = await response.json();
-            
             if (data.success) {
                 this.messages = data.messages || [];
                 this.renderMessages();
-                this.updateVillageLastMessage();
+                this.updateVillagePreview();
             }
         } catch (error) {
-            console.error('Error loading messages:', error);
             this.messages = [];
             this.renderMessages();
         } finally {
@@ -149,28 +111,31 @@ if (senderId !== this.user.id) {
     }
     
     switchToVillageChat() {
+        console.log('🏘️ Switching to Village Chat');
         this.currentChat = 'village';
         
-        document.querySelectorAll('.conversation-item').forEach(item => {
-            item.classList.toggle('active', item.dataset.chat === 'village');
-        });
+        // Update active states
+        document.querySelectorAll('.village-chat, .conversation-item').forEach(c => c.classList.remove('active'));
+        document.getElementById('villageChatItem')?.classList.add('active');
         
+        // Update header
         document.getElementById('currentChatName').textContent = '🏘️ Village Community';
-        document.getElementById('chatSubtitle').innerHTML = `
-            <i class="fas fa-globe"></i> Public Chat • Everyone can message
-        `;
-        document.getElementById('chatAvatar').innerHTML = '<i class="fas fa-tree"></i>';
+        document.getElementById('chatSubtitle').textContent = 'Public Chat • Everyone can message';
+        document.getElementById('chatAvatar').innerHTML = '<i class="fas fa-users" style="font-size:20px;"></i>';
+        
+        // Show chat on mobile
+        document.getElementById('chatMain')?.classList.add('active');
         
         this.loadVillageMessages();
     }
     
-    updateVillageLastMessage() {
+    updateVillagePreview() {
         if (this.messages.length > 0) {
-            const lastMsg = this.messages[this.messages.length - 1];
-            const lastMsgEl = document.getElementById('villageLastMessage');
-            const timeEl = document.getElementById('villageLastTime');
-            if (lastMsgEl) lastMsgEl.textContent = (lastMsg.content || '').substring(0, 30) + ((lastMsg.content || '').length > 30 ? '...' : '');
-            if (timeEl) timeEl.textContent = formatRelativeTime(lastMsg.createdAt);
+            const last = this.messages[this.messages.length - 1];
+            const el = document.getElementById('villageLastMessage');
+            const time = document.getElementById('villageLastTime');
+            if (el) el.textContent = (last.content || '').substring(0, 40);
+            if (time) time.textContent = formatRelativeTime(last.createdAt);
         }
     }
     
@@ -181,7 +146,6 @@ if (senderId !== this.user.id) {
                 headers: { 'Authorization': `Bearer ${this.user.token}` }
             });
             const data = await response.json();
-            
             if (data.success) {
                 this.conversations = data.conversations || [];
                 this.renderConversations();
@@ -197,104 +161,75 @@ if (senderId !== this.user.id) {
         
         if (this.conversations.length === 0) {
             container.innerHTML = `
-                <div class="chat-section-header">
-                    <i class="fas fa-user-friends"></i> PERSONAL CHATS
-                </div>
-                <div class="p-md text-center text-gray-500">
-                    <i class="fas fa-comments" style="font-size: 2rem; opacity: 0.5;"></i>
-                    <p class="text-sm mt-sm">No personal chats yet</p>
-                    <p class="text-xs">Click ✏️ to start chatting with someone</p>
+                <div style="text-align:center;padding:20px;color:#999;">
+                    <p>No conversations yet</p>
+                    <p style="font-size:12px;">Click + to start chatting</p>
                 </div>
             `;
             return;
         }
         
-        container.innerHTML = `
-            <div class="chat-section-header">
-                <i class="fas fa-user-friends"></i> PERSONAL CHATS
-            </div>
-            ${this.conversations.map(conv => `
-                <div class="conversation-item" data-chat="${conv._id}">
-                    ${createAvatar(conv.participant, 'md')}
+        container.innerHTML = this.conversations.map(conv => {
+            const name = conv.participant?.name || 'User';
+            const lastMsg = conv.lastMessage || 'Start a conversation';
+            const time = conv.lastMessageTime ? formatRelativeTime(conv.lastMessageTime) : '';
+            const unread = conv.unreadCount > 0 ? `<span class="unread-badge">${conv.unreadCount}</span>` : '';
+            const online = conv.participant?.online ? '<span class="online-indicator"></span>' : '';
+            
+            return `
+                <div class="conversation-item" data-chat="${conv._id}" onclick="chatManager.openPersonalChat('${conv._id}')">
+                    ${createAvatar(conv.participant || {name}, 'md')}
                     <div class="conversation-info">
-                        <div class="conversation-name">
-                            ${conv.participant.name}
-                            ${conv.participant.online ? '<span class="online-indicator"></span>' : ''}
-                        </div>
-                        <div class="conversation-last-message">
-                            ${conv.lastMessage || '✨ Start a conversation'}
-                        </div>
+                        <div class="conversation-name">${name} ${online}</div>
+                        <div class="conversation-last-message">${lastMsg}</div>
                     </div>
-                    <div class="conversation-time">${conv.lastMessageTime ? formatRelativeTime(conv.lastMessageTime) : ''}</div>
-                    ${conv.unreadCount > 0 ? `<span class="unread-badge">${conv.unreadCount}</span>` : ''}
+                    <div class="conversation-time">${time}</div>
+                    ${unread}
                 </div>
-            `).join('')}
-        `;
+            `;
+        }).join('');
+    }
+    
+    openPersonalChat(chatId) {
+        console.log('💬 Opening personal chat:', chatId);
         
-        document.querySelectorAll('#individualChats .conversation-item').forEach(item => {
-            item.addEventListener('click', () => {
-                this.switchToPersonalChat(item.dataset.chat);
-            });
-        });
-    }
-    
-    async switchToPersonalChat(chatId) {
-    console.log('🔄 switchToPersonalChat called with:', chatId);
-    this.currentChat = chatId;
-    
-    // Update UI - remove active from all, add to selected
-    document.querySelectorAll('.village-chat, .chat-item').forEach(item => {
-        item.classList.remove('active');
-    });
-    
-    const selectedChat = document.querySelector(`[data-chat="${chatId}"]`);
-    if (selectedChat) {
-        selectedChat.classList.add('active');
-    }
-    
-    // Update header
-    const conversation = this.conversations.find(c => c._id === chatId);
-    if (conversation) {
-        document.getElementById('currentChatName').textContent = conversation.participant.name;
-        document.getElementById('chatSubtitle').textContent = 'Private Chat';
+        // Update active state
+        document.querySelectorAll('.village-chat, .conversation-item').forEach(c => c.classList.remove('active'));
+        const item = document.querySelector(`.conversation-item[data-chat="${chatId}"]`);
+        if (item) item.classList.add('active');
         
-        // Update avatar
-        const avatarHtml = createAvatar(conversation.participant, 'md');
-        document.getElementById('chatAvatar').innerHTML = avatarHtml;
+        // Update header
+        const conv = this.conversations.find(c => c._id === chatId);
+        if (conv) {
+            document.getElementById('currentChatName').textContent = conv.participant?.name || 'User';
+            document.getElementById('chatSubtitle').textContent = 'Private Chat';
+            document.getElementById('chatAvatar').innerHTML = createAvatar(conv.participant || {name: 'U'}, 'sm');
+        }
+        
+        // Show chat on mobile
+        document.getElementById('chatMain')?.classList.add('active');
+        
+        // Switch and load messages
+        this.currentChat = chatId;
+        this.loadPrivateMessages(chatId);
     }
-    
-    // Load messages
-    this.loadPrivateMessages(chatId);
-} 
     
     async loadPrivateMessages(chatId) {
-    console.log('📩 Loading private messages for:', chatId);
-    
-    try {
-        const response = await fetch(`${this.API_BASE_URL}/chat/${chatId}/messages`, {
-            headers: { 'Authorization': `Bearer ${this.user.token}` }
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
+        try {
+            const response = await fetch(`${this.API_BASE_URL}/chat/${chatId}/messages`, {
+                headers: { 'Authorization': `Bearer ${this.user.token}` }
+            });
+            const data = await response.json();
             this.messages = data.messages || [];
             this.renderMessages();
-        } else {
+        } catch (error) {
             this.messages = [];
             this.renderMessages();
         }
-    } catch (error) {
-        console.error('Error loading private messages:', error);
-        this.messages = [];
-        this.renderMessages();
     }
-}
     
     async startPersonalChat(userId) {
         try {
-            showToast('Starting chat...', 'info');
-            
             const response = await fetch(`${this.API_BASE_URL}/chat/create`, {
                 method: 'POST',
                 headers: {
@@ -308,22 +243,15 @@ if (senderId !== this.user.id) {
             closeNewChatModal();
             
             if (data.success) {
-                // Check if conversation already exists
-                const existing = this.conversations.find(c => c.participant._id === userId);
-                if (!existing) {
-                    this.conversations.unshift(data.conversation);
-                    this.renderConversations();
+                await this.loadConversations();
+                const conv = this.conversations.find(c => c.participant?._id === userId);
+                if (conv) {
+                    this.openPersonalChat(conv._id);
                 }
-                
-                const chatId = existing?._id || data.conversation._id;
-                await this.switchToPersonalChat(chatId);
-                showToast('Chat started! Say hello 👋', 'success');
-            } else {
-                showToast(data.message || 'Failed to start chat', 'error');
+                showToast('Chat started! 👋', 'success');
             }
         } catch (error) {
-            console.error('Error starting chat:', error);
-            showToast('Network error', 'error');
+            showToast('Failed to start chat', 'error');
         }
     }
     
@@ -335,80 +263,49 @@ if (senderId !== this.user.id) {
         if (!this.messages || this.messages.length === 0) {
             container.innerHTML = `
                 <div class="empty-state">
-                    <i class="fas fa-comments" style="font-size: 4rem; opacity: 0.3;"></i>
-                    <p style="margin-top: 16px; font-size: 1.1rem;">No messages yet</p>
-                    <p style="font-size: 0.9rem; color: var(--gray-500);">Be the first to say something!</p>
+                    <i class="fas fa-comments"></i>
+                    <p>No messages yet</p>
                 </div>
             `;
             return;
         }
         
-        // Group messages by date
         let html = '';
         let currentDate = '';
         
-        for (const msg of this.messages) {
+        this.messages.forEach(msg => {
             const msgDate = new Date(msg.createdAt).toDateString();
             if (msgDate !== currentDate) {
                 currentDate = msgDate;
-                html += `
-                    <div class="message-date-divider">
-                        <span>${this.formatMessageDate(msg.createdAt)}</span>
-                    </div>
-                `;
+                html += `<div class="message-date-divider"><span>${this.formatDate(msg.createdAt)}</span></div>`;
             }
             
-           const senderId = msg.sender?._id || msg.sender;
-           const isSent = senderId === this.user.id;
-           const senderName = msg.sender?.name || 'User';
+            const senderId = msg.sender?._id || msg.sender;
+            const isSent = senderId === this.user.id;
+            const name = msg.sender?.name || 'User';
             
             html += `
                 <div class="message ${isSent ? 'sent' : 'received'}">
-                    ${!isSent ? createAvatar({ name: senderName }, 'sm') : ''}
                     <div>
-                        ${!isSent ? `<div class="text-sm font-medium mb-xs">${senderName}</div>` : ''}
-                        <div class="message-content">${this.escapeHtml(msg.content || '')}</div>
-                        <div class="message-time">
-                            ${formatRelativeTime(msg.createdAt)}
-                            ${isSent ? ' • ' + (msg.status === 'sent' ? '✓✓' : '✓') : ''}
-                        </div>
+                        ${!isSent ? `<div style="font-size:12px;font-weight:600;color:#2E7D32;margin-bottom:2px;">${name}</div>` : ''}
+                        <div class="message-content">${msg.content || ''}</div>
+                        <div class="message-time">${formatRelativeTime(msg.createdAt)}</div>
                     </div>
-                    ${isSent ? createAvatar({ name: senderName }, 'sm') : ''}
                 </div>
             `;
-        }
+        });
         
         container.innerHTML = html;
         container.scrollTop = container.scrollHeight;
     }
     
-    formatMessageDate(date) {
-        const msgDate = new Date(date);
+    formatDate(date) {
+        const d = new Date(date);
         const today = new Date();
-        const yesterday = new Date(today);
-        yesterday.setDate(yesterday.getDate() - 1);
-        
-        if (msgDate.toDateString() === today.toDateString()) return 'Today';
-        if (msgDate.toDateString() === yesterday.toDateString()) return 'Yesterday';
-        return msgDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-    }
-    
-    escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-    
-    handleTyping() {
-        // Clear existing timeout
-        if (this.typingTimeout) clearTimeout(this.typingTimeout);
-        
-        // Emit typing event (if using socket.io in future)
-        
-        // Clear typing after 2 seconds
-        this.typingTimeout = setTimeout(() => {
-            this.typingTimeout = null;
-        }, 2000);
+        if (d.toDateString() === today.toDateString()) return 'Today';
+        const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
+        if (d.toDateString() === yesterday.toDateString()) return 'Yesterday';
+        return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
     }
     
     async sendMessage() {
@@ -417,20 +314,6 @@ if (senderId !== this.user.id) {
         if (!content) return;
         
         input.value = '';
-        input.style.height = 'auto';
-        
-        // Optimistic UI update
-        const tempId = 'temp_' + Date.now();
-        const tempMessage = {
-            _id: tempId,
-            sender: { _id: this.user.id, name: this.user.name },
-            content: content,
-            createdAt: new Date().toISOString(),
-            status: 'sending'
-        };
-        
-        this.messages.push(tempMessage);
-        this.renderMessages();
         
         try {
             const endpoint = this.currentChat === 'village'
@@ -449,44 +332,44 @@ if (senderId !== this.user.id) {
             const data = await response.json();
             
             if (data.success) {
-                // Replace temp message with real one
-                const index = this.messages.findIndex(m => m._id === tempId);
-                if (index !== -1) {
-                    this.messages[index] = { ...data.message, status: 'sent' };
-                    this.renderMessages();
+                if (this.currentChat === 'village') {
+                    await this.loadVillageMessages();
+                } else {
+                    await this.loadPrivateMessages(this.currentChat);
                 }
-                this.updateLastMessage(content);
-            } else {
-                // Mark as failed
-                const index = this.messages.findIndex(m => m._id === tempId);
-                if (index !== -1) {
-                    this.messages[index].status = 'failed';
-                    this.renderMessages();
-                }
-                showToast('Failed to send message', 'error');
+                await this.loadConversations();
             }
         } catch (error) {
-            console.error('Error sending message:', error);
-            const index = this.messages.findIndex(m => m._id === tempId);
-            if (index !== -1) {
-                this.messages[index].status = 'failed';
-                this.renderMessages();
-            }
-            showToast('Network error', 'error');
+            showToast('Failed to send', 'error');
         }
     }
     
-    updateLastMessage(content) {
-        if (this.currentChat === 'village') {
-            const lastMsgEl = document.getElementById('villageLastMessage');
-            const timeEl = document.getElementById('villageLastTime');
-            if (lastMsgEl) lastMsgEl.textContent = (content || '').substring(0, 30) + (content.length > 30 ? '...' : '');
-            if (timeEl) timeEl.textContent = 'Just now';
+    // ============ SEARCH ============
+    filterChats(query) {
+        if (!query) {
+            this.renderConversations();
+            return;
         }
-        this.loadConversations(); // Refresh sidebar
+        const filtered = this.conversations.filter(c => 
+            c.participant?.name?.toLowerCase().includes(query.toLowerCase())
+        );
+        const container = document.getElementById('individualChats');
+        if (!container) return;
+        
+        container.innerHTML = filtered.map(conv => {
+            const name = conv.participant?.name || 'User';
+            return `
+                <div class="conversation-item" data-chat="${conv._id}" onclick="chatManager.openPersonalChat('${conv._id}')">
+                    ${createAvatar(conv.participant || {name}, 'md')}
+                    <div class="conversation-info">
+                        <div class="conversation-name">${name}</div>
+                        <div class="conversation-last-message">${conv.lastMessage || 'Start a conversation'}</div>
+                    </div>
+                </div>
+            `;
+        }).join('');
     }
     
-    // ============ USER SEARCH ============
     openNewChatModal() {
         document.getElementById('newChatModal').style.display = 'flex';
         document.getElementById('userSearchInput').focus();
@@ -505,37 +388,18 @@ if (senderId !== this.user.id) {
             const data = await response.json();
             
             const container = document.getElementById('userSearchResults');
-            if (data.users && data.users.length > 0) {
+            if (data.users?.length > 0) {
                 container.innerHTML = data.users.map(user => `
-                    <div class="flex items-center gap-md p-md hover:bg-gray-100 cursor-pointer" onclick="chatManager.startPersonalChat('${user._id}')">
+                    <div onclick="chatManager.startPersonalChat('${user._id}')" style="padding:12px;display:flex;align-items:center;gap:12px;cursor:pointer;border-radius:12px;" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='transparent'">
                         ${createAvatar(user, 'md')}
-                        <div style="flex: 1;">
-                            <div class="font-medium">${user.name}</div>
-                           
-                        </div>
-                        <i class="fas fa-chevron-right" style="color: var(--gray-400);"></i>
+                        <div style="flex:1;font-weight:500;">${user.name}</div>
+                        <i class="fas fa-chevron-right" style="color:#ccc;"></i>
                     </div>
                 `).join('');
             } else {
-                container.innerHTML = '<p class="text-center text-gray-500 p-md">No users found</p>';
+                container.innerHTML = '<p style="text-align:center;padding:20px;color:#999;">No users found</p>';
             }
-        } catch (error) {
-            console.error('Search error:', error);
-        }
-    }
-    
-    // ============ ONLINE STATUS ============
-    updateOnlineStatus() {
-        setInterval(() => {
-            const count = Math.floor(Math.random() * 20) + 5; // Simulate online count
-            document.getElementById('onlineCount').textContent = count;
-        }, 30000);
-    }
-    
-    // ============ CLEANUP ============
-    destroy() {
-        this.stopPolling();
-        if (this.typingTimeout) clearTimeout(this.typingTimeout);
+        } catch (error) {}
     }
 }
 
@@ -551,8 +415,4 @@ function closeNewChatModal() {
 document.addEventListener('DOMContentLoaded', () => {
     chatManager = new ChatManager();
     window.chatManager = chatManager;
-});
-
-window.addEventListener('beforeunload', () => {
-    if (chatManager) chatManager.destroy();
 });
