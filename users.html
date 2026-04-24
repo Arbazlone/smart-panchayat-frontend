@@ -260,6 +260,12 @@
     </style>
 </head>
 <body>
+    <script>
+    const userCheck = JSON.parse(localStorage.getItem('panchayat_user') || sessionStorage.getItem('panchayat_user') || '{}');
+    if (userCheck.role !== 'admin') {
+        window.location.href = 'dashboard.html';
+    }
+</script>
     <nav class="navbar">
         <div class="container navbar-container">
             <a href="dashboard.html" class="navbar-brand">
