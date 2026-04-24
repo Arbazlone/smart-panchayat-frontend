@@ -17,7 +17,7 @@
         
         body {
             font-family: 'Inter', sans-serif;
-            background: #F0F2F5;
+            background: #E8ECF0;
             height: 100vh;
             overflow: hidden;
         }
@@ -25,14 +25,13 @@
         .chat-container {
             display: flex;
             height: 100vh;
-            max-width: 1200px;
+            max-width: 1100px;
             margin: 0 auto;
             background: white;
-            box-shadow: 0 2px 20px rgba(0,0,0,0.08);
-            border-radius: 0;
+            box-shadow: 0 0 30px rgba(0,0,0,0.08);
         }
         
-        /* ============ SIDEBAR ============ */
+        /* ===== SIDEBAR ===== */
         .chat-sidebar {
             width: 340px;
             border-right: 1px solid #E8ECF0;
@@ -42,129 +41,87 @@
         }
         
         .sidebar-header {
-            padding: 20px 18px;
+            padding: 18px 16px;
             border-bottom: 1px solid #E8ECF0;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            background: white;
         }
         
         .sidebar-header h3 {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             font-weight: 700;
             color: #1a1a1a;
-            display: flex;
-            align-items: center;
-            gap: 10px;
         }
         
-        .sidebar-header h3 i { color: #2E7D32; font-size: 1.1rem; }
-        
         .new-chat-btn {
-            width: 42px;
-            height: 42px;
-            border-radius: 14px;
-            background: linear-gradient(135deg, #2E7D32, #1B5E20);
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: #2E7D32;
             border: none;
             color: white;
             font-size: 1.1rem;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s;
-            box-shadow: 0 2px 8px rgba(46,125,50,0.2);
+            transition: all 0.2s;
         }
         
-        .new-chat-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(46,125,50,0.3);
-        }
+        .new-chat-btn:hover { background: #1B5E20; }
         
         .chat-search {
-            padding: 14px 16px;
-            background: white;
+            padding: 12px 14px;
         }
         
         .chat-search input {
             width: 100%;
-            padding: 12px 16px 12px 40px;
+            padding: 10px 14px;
             border: 1.5px solid #E0E4E8;
-            border-radius: 14px;
+            border-radius: 12px;
             font-size: 0.9rem;
             outline: none;
             background: #F5F7FA;
-            transition: all 0.3s;
         }
         
         .chat-search input:focus {
             border-color: #2E7D32;
             background: white;
-            box-shadow: 0 0 0 3px rgba(46,125,50,0.08);
         }
         
         .chat-list {
             flex: 1;
             overflow-y: auto;
-            scrollbar-width: thin;
         }
         
-        .chat-list::-webkit-scrollbar { width: 4px; }
-        .chat-list::-webkit-scrollbar-thumb { background: #d0d5dd; border-radius: 4px; }
-        
-        /* Village Community Chat - Premium */
+        /* Village Chat */
         .village-chat {
-            padding: 16px 18px;
+            padding: 14px 16px;
             background: linear-gradient(135deg, #E8F5E9, #C8E6C9);
-            border-bottom: 1px solid #A5D6A7;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 14px;
-            transition: all 0.3s;
-            position: relative;
-            overflow: hidden;
+            gap: 12px;
+            transition: all 0.2s;
+            border-bottom: 1px solid #A5D6A7;
         }
         
-        .village-chat::before {
-            content: '';
-            position: absolute;
-            top: -30px;
-            right: -30px;
-            width: 80px;
-            height: 80px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 50%;
-        }
-        
-        .village-chat:hover {
-            background: linear-gradient(135deg, #C8E6C9, #A5D6A7);
-            transform: translateY(-1px);
-        }
+        .village-chat:hover { background: linear-gradient(135deg, #C8E6C9, #A5D6A7); }
         
         .village-chat.active {
             background: linear-gradient(135deg, #2E7D32, #1B5E20);
-            box-shadow: 0 4px 16px rgba(46,125,50,0.25);
+            color: white;
         }
         
-        .village-chat.active .chat-name,
-        .village-chat.active .chat-preview,
-        .village-chat.active .chat-time { color: white; }
-        
         .village-avatar {
-            width: 52px;
-            height: 52px;
-            border-radius: 16px;
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
             background: #2E7D32;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 1.4rem;
-            position: relative;
-            z-index: 1;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            font-size: 1.3rem;
+            flex-shrink: 0;
         }
         
         .village-chat.active .village-avatar {
@@ -172,103 +129,117 @@
             color: #2E7D32;
         }
         
-        .village-badge {
-            position: absolute;
-            top: -4px;
-            right: -4px;
-            background: #FF6B35;
-            color: white;
-            font-size: 10px;
+        .village-info { flex: 1; min-width: 0; }
+        
+        .village-name {
             font-weight: 700;
-            padding: 2px 6px;
-            border-radius: 8px;
-        }
-        
-        /* Individual Chat Items */
-        .chat-item {
-            padding: 14px 18px;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            cursor: pointer;
-            border-bottom: 1px solid #F0F3F6;
-            transition: all 0.2s;
-            position: relative;
-        }
-        
-        .chat-item:hover { background: #F8FAFB; }
-        
-        .chat-item.active {
-            background: #E8F5E9;
-            border-left: 3px solid #2E7D32;
-        }
-        
-        .chat-avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 700;
-            font-size: 1.1rem;
-            flex-shrink: 0;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        
-        .online-dot {
-            position: absolute;
-            bottom: 2px;
-            right: 2px;
-            width: 12px;
-            height: 12px;
-            background: #4CAF50;
-            border-radius: 50%;
-            border: 2px solid white;
-        }
-        
-        .chat-info {
-            flex: 1;
-            min-width: 0;
-        }
-        
-        .chat-name {
-            font-weight: 600;
             font-size: 0.95rem;
-            color: #1a1a1a;
-            margin-bottom: 4px;
+            color: #1B5E20;
+            margin-bottom: 3px;
             display: flex;
-            align-items: center;
             justify-content: space-between;
         }
         
-        .chat-time {
-            font-size: 0.7rem;
-            color: #999;
-            font-weight: 400;
-        }
+        .village-chat.active .village-name { color: white; }
         
-        .chat-preview {
-            font-size: 0.82rem;
-            color: #777;
+        .village-last {
+            font-size: 0.8rem;
+            color: #555;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
         
-        .unread-count {
-            background: #2E7D32;
-            color: white;
-            font-size: 11px;
-            font-weight: 700;
-            padding: 3px 8px;
-            border-radius: 10px;
-            min-width: 22px;
-            text-align: center;
+        .village-chat.active .village-last { color: rgba(255,255,255,0.8); }
+        
+        .village-time {
+            font-size: 0.7rem;
+            color: #888;
+            font-weight: 400;
         }
         
-        /* ============ MAIN CHAT ============ */
+        .village-chat.active .village-time { color: rgba(255,255,255,0.7); }
+        
+        /* Section Header */
+        .chat-section-header {
+            padding: 16px 16px 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Conversation Items (Personal Chats) */
+        .conversation-item {
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.15s;
+            border-bottom: 1px solid #F0F3F6;
+        }
+        
+        .conversation-item:hover { background: #F8FAFB; }
+        
+        .conversation-item.active {
+            background: #E8F5E9;
+            border-left: 3px solid #2E7D32;
+        }
+        
+        .conversation-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        
+        .conversation-info { flex: 1; min-width: 0; }
+        
+        .conversation-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #1a1a1a;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .online-indicator {
+            width: 8px;
+            height: 8px;
+            background: #4CAF50;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        
+        .conversation-last-message {
+            font-size: 0.8rem;
+            color: #888;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-top: 2px;
+        }
+        
+        .conversation-time {
+            font-size: 0.7rem;
+            color: #aaa;
+            flex-shrink: 0;
+        }
+        
+        .unread-badge {
+            background: #2E7D32;
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 3px 7px;
+            border-radius: 10px;
+            margin-left: 6px;
+        }
+        
+        /* ===== MAIN CHAT ===== */
         .chat-main {
             flex: 1;
             display: flex;
@@ -277,19 +248,18 @@
         }
         
         .chat-header {
-            padding: 16px 22px;
+            padding: 14px 20px;
             background: white;
             border-bottom: 1px solid #E8ECF0;
             display: flex;
             align-items: center;
-            gap: 14px;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+            gap: 12px;
         }
         
         .chat-header-avatar {
-            width: 44px;
-            height: 44px;
-            border-radius: 14px;
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
             background: #2E7D32;
             display: flex;
             align-items: center;
@@ -299,7 +269,7 @@
         }
         
         .chat-header-info h3 {
-            font-size: 1.05rem;
+            font-size: 1rem;
             font-weight: 700;
             color: #1a1a1a;
         }
@@ -307,92 +277,84 @@
         .chat-header-info p {
             font-size: 0.75rem;
             color: #888;
-            margin-top: 2px;
+            margin-top: 1px;
         }
         
         .messages-container {
             flex: 1;
             overflow-y: auto;
-            padding: 20px 24px;
+            padding: 16px 20px;
             display: flex;
             flex-direction: column;
-            gap: 6px;
-            scrollbar-width: thin;
+            gap: 4px;
         }
         
-        .messages-container::-webkit-scrollbar { width: 4px; }
-        .messages-container::-webkit-scrollbar-thumb { background: #d0d5dd; border-radius: 4px; }
+        .message-date-divider {
+            text-align: center;
+            margin: 12px 0;
+        }
+        
+        .message-date-divider span {
+            background: #E8ECF0;
+            padding: 4px 14px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            color: #666;
+            font-weight: 500;
+        }
         
         .message {
             display: flex;
-            margin-bottom: 2px;
-            animation: messageIn 0.3s ease;
+            gap: 8px;
+            max-width: 80%;
+            animation: msgIn 0.25s ease;
         }
         
-        @keyframes messageIn {
-            from { opacity: 0; transform: translateY(8px); }
+        @keyframes msgIn {
+            from { opacity: 0; transform: translateY(6px); }
             to { opacity: 1; transform: translateY(0); }
         }
         
-        .message.sent { justify-content: flex-end; }
-        
-        .message-bubble {
-            max-width: 70%;
-            padding: 10px 16px;
-            border-radius: 18px;
-            position: relative;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+        .message.sent {
+            align-self: flex-end;
+            flex-direction: row-reverse;
         }
         
-        .message.sent .message-bubble {
-            background: #DCF8C6;
-            border-bottom-right-radius: 6px;
-        }
-        
-        .message.received .message-bubble {
-            background: white;
-            border-bottom-left-radius: 6px;
-        }
-        
-        .message-sender {
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: #2E7D32;
-            margin-bottom: 3px;
-        }
-        
-        .message-text {
+        .message-content {
+            padding: 8px 14px;
+            border-radius: 16px;
             font-size: 0.9rem;
             line-height: 1.4;
             color: #333;
         }
         
+        .message.received .message-content {
+            background: white;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+        }
+        
+        .message.sent .message-content {
+            background: #DCF8C6;
+            border-bottom-right-radius: 4px;
+        }
+        
         .message-time {
             font-size: 0.65rem;
-            color: #888;
-            margin-top: 4px;
-            text-align: right;
+            color: #999;
+            margin-top: 2px;
         }
         
-        .empty-messages {
+        .empty-state {
             text-align: center;
             padding: 60px 20px;
-            color: #aaa;
+            color: #bbb;
         }
         
-        .empty-messages i {
-            font-size: 4rem;
-            margin-bottom: 20px;
-            opacity: 0.3;
-        }
-        
-        .empty-messages p {
-            font-size: 1rem;
-            font-weight: 500;
-        }
+        .empty-state i { font-size: 4rem; margin-bottom: 16px; opacity: 0.3; }
         
         .message-input-area {
-            padding: 14px 20px;
+            padding: 12px 18px;
             background: white;
             border-top: 1px solid #E8ECF0;
             display: flex;
@@ -402,56 +364,45 @@
         
         .message-input-area input {
             flex: 1;
-            padding: 13px 18px;
+            padding: 12px 16px;
             border: 1.5px solid #E0E4E8;
-            border-radius: 24px;
-            font-size: 0.95rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
             outline: none;
             background: #F5F7FA;
-            transition: all 0.3s;
         }
         
         .message-input-area input:focus {
             border-color: #2E7D32;
             background: white;
-            box-shadow: 0 0 0 3px rgba(46,125,50,0.06);
         }
         
         .send-btn {
-            width: 44px;
-            height: 44px;
+            width: 42px;
+            height: 42px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #2E7D32, #1B5E20);
+            background: #2E7D32;
             border: none;
             color: white;
             font-size: 1rem;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s;
-            box-shadow: 0 2px 8px rgba(46,125,50,0.25);
+            transition: all 0.2s;
+            flex-shrink: 0;
         }
         
-        .send-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 12px rgba(46,125,50,0.35);
-        }
+        .send-btn:hover { background: #1B5E20; }
         
         .send-btn:active { transform: scale(0.95); }
         
-        /* ============ MOBILE ============ */
+        /* ===== MOBILE ===== */
         @media (max-width: 768px) {
-            .chat-container { border-radius: 0; }
             .chat-sidebar { width: 100%; }
-            
             .chat-main {
                 display: none;
                 position: fixed;
                 top: 0; left: 0; right: 0; bottom: 0;
                 z-index: 100;
             }
-            
             .chat-main.active { display: flex; }
         }
     </style>
@@ -461,7 +412,7 @@
         <!-- Sidebar -->
         <div class="chat-sidebar">
             <div class="sidebar-header">
-                <h3><i class="fas fa-comments"></i> Messages</h3>
+                <h3><i class="fas fa-comments" style="color:#2E7D32;"></i> Messages</h3>
                 <button class="new-chat-btn" id="newChatBtn">
                     <i class="fas fa-plus"></i>
                 </button>
@@ -472,43 +423,42 @@
             </div>
             
             <div class="chat-list" id="conversationList">
-                <!-- Village Chat -->
+                <!-- Village Community Chat -->
                 <div class="village-chat active" data-chat="village" id="villageChatItem">
                     <div class="village-avatar">
                         <i class="fas fa-tree"></i>
-                        <span class="village-badge">ALL</span>
                     </div>
-                    <div class="chat-info">
-                        <div class="chat-name">
-                            Village Community
-                            <span class="chat-time" id="villageLastTime"></span>
+                    <div class="village-info">
+                        <div class="village-name">
+                            🏘️ Village Community
+                            <span class="village-time" id="villageLastTime"></span>
                         </div>
-                        <div class="chat-preview" id="villageLastMessage">Loading messages...</div>
+                        <div class="village-last" id="villageLastMessage">Loading messages...</div>
                     </div>
                 </div>
                 
-                <!-- Individual Chats -->
+                <!-- Personal Chats Container -->
                 <div id="individualChats"></div>
             </div>
         </div>
         
-        <!-- Main Chat -->
+        <!-- Main Chat Area -->
         <div class="chat-main" id="chatMain">
             <div class="chat-header">
-                <button class="back-btn" style="display:none; background:#f0f0f0; border:none; width:36px; height:36px; border-radius:50%; cursor:pointer;" onclick="document.getElementById('chatMain').classList.remove('active')">
-                    <i class="fas fa-arrow-left"></i>
+                <button class="back-btn" style="display:none;background:#f0f0f0;border:none;width:34px;height:34px;border-radius:50%;cursor:pointer;margin-right:4px;" onclick="document.getElementById('chatMain').classList.remove('active')">
+                    <i class="fas fa-arrow-left" style="font-size:14px;"></i>
                 </button>
                 <div class="chat-header-avatar" id="chatAvatar">
                     <i class="fas fa-users"></i>
                 </div>
                 <div class="chat-header-info">
-                    <h3 id="currentChatName">Village Community</h3>
-                    <p id="chatSubtitle">Everyone can message</p>
+                    <h3 id="currentChatName">🏘️ Village Community</h3>
+                    <p id="chatSubtitle">Public Chat • Everyone can message</p>
                 </div>
             </div>
             
             <div class="messages-container" id="messagesContainer">
-                <div class="empty-messages">
+                <div class="empty-state">
                     <i class="fas fa-comments"></i>
                     <p>No messages yet. Start the conversation!</p>
                 </div>
@@ -541,59 +491,13 @@
     <script src="js/chat.js"></script>
     
     <script>
-        // Fix Personal Chat Click Handlers
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🔧 Chat handlers ready');
-            
-            function attachPersonalChatHandlers() {
-                const personalChats = document.querySelectorAll('#individualChats .chat-item');
-                personalChats.forEach(item => {
-                    item.removeEventListener('click', handleChatClick);
-                    item.addEventListener('click', handleChatClick);
-                });
-            }
-            
-            function handleChatClick(e) {
-                const chatItem = e.currentTarget;
-                const chatId = chatItem.dataset.chat;
-                
-                document.querySelectorAll('.village-chat, .chat-item').forEach(c => c.classList.remove('active'));
-                chatItem.classList.add('active');
-                document.getElementById('chatMain').classList.add('active');
-                
-                if (window.chatManager) {
-                    chatManager.switchToPersonalChat(chatId);
-                }
-            }
-            
-            const observer = new MutationObserver(function(mutations) {
-                mutations.forEach(function(mutation) {
-                    if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-                        setTimeout(attachPersonalChatHandlers, 100);
-                    }
-                });
-            });
-            
-            const container = document.getElementById('individualChats');
-            if (container) observer.observe(container, { childList: true, subtree: true });
-            
-            setTimeout(attachPersonalChatHandlers, 500);
-            
-            // Village Chat click
-            const villageChat = document.querySelector('[data-chat="village"]');
-            if (villageChat) {
-                villageChat.addEventListener('click', function() {
-                    document.querySelectorAll('.village-chat, .chat-item').forEach(c => c.classList.remove('active'));
-                    this.classList.add('active');
-                    document.getElementById('chatMain').classList.add('active');
-                    if (window.chatManager) chatManager.switchToVillageChat();
-                });
-            }
-            
             // Show back button on mobile
             if (window.innerWidth <= 768) {
-                document.querySelector('.back-btn').style.display = 'flex';
+                const backBtn = document.querySelector('.back-btn');
+                if (backBtn) backBtn.style.display = 'flex';
             }
+            console.log('✅ Chat UI ready');
         });
     </script>
 </body>
